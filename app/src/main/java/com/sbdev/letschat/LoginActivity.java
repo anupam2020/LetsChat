@@ -9,37 +9,50 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
-    AppCompatButton join;
+public class LoginActivity extends AppCompatActivity {
 
-    TextView login;
+    TextInputLayout layout1,layout2;
+
+    TextInputEditText email,password;
+
+    AppCompatButton login;
+
+    RelativeLayout google,facebook;
+
+    TextView signUp,forgot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.WHITE);
 
-        join=findViewById(R.id.btnJoin);
-        login=findViewById(R.id.tvLogin);
+        layout1=findViewById(R.id.layout1Login);
+        layout2=findViewById(R.id.layout2Login);
 
-        join.setOnClickListener(new View.OnClickListener() {
+        email=findViewById(R.id.etEmailLogin);
+        password=findViewById(R.id.etPasswordLogin);
+
+        login=findViewById(R.id.btnLogin);
+
+        google=findViewById(R.id.relativeGoogleLogin);
+        facebook=findViewById(R.id.relativeFacebookLogin);
+
+        signUp=findViewById(R.id.loginSignUp);
+        forgot=findViewById(R.id.forgotPass);
+
+        signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,RegisterActivity.class));
-                finish();
-            }
-        });
-
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                startActivity(new Intent(LoginActivity.this,RegisterActivity.class));
                 finish();
             }
         });
@@ -68,4 +81,5 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
     }
+
 }

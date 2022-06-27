@@ -9,37 +9,51 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
-    AppCompatButton join;
+public class RegisterActivity extends AppCompatActivity {
+
+    TextInputLayout layout1,layout2,layout3;
+
+    TextInputEditText name,email,password;
+
+    AppCompatButton signUp;
+
+    RelativeLayout google,facebook;
 
     TextView login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.WHITE);
 
-        join=findViewById(R.id.btnJoin);
-        login=findViewById(R.id.tvLogin);
+        layout1=findViewById(R.id.layout1);
+        layout2=findViewById(R.id.layout2);
+        layout3=findViewById(R.id.layout3);
 
-        join.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,RegisterActivity.class));
-                finish();
-            }
-        });
+        name=findViewById(R.id.etName);
+        email=findViewById(R.id.etEmail);
+        password=findViewById(R.id.etPassword);
+
+        signUp=findViewById(R.id.btnSignUp);
+
+        google=findViewById(R.id.relativeGoogle);
+        facebook=findViewById(R.id.relativeFacebook);
+
+        login=findViewById(R.id.registerLogin);
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                startActivity(new Intent(RegisterActivity.this,LoginActivity.class));
                 finish();
             }
         });
@@ -68,4 +82,5 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
     }
+
 }
