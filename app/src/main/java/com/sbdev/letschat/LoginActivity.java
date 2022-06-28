@@ -1,19 +1,43 @@
 package com.sbdev.letschat;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.pranavpandey.android.dynamic.toasts.DynamicToast;
+
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -26,6 +50,16 @@ public class LoginActivity extends AppCompatActivity {
     RelativeLayout google,facebook;
 
     TextView signUp,forgot;
+
+    ProgressDialog progressDialog;
+
+    FirebaseAuth firebaseAuth;
+
+    DatabaseReference reference;
+
+    static final int RC_SIGN_IN = 1;
+
+    GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +83,19 @@ public class LoginActivity extends AppCompatActivity {
         signUp=findViewById(R.id.loginSignUp);
         forgot=findViewById(R.id.forgotPass);
 
+        progressDialog=new ProgressDialog(this);
+
+        firebaseAuth=FirebaseAuth.getInstance();
+
+        reference= FirebaseDatabase.getInstance().getReference("Users");
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("1029270978164-m80ep216u57m97jrp72qffsi4p27ppu3.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+
+        mGoogleSignInClient = GoogleSignIn.getClient(LoginActivity.this, gso);
+
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,6 +103,206 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                InputMethodManager imm = (InputMethodManager) LoginActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                progressDialog.show();
+                progressDialog.setContentView(R.layout.progress_dialog);
+                progressDialog.setCancelable(true);
+                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                String e=email.getText().toString();
+                String p=password.getText().toString();
+
+                if(e.trim().isEmpty())
+                {
+                    progressDialog.dismiss();
+                    layout1.setError("Email cannot be empty!");
+                }
+                else if(p.trim().isEmpty())
+                {
+                    progressDialog.dismiss();
+                    layout2.setError("Password cannot be empty!");
+                }
+                else
+                {
+                    signInToApp(e,p);
+                }
+
+            }
+        });
+
+        email.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                layout1.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        password.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                layout2.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        google.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                signIn();
+
+            }
+        });
+
+        facebook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent=new Intent(LoginActivity.this,FacebookActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+
+            }
+        });
+
+    }
+
+
+    private void signIn() {
+
+        //For fresh registers
+        mGoogleSignInClient.signOut();
+
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+
+            progressDialog.show();
+            progressDialog.setContentView(R.layout.progress_dialog);
+            progressDialog.setCancelable(false);
+            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+
+                progressDialog.dismiss();
+                DynamicToast.makeError(LoginActivity.this,e.getMessage(),2500).show();
+            }
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        firebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+
+                            HashMap<String,String> map=new HashMap<>();
+                            map.put("Name",firebaseAuth.getCurrentUser().getDisplayName());
+                            map.put("Email",firebaseAuth.getCurrentUser().getEmail());
+
+                            reference.child(firebaseAuth.getCurrentUser().getUid()).child("Profile")
+                                    .setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+
+                                            if(task.isSuccessful())
+                                            {
+                                                progressDialog.dismiss();
+                                                DynamicToast.make(LoginActivity.this,"Registration Successful!",2500).show();
+                                                startActivity(new Intent(LoginActivity.this,ProfilePicActivity.class));
+                                                finish();
+                                            }
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                            progressDialog.dismiss();
+                                            DynamicToast.makeError(LoginActivity.this,e.getMessage(),2500).show();
+                                        }
+                                    });
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+
+                            progressDialog.dismiss();
+                            DynamicToast.makeError(LoginActivity.this, (CharSequence) task.getException(),2500).show();
+                        }
+                    }
+                });
+    }
+
+
+    private void signInToApp(String email, String password)
+    {
+
+        firebaseAuth.signInWithEmailAndPassword(email,password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        if(task.isSuccessful())
+                        {
+                            progressDialog.dismiss();
+                            DynamicToast.make(LoginActivity.this,"Login Successful!",2500).show();
+
+                            startActivity(new Intent(LoginActivity.this,ChatActivity.class));
+                            finishAffinity();
+                        }
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        progressDialog.dismiss();
+                        DynamicToast.make(LoginActivity.this,e.getMessage(),2500).show();
+
+                    }
+                });
 
     }
 

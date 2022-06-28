@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/mainText1"
             android:layout_marginTop="10dp"
-            android:text="Connect with each other. Enjoy safe and private texting!"
+            android:text="Connect with different people. Enjoy safe and private texting!"
             android:textColor="#BF000000"
             android:textSize="15sp" />
 
