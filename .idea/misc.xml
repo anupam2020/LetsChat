@@ -7,6 +7,7 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/black_gradient.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/gray_stroke.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/progress_dialog.xml" value="0.2115" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/white_box.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_chat.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_facebook.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_login.xml" value="0.25364583333333335" />
@@ -14,7 +15,12 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_profile_pic.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_register.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_splash_screen.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/fragment_chat.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/fragment_users.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/progress_dialog.xml" value="0.189453125" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/progress_dialog_dots.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/user_item_layout.xml" value="0.264" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/menu.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2115" />
       </map>
     </option>

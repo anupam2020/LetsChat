@@ -34,10 +34,15 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -114,8 +119,8 @@ public class RegisterActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
                 progressDialog.show();
-                progressDialog.setContentView(R.layout.progress_dialog);
-                progressDialog.setCancelable(true);
+                progressDialog.setContentView(R.layout.progress_dialog_dots);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 String n=name.getText().toString();
@@ -235,7 +240,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
 
             progressDialog.show();
-            progressDialog.setContentView(R.layout.progress_dialog);
+            progressDialog.setContentView(R.layout.progress_dialog_dots);
             progressDialog.setCancelable(false);
             progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
@@ -248,7 +253,7 @@ public class RegisterActivity extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
 
                 progressDialog.dismiss();
-                DynamicToast.makeError(RegisterActivity.this,e.getMessage(),2500).show();
+                DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
             }
         }
     }
@@ -256,47 +261,71 @@ public class RegisterActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
+            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
 
-                            HashMap map=new HashMap();
-                            map.put("Name",firebaseAuth.getCurrentUser().getDisplayName());
-                            map.put("Email",firebaseAuth.getCurrentUser().getEmail());
+                        HashMap map=new HashMap();
+                        map.put("Name",firebaseAuth.getCurrentUser().getDisplayName());
+                        map.put("Email",firebaseAuth.getCurrentUser().getEmail());
+                        map.put("UID",firebaseAuth.getCurrentUser().getUid());
 
-                            reference.child(firebaseAuth.getCurrentUser().getUid()).child("Profile")
-                                    .setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
 
-                                            if(task.isSuccessful())
-                                            {
-                                                progressDialog.dismiss();
-                                                DynamicToast.make(RegisterActivity.this,"Registration Successful!",2500).show();
-                                                startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
-                                                finish();
-                                            }
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                            progressDialog.dismiss();
-                                            DynamicToast.makeError(RegisterActivity.this,e.getMessage(),2500).show();
-                                        }
-                                    });
+                                    if (snapshot.exists()) {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(RegisterActivity.this, "Login Successful!", 3000).show();
+                                        startActivity(new Intent(RegisterActivity.this, ChatActivity.class));
+                                        finish();
+                                    }
+                                    else {
+                                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                            .setValue(map)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
 
-                        } else {
-                            // If sign in fails, display a message to the user.
+                                                    if (task.isSuccessful()) {
+                                                        progressDialog.dismiss();
+                                                        DynamicToast.make(RegisterActivity.this, "Registration Successful!", 3000).show();
+                                                        startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
+                                                        finish();
+                                                    }
 
-                            progressDialog.dismiss();
-                            DynamicToast.makeError(RegisterActivity.this, (CharSequence) task.getException(),2500).show();
-                        }
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+                                                }
+                                            });
+
+                                    }
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    DynamicToast.make(RegisterActivity.this,error.getMessage(),3000).show();
+                                }
+                            });
+
+
+                    } else {
+                        // If sign in fails, display a message to the user.
+
+                        progressDialog.dismiss();
+                        DynamicToast.make(RegisterActivity.this, (CharSequence) task.getException(),3000).show();
                     }
-                });
+                }
+            });
     }
 
 
@@ -310,34 +339,34 @@ public class RegisterActivity extends AppCompatActivity {
                 if(task.isSuccessful())
                 {
 
-                        HashMap<String,String> map=new HashMap<>();
-                        map.put("Name",name);
-                        map.put("Email",email);
+                    HashMap map=new HashMap();
+                    map.put("Name",name);
+                    map.put("Email",email);
+                    map.put("UID",firebaseAuth.getCurrentUser().getUid());
 
-                        reference.child(firebaseAuth.getCurrentUser().getUid())
-                                .child("Profile")
-                                .setValue(map)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
+                    reference.child(firebaseAuth.getCurrentUser().getUid())
+                            .setValue(map)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
 
-                                        if(task.isSuccessful())
-                                        {
-                                            progressDialog.dismiss();
-                                            DynamicToast.make(RegisterActivity.this,"Registration Successful!",2500).show();
-                                            startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
-                                        }
-
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-
+                                    if(task.isSuccessful())
+                                    {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(RegisterActivity.this,e.getMessage(),2500).show();
-
+                                        DynamicToast.make(RegisterActivity.this,"Registration Successful!",3000).show();
+                                        startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
                                     }
-                                });
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                    progressDialog.dismiss();
+                                    DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+
+                                }
+                            });
 
                 }
 
@@ -347,7 +376,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onFailure(@NonNull Exception e) {
 
                 progressDialog.dismiss();
-                DynamicToast.make(RegisterActivity.this,e.getMessage(),2500).show();
+                DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
 
             }
         });

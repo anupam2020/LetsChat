@@ -13,14 +13,22 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
+
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -35,6 +43,8 @@ public class ProfilePicActivity extends AppCompatActivity {
     Uri imageURI;
 
     FirebaseAuth firebaseAuth;
+
+    DatabaseReference reference;
 
     StorageReference storageReference;
 
@@ -55,6 +65,8 @@ public class ProfilePicActivity extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
+        reference= FirebaseDatabase.getInstance().getReference("Users");
+
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
         img.setOnClickListener(new View.OnClickListener() {
@@ -71,8 +83,8 @@ public class ProfilePicActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 progressDialog.show();
-                progressDialog.setContentView(R.layout.progress_dialog);
-                progressDialog.setCancelable(true);
+                progressDialog.setContentView(R.layout.progress_dialog_dots);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 uploadImgToFirebase();
@@ -88,7 +100,7 @@ public class ProfilePicActivity extends AppCompatActivity {
         if(imageURI==null)
         {
             progressDialog.dismiss();
-            DynamicToast.make(ProfilePicActivity.this,"Please select an image!",2500).show();
+            DynamicToast.make(ProfilePicActivity.this,"Please select an image!",3000).show();
         }
         else
         {
@@ -100,10 +112,47 @@ public class ProfilePicActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            progressDialog.dismiss();
-                            DynamicToast.make(ProfilePicActivity.this,"Profile picture was successfully uploaded!",2500).show();
-                            startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
-                            finishAffinity();
+                            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                                    .child("Profile_Pic")
+                                    .getDownloadUrl()
+                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+
+                                            HashMap map=new HashMap();
+                                            map.put("ProfilePic",uri.toString());
+
+                                            reference.child(firebaseAuth.getCurrentUser().getUid())
+                                                    .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task task) {
+
+                                                            if(task.isSuccessful())
+                                                            {
+
+                                                                progressDialog.dismiss();
+                                                                DynamicToast.make(ProfilePicActivity.this,"Profile picture was successfully uploaded!",3000).show();
+                                                                startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
+                                                                finishAffinity();
+                                                            }
+
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Toast.makeText(ProfilePicActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                            DynamicToast.make(ProfilePicActivity.this,e.getMessage(),2500).show();
+
+                                        }
+                                    });
 
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -111,7 +160,7 @@ public class ProfilePicActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Exception e) {
 
                             progressDialog.dismiss();
-                            DynamicToast.make(ProfilePicActivity.this,e.getMessage(),2500).show();
+                            DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
 
                         }
                     });

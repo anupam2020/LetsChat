@@ -6,26 +6,83 @@
     android:layout_height="match_parent"
     tools:context=".ChatActivity">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnSignOut"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@drawable/black_box"
-        android:text="Sign Out"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="16sp" />
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/chatProfilePic"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_below="@id/btnSignOut"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30sp"
-        android:src="@drawable/upload_new" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/black"
+        android:id="@+id/chatRelative1">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp">
+
+            <TextView
+                android:id="@+id/chatText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="Let'sChat"
+                android:textColor="@color/white"
+                android:textSize="25sp" />
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35sp"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:layout_toLeftOf="@id/chatMore"
+                android:src="@drawable/ic_baseline_cloud_24"
+                app:tint="@color/white"
+                android:id="@+id/chatWeather"/>
+
+            <ImageView
+                android:id="@+id/chatMore"
+                android:layout_width="25dp"
+                android:layout_height="25sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_baseline_more_vert_24"
+                app:tint="@color/white" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/chatRelative1"
+        android:id="@+id/chatRelative2">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/black"
+            android:id="@+id/chatRelative3">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/chatTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@color/black"/>
+
+        </RelativeLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/viewPager2"
+            android:layout_below="@id/chatRelative3"/>
+
+    </RelativeLayout>
+
 
 </RelativeLayout>

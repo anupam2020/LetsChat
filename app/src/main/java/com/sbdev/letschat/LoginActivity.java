@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
@@ -33,8 +34,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.HashMap;
@@ -112,8 +116,8 @@ public class LoginActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
                 progressDialog.show();
-                progressDialog.setContentView(R.layout.progress_dialog);
-                progressDialog.setCancelable(true);
+                progressDialog.setContentView(R.layout.progress_dialog_dots);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 String e=email.getText().toString();
@@ -211,7 +215,7 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
 
             progressDialog.show();
-            progressDialog.setContentView(R.layout.progress_dialog);
+            progressDialog.setContentView(R.layout.progress_dialog_dots);
             progressDialog.setCancelable(false);
             progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
@@ -224,7 +228,7 @@ public class LoginActivity extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
 
                 progressDialog.dismiss();
-                DynamicToast.makeError(LoginActivity.this,e.getMessage(),2500).show();
+                DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
             }
         }
     }
@@ -232,47 +236,64 @@ public class LoginActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
+            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
 
-                            HashMap<String,String> map=new HashMap<>();
-                            map.put("Name",firebaseAuth.getCurrentUser().getDisplayName());
-                            map.put("Email",firebaseAuth.getCurrentUser().getEmail());
+                        HashMap map = new HashMap();
+                        map.put("Name", firebaseAuth.getCurrentUser().getDisplayName());
+                        map.put("Email", firebaseAuth.getCurrentUser().getEmail());
+                        map.put("UID",firebaseAuth.getCurrentUser().getUid());
 
-                            reference.child(firebaseAuth.getCurrentUser().getUid()).child("Profile")
-                                    .setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
 
-                                            if(task.isSuccessful())
-                                            {
-                                                progressDialog.dismiss();
-                                                DynamicToast.make(LoginActivity.this,"Registration Successful!",2500).show();
-                                                startActivity(new Intent(LoginActivity.this,ProfilePicActivity.class));
-                                                finish();
-                                            }
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                            progressDialog.dismiss();
-                                            DynamicToast.makeError(LoginActivity.this,e.getMessage(),2500).show();
-                                        }
-                                    });
+                                    if (snapshot.exists()) {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(LoginActivity.this, "Login Successful!", 3000).show();
+                                        startActivity(new Intent(LoginActivity.this, ChatActivity.class));
+                                        finish();
+                                    }
+                                    else {
+                                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                            .setValue(map)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
 
-                        } else {
-                            // If sign in fails, display a message to the user.
+                                                    if (task.isSuccessful()) {
+                                                        progressDialog.dismiss();
+                                                        DynamicToast.make(LoginActivity.this, "Registration Successful!", 3000).show();
+                                                        startActivity(new Intent(LoginActivity.this, ProfilePicActivity.class));
+                                                        finish();
+                                                    }
 
-                            progressDialog.dismiss();
-                            DynamicToast.makeError(LoginActivity.this, (CharSequence) task.getException(),2500).show();
-                        }
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                                                }
+                                            });
+
+                                    }
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    DynamicToast.make(LoginActivity.this,error.getMessage(),3000).show();
+                                }
+                            });
                     }
-                });
+                }
+            });
     }
 
 
@@ -287,8 +308,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful())
                         {
                             progressDialog.dismiss();
-                            DynamicToast.make(LoginActivity.this,"Login Successful!",2500).show();
-
+                            DynamicToast.make(LoginActivity.this,"Login Successful!",3000).show();
                             startActivity(new Intent(LoginActivity.this,ChatActivity.class));
                             finishAffinity();
                         }
@@ -299,7 +319,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
 
                         progressDialog.dismiss();
-                        DynamicToast.make(LoginActivity.this,e.getMessage(),2500).show();
+                        DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
 
                     }
                 });

@@ -72,7 +72,7 @@ public class FacebookActivity extends AppCompatActivity {
                     @Override
                     public void onError(FacebookException exception) {
                         // App code
-                        DynamicToast.makeError(FacebookActivity.this,exception.getMessage(),2500).show();
+                        DynamicToast.make(FacebookActivity.this,exception.getMessage(),3000).show();
                         finish();
                     }
                 });
@@ -101,19 +101,20 @@ public class FacebookActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
 
 
-                            HashMap<String,String> map=new HashMap<>();
+                            HashMap map=new HashMap();
                             map.put("Name",mAuth.getCurrentUser().getDisplayName());
                             map.put("Email",mAuth.getCurrentUser().getEmail());
+                            map.put("UID",mAuth.getCurrentUser().getUid());
 
 
-                            reference.child(mAuth.getCurrentUser().getUid()).child("Profile")
+                            reference.child(mAuth.getCurrentUser().getUid())
                                     .setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
 
                                             if(task.isSuccessful())
                                             {
-                                                DynamicToast.make(FacebookActivity.this,"Registration Successful!",2500).show();
+                                                DynamicToast.make(FacebookActivity.this,"Registration Successful!",3000).show();
                                                 startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
                                                 finish();
                                             }
@@ -122,7 +123,7 @@ public class FacebookActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
 
-                                            DynamicToast.makeError(FacebookActivity.this,e.getMessage(),2500).show();
+                                            DynamicToast.make(FacebookActivity.this,e.getMessage(),3000).show();
                                             finish();
                                         }
                                     });
@@ -130,7 +131,7 @@ public class FacebookActivity extends AppCompatActivity {
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            DynamicToast.makeError(FacebookActivity.this,task.getException().toString(),2500).show();
+                            DynamicToast.make(FacebookActivity.this,task.getException().toString(),3000).show();
                             finish();
                         }
                     }
