@@ -1,6 +1,7 @@
 package com.sbdev.letschat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +50,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, model.UID, Toast.LENGTH_SHORT).show();
+
+                Intent intent=new Intent(context,MessageActivity.class);
+                intent.putExtra("friendUID",model.UID);
+                context.startActivity(intent);
+
             }
         });
 

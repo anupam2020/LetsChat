@@ -106,64 +106,64 @@ public class ProfilePicActivity extends AppCompatActivity {
         {
 
             storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                    .child("Profile_Pic")
-                    .putFile(imageURI)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                .child("Profile_Pic")
+                .putFile(imageURI)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                                    .child("Profile_Pic")
-                                    .getDownloadUrl()
-                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
+                        storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                            .child("Profile_Pic")
+                            .getDownloadUrl()
+                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
 
-                                            HashMap map=new HashMap();
-                                            map.put("ProfilePic",uri.toString());
+                                    HashMap map=new HashMap();
+                                    map.put("ProfilePic",uri.toString());
 
-                                            reference.child(firebaseAuth.getCurrentUser().getUid())
-                                                    .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task task) {
+                                    reference.child(firebaseAuth.getCurrentUser().getUid())
+                                        .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                                            @Override
+                                            public void onComplete(@NonNull Task task) {
 
-                                                            if(task.isSuccessful())
-                                                            {
+                                                if(task.isSuccessful())
+                                                {
 
-                                                                progressDialog.dismiss();
-                                                                DynamicToast.make(ProfilePicActivity.this,"Profile picture was successfully uploaded!",3000).show();
-                                                                startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
-                                                                finishAffinity();
-                                                            }
+                                                    progressDialog.dismiss();
+                                                    DynamicToast.make(ProfilePicActivity.this,"Profile picture was successfully uploaded!",3000).show();
+                                                    startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
+                                                    finishAffinity();
+                                                }
 
-                                                        }
-                                                    }).addOnFailureListener(new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            Toast.makeText(ProfilePicActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    });
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
+                                            }
+                                        });
 
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
 
-                                            DynamicToast.make(ProfilePicActivity.this,e.getMessage(),2500).show();
+                                    DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
 
-                                        }
-                                    });
+                                }
+                            });
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
-                            progressDialog.dismiss();
-                            DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
+                        progressDialog.dismiss();
+                        DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
 
-                        }
-                    });
+                    }
+                });
 
         }
 

@@ -3,22 +3,22 @@
 
     <item
         android:id="@+id/profile"
-        android:title="Profile"
+        android:title="    Profile"
         android:icon="@drawable/ic_outline_person_outline_24"/>
 
     <item
         android:id="@+id/favMsg"
-        android:title="Fav Messages"
+        android:title="    Fav Messages"
         android:icon="@drawable/ic_baseline_favorite_border_24"/>
 
     <item
         android:id="@+id/settings"
-        android:title="Settings"
+        android:title="    Settings"
         android:icon="@drawable/ic_outline_settings_24"/>
 
     <item
         android:id="@+id/logout"
-        android:title="Logout"
+        android:title="    Logout"
         android:icon="@drawable/ic_baseline_logout"/>
 
 </menu>
