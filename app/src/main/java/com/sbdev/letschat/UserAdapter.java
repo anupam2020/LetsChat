@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,10 +39,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         Glide.with(context)
                 .load(model.ProfilePic)
+                .placeholder(R.drawable.item_user)
+                .error(R.drawable.item_user)
                 .into(holder.profile);
 
         holder.name.setText(model.Name);
         holder.email.setText(model.Email);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, model.UID, Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

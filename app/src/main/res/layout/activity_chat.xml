@@ -31,10 +31,10 @@
                 android:textSize="25sp" />
 
             <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35sp"
+                android:layout_width="25dp"
+                android:layout_height="25sp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="15dp"
                 android:layout_toLeftOf="@id/chatMore"
                 android:src="@drawable/ic_baseline_cloud_24"
                 app:tint="@color/white"
