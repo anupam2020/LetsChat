@@ -67,7 +67,7 @@ public class UsersFragment extends Fragment {
                 {
                     UserModel userModel=dataSnapshot.getValue(UserModel.class);
 
-                    if(!userModel.UID.equals(firebaseAuth.getCurrentUser().getUid()))
+                    if(!userModel.getUID().equals(firebaseAuth.getCurrentUser().getUid()))
                     {
                         arrayList.add(userModel);
                     }

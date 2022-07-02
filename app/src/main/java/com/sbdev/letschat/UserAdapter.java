@@ -39,20 +39,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         UserModel model=arrayList.get(holder.getAdapterPosition());
 
         Glide.with(context)
-                .load(model.ProfilePic)
+                .load(model.getProfilePic())
                 .placeholder(R.drawable.item_user)
                 .error(R.drawable.item_user)
                 .into(holder.profile);
 
-        holder.name.setText(model.Name);
-        holder.email.setText(model.Email);
+        holder.name.setText(model.getName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent intent=new Intent(context,MessageActivity.class);
-                intent.putExtra("friendUID",model.UID);
+                intent.putExtra("friendUID",model.getUID());
                 context.startActivity(intent);
 
             }
@@ -68,14 +67,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public class UserViewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView profile;
-        TextView name,email;
+        TextView name;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
 
             profile=itemView.findViewById(R.id.userProfilePic);
             name=itemView.findViewById(R.id.userName);
-            email=itemView.findViewById(R.id.userEmail);
 
         }
     }

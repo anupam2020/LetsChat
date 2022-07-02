@@ -48,7 +48,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         MessageModel messageModel=arrayList.get(position);
 
-        holder.msg.setText(messageModel.text);
+        holder.msg.setText(messageModel.getText());
 
     }
 

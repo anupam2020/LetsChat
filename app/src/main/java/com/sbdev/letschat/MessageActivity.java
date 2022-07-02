@@ -14,12 +14,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -121,10 +124,10 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
-                userName.setText(userModel.Name);
+                userName.setText(userModel.getName());
 
                 Glide.with(MessageActivity.this)
-                        .load(userModel.ProfilePic)
+                        .load(userModel.getProfilePic())
                         .placeholder(R.drawable.item_user)
                         .error(R.drawable.item_user)
                         .into(profilePic);
@@ -191,7 +194,7 @@ public class MessageActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
 
                     progressDialog.dismiss();
-                    background.setBackgroundColor(Color.WHITE);
+                    background.setBackgroundResource(R.drawable.msg_bg);
 
                 }
             });
@@ -233,8 +236,8 @@ public class MessageActivity extends AppCompatActivity {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-                    if(messageModel.sender.equals(uid) && messageModel.receiver.equals(friendUID) ||
-                        messageModel.receiver.equals(uid) && messageModel.sender.equals(friendUID))
+                    if(messageModel.getSender().equals(uid) && messageModel.getReceiver().equals(friendUID) ||
+                        messageModel.getReceiver().equals(uid) && messageModel.getSender().equals(friendUID))
                     {
                         arrayList.add(messageModel);
                     }
@@ -282,6 +285,25 @@ public class MessageActivity extends AppCompatActivity {
                 }
             });
 
+        DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList").child(sender).child(receiver);
+
+        chatsListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if(!snapshot.exists())
+                        {
+                            chatsListRef.child("UID").setValue(receiver);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
     }
 
     private void selectImgAndSetBg()
@@ -310,4 +332,6 @@ public class MessageActivity extends AppCompatActivity {
         }
 
     }
+
+
 }

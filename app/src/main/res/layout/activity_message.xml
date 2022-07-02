@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
+        android:src="@drawable/msg_bg"
         android:scaleType="centerCrop" />
 
     <RelativeLayout
@@ -86,7 +87,7 @@
         <EditText
             android:id="@+id/msgEditText"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="45dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="15dp"
             android:layout_toLeftOf="@id/msgSend"

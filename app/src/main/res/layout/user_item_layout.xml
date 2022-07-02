@@ -6,7 +6,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="75dp"
         app:cardCornerRadius="10dp"
         android:layout_margin="5dp"
         android:elevation="5dp">
@@ -18,8 +18,8 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/userProfilePic"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_centerVertical="true"
                 android:src="@drawable/item_user" />
 
@@ -31,23 +31,13 @@
                 android:layout_marginLeft="10dp">
 
                 <TextView
+                    android:id="@+id/userName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:singleLine="true"
                     android:text="Anupam Basak"
                     android:textColor="@color/black"
-                    android:textSize="18dp"
-                    android:id="@+id/userName"
-                    android:singleLine="true"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="anupam00baak@gmail.com"
-                    android:textColor="#99000000"
-                    android:textSize="15dp"
-                    android:id="@+id/userEmail"
-                    android:singleLine="true"
-                    android:layout_below="@id/userName" />
+                    android:textSize="16dp" />
 
             </RelativeLayout>
 
