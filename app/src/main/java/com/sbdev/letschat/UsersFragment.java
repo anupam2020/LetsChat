@@ -1,6 +1,8 @@
 package com.sbdev.letschat;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,6 +60,12 @@ public class UsersFragment extends Fragment {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+        }
+
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -86,6 +95,13 @@ public class UsersFragment extends Fragment {
             }
         });
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     @Override

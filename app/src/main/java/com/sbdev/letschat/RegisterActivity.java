@@ -7,9 +7,11 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,6 +29,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
@@ -67,6 +70,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     GoogleSignInClient mGoogleSignInClient;
 
+    RelativeLayout layout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.WHITE);
 
+        layout=findViewById(R.id.relativeRegister);
         layout1=findViewById(R.id.layout1);
         layout2=findViewById(R.id.layout2);
         layout3=findViewById(R.id.layout3);
@@ -103,6 +109,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(RegisterActivity.this, gso);
 
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
+
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,24 +138,32 @@ public class RegisterActivity extends AppCompatActivity {
                 String e=email.getText().toString();
                 String p=password.getText().toString();
 
-                if(n.trim().isEmpty())
+                if(isNetworkConnected())
                 {
-                    progressDialog.dismiss();
-                    layout1.setError("Name cannot be empty!");
-                }
-                else if(e.trim().isEmpty())
-                {
-                    progressDialog.dismiss();
-                    layout2.setError("Email cannot be empty!");
-                }
-                else if(p.trim().isEmpty())
-                {
-                    progressDialog.dismiss();
-                    layout3.setError("Password cannot be empty!");
+                    if(n.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout1.setError("Name cannot be empty!");
+                    }
+                    else if(e.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout2.setError("Email cannot be empty!");
+                    }
+                    else if(p.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout3.setError("Password cannot be empty!");
+                    }
+                    else
+                    {
+                        uploadToFirebase(n,e,p);
+                    }
                 }
                 else
                 {
-                    uploadToFirebase(n,e,p);
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                 }
 
             }
@@ -205,7 +224,15 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                signIn();
+                if(isNetworkConnected())
+                {
+                    signIn();
+                }
+                else
+                {
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -214,9 +241,17 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent intent=new Intent(RegisterActivity.this,FacebookActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(intent);
+                if(isNetworkConnected())
+                {
+                    Intent intent=new Intent(RegisterActivity.this,FacebookActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    startActivity(intent);
+                }
+                else
+                {
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -383,7 +418,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
 
     @Override
     public void onBackPressed() {

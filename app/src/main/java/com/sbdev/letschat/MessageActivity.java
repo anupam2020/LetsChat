@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,7 +50,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageActivity extends AppCompatActivity {
 
-    ImageView back,more,background;
+    ImageView back,more;
+
+    BgImageView background;
 
     EditText msgText;
 
@@ -77,6 +82,8 @@ public class MessageActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
+    RelativeLayout layout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +97,7 @@ public class MessageActivity extends AppCompatActivity {
         profilePic=findViewById(R.id.msgProfilePic);
         userName=findViewById(R.id.msgName);
         recyclerView=findViewById(R.id.msgRecycler);
+        layout=findViewById(R.id.relativeMsg);
 
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
@@ -111,6 +119,12 @@ public class MessageActivity extends AppCompatActivity {
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+        }
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,11 +171,9 @@ public class MessageActivity extends AppCompatActivity {
 
                         switch (item.getItemId())
                         {
-
                             case R.id.more_wallpaper:
                                 selectImgAndSetBg();
                                 break;
-
                         }
 
                         return false;
@@ -194,7 +206,7 @@ public class MessageActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
 
                     progressDialog.dismiss();
-                    background.setBackgroundResource(R.drawable.msg_bg);
+                    background.setImageResource(R.drawable.msg_bg);
 
                 }
             });
@@ -203,18 +215,23 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String text=msgText.getText().toString().trim();
-
-                if(text.isEmpty())
+                if(!isNetworkConnected())
                 {
-                    DynamicToast.make(MessageActivity.this,"Please write a message to send!",3000).show();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
                 }
                 else
                 {
-                    InputMethodManager imm = (InputMethodManager) MessageActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    String text=msgText.getText().toString().trim();
 
-                    addTextToFirebase(myUID,friendUID,text);
+                    if(text.isEmpty())
+                    {
+                        DynamicToast.make(MessageActivity.this,"Please write a message to send!",3000).show();
+                    }
+                    else
+                    {
+                        addTextToFirebase(myUID,friendUID,text);
+                    }
                 }
 
             }
@@ -331,6 +348,13 @@ public class MessageActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
 

@@ -1,5 +1,8 @@
 package com.sbdev.letschat;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,6 +41,8 @@ public class ChatFragment extends Fragment {
 
     DatabaseReference reference;
 
+    ProgressDialog progressDialog;
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -47,11 +53,24 @@ public class ChatFragment extends Fragment {
         adapter=new UserAdapter(mUsers,getActivity());
         recyclerView.setAdapter(adapter);
 
+        progressDialog=new ProgressDialog(getActivity());
+
         userList=new ArrayList<>();
 
         firebaseAuth=FirebaseAuth.getInstance();
 
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
+
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_dialog_dots);
+        progressDialog.setCancelable(true);
+        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+        }
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -71,6 +90,7 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
                 Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -103,15 +123,24 @@ public class ChatFragment extends Fragment {
                 }
 
                 adapter.notifyDataSetChanged();
+                progressDialog.dismiss();
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
                 Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     @Override

@@ -41,7 +41,7 @@
             android:layout_below="@id/profileText2"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30sp"
-            android:src="@drawable/upload_new" />
+            android:src="@drawable/item_user" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnUpload"

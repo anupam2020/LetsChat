@@ -7,9 +7,11 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,6 +29,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
@@ -65,6 +68,8 @@ public class LoginActivity extends AppCompatActivity {
 
     GoogleSignInClient mGoogleSignInClient;
 
+    RelativeLayout layout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.WHITE);
 
+        layout=findViewById(R.id.relativeLogin);
         layout1=findViewById(R.id.layout1Login);
         layout2=findViewById(R.id.layout2Login);
 
@@ -100,6 +106,11 @@ public class LoginActivity extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(LoginActivity.this, gso);
 
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
+
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,19 +134,28 @@ public class LoginActivity extends AppCompatActivity {
                 String e=email.getText().toString();
                 String p=password.getText().toString();
 
-                if(e.trim().isEmpty())
+                if(isNetworkConnected())
                 {
-                    progressDialog.dismiss();
-                    layout1.setError("Email cannot be empty!");
-                }
-                else if(p.trim().isEmpty())
-                {
-                    progressDialog.dismiss();
-                    layout2.setError("Password cannot be empty!");
+                    if(e.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout1.setError("Email cannot be empty!");
+                    }
+                    else if(p.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout2.setError("Password cannot be empty!");
+                    }
+                    else
+                    {
+                        signInToApp(e,p);
+                    }
+
                 }
                 else
                 {
-                    signInToApp(e,p);
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                 }
 
             }
@@ -179,7 +199,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                signIn();
+                if(isNetworkConnected())
+                {
+                    signIn();
+                }
+                else
+                {
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -188,9 +216,17 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent intent=new Intent(LoginActivity.this,FacebookActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(intent);
+                if(isNetworkConnected())
+                {
+                    Intent intent=new Intent(LoginActivity.this,FacebookActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    startActivity(intent);
+                }
+                else
+                {
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -324,6 +360,13 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     @Override
