@@ -42,8 +42,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
@@ -52,10 +55,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private static final String TAG = "Connection";
     ImageView more,weather;
 
     FirebaseAuth firebaseAuth;
@@ -74,6 +80,8 @@ public class ChatActivity extends AppCompatActivity {
 
     String url="https://api.weatherapi.com/v1/current.json?key=ceea495be7374dc6a39174422222906%20&q=India&aqi=no";
 
+    RelativeLayout layout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +93,10 @@ public class ChatActivity extends AppCompatActivity {
         viewPager2=findViewById(R.id.viewPager2);
 
         firebaseAuth=FirebaseAuth.getInstance();
+
+        layout=findViewById(R.id.relativeChats);
+
+        checkRealTimeNetwork();
 
         adapter=new ChatStateAdapter(getSupportFragmentManager(),getLifecycle());
         viewPager2.setAdapter(adapter);
@@ -148,9 +160,7 @@ public class ChatActivity extends AppCompatActivity {
                                 Toast.makeText(ChatActivity.this, "Settings", Toast.LENGTH_SHORT).show();
                                 break;
                             case R.id.logout:
-                                firebaseAuth.signOut();
-                                startActivity(new Intent(ChatActivity.this,MainActivity.class));
-                                finishAffinity();
+                                logoutUser();
                                 break;
                         }
 
@@ -203,6 +213,27 @@ public class ChatActivity extends AppCompatActivity {
 
         RequestQueue queue= Volley.newRequestQueue(this);
         queue.add(request);
+
+    }
+
+    private void checkRealTimeNetwork()
+    {
+
+        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (!connected) {
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
+            }
+        });
 
     }
 
@@ -322,15 +353,60 @@ public class ChatActivity extends AppCompatActivity {
         }).setNegativeButton("Logout", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                firebaseAuth.signOut();
-                startActivity(new Intent(ChatActivity.this,MainActivity.class));
-                finishAffinity();
-
+                logoutUser();
             }
         });
 
         builder.show();
 
     }
+
+    public void logoutUser()
+    {
+
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+
+        HashMap map=new HashMap();
+        map.put("status","offline");
+
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            reference.child(firebaseAuth.getCurrentUser().getUid())
+                    .updateChildren(map);
+        }
+
+        firebaseAuth.signOut();
+        startActivity(new Intent(ChatActivity.this,MainActivity.class));
+        finishAffinity();
+
+    }
+
+    public void checkStatus(String status)
+    {
+
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+
+        HashMap map=new HashMap();
+        map.put("status",status);
+
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            reference.child(firebaseAuth.getCurrentUser().getUid())
+                    .updateChildren(map);
+        }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkStatus("online");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        checkStatus("offline");
+    }
+
 }

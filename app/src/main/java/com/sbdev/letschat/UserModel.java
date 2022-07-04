@@ -2,13 +2,14 @@ package com.sbdev.letschat;
 
 public class UserModel {
 
-    String Email,Name,ProfilePic,UID;
+    String Email,Name,ProfilePic,UID,status;
 
-    public UserModel(String email, String name, String profilePic, String UID) {
+    public UserModel(String email, String name, String profilePic, String UID, String status) {
         Email = email;
         Name = name;
         ProfilePic = profilePic;
         this.UID = UID;
+        this.status = status;
     }
 
     public UserModel()
@@ -46,5 +47,13 @@ public class UserModel {
 
     public void setUID(String UID) {
         this.UID = UID;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

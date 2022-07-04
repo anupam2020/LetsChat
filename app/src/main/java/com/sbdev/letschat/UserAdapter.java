@@ -5,13 +5,14 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.ArrayList;
 
@@ -46,9 +47,20 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         holder.name.setText(model.getName());
 
+        if(model.getStatus().equals("online"))
+        {
+            holder.statusIcon.setImageResource(R.drawable.circle_online);
+        }
+        else
+        {
+            holder.statusIcon.setImageResource(R.drawable.circle_offline);
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //DynamicToast.make(context,"status: "+model.getStatus(),3000).show();
 
                 Intent intent=new Intent(context,MessageActivity.class);
                 intent.putExtra("friendUID",model.getUID());
@@ -67,6 +79,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public class UserViewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView profile;
+        ImageView statusIcon;
         TextView name;
 
         public UserViewHolder(@NonNull View itemView) {
@@ -74,6 +87,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
             profile=itemView.findViewById(R.id.userProfilePic);
             name=itemView.findViewById(R.id.userName);
+            statusIcon=itemView.findViewById(R.id.userStatusIcon);
 
         }
     }

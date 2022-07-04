@@ -28,7 +28,8 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/userProfilePic"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp">
+                android:layout_marginLeft="10dp"
+                android:id="@+id/relativeUserItem">
 
                 <TextView
                     android:id="@+id/userName"
@@ -39,6 +40,14 @@
                     android:textSize="16dp" />
 
             </RelativeLayout>
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_below="@id/relativeUserItem"
+                android:layout_toRightOf="@id/userProfilePic"
+                android:layout_marginLeft="-15dp"
+                android:id="@+id/userStatusIcon"/>
 
         </RelativeLayout>
 

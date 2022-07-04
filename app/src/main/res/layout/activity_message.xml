@@ -7,11 +7,12 @@
     tools:context=".MessageActivity"
     android:id="@+id/relativeMsg">
 
-    <com.sbdev.letschat.BgImageView
-        android:id="@+id/msgBackgroundImg"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/msg_bg" />
+<!--    <ImageView-->
+<!--        android:id="@+id/msgBackgroundImg"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:scaleType="fitXY"-->
+<!--        android:src="@drawable/me" />-->
 
     <RelativeLayout
         android:id="@+id/msgRelativeTop"
@@ -100,11 +101,11 @@
             android:textSize="18sp" />
 
         <ImageView
+            android:id="@+id/msgSend"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:id="@+id/msgSend"
             android:src="@drawable/send" />
 
     </RelativeLayout>
