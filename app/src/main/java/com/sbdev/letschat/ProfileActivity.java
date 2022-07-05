@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -70,6 +72,8 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         back=findViewById(R.id.profileBack);
         profilePic=findViewById(R.id.profileCircleImg);
         layoutName=findViewById(R.id.profileLayout1);
@@ -85,6 +89,7 @@ public class ProfileActivity extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
+        reference.keepSynced(true);
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
@@ -178,78 +183,137 @@ public class ProfileActivity extends AppCompatActivity {
                     String n=name.getText().toString().trim();
                     String e=email.getText().toString().trim();
 
-                    reference.child(firebaseAuth.getCurrentUser().getUid())
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(isNetworkConnected())
+                    {
+                        if(n.trim().isEmpty())
+                        {
+                            progressDialog.dismiss();
+                            layoutName.setError("Name cannot be empty!");
+                        }
+                        else if(e.trim().isEmpty())
+                        {
+                            progressDialog.dismiss();
+                            layoutEmail.setError("Email cannot be empty!");
+                        }
+                        else
+                        {
 
-                                UserModel userModel=snapshot.getValue(UserModel.class);
+                            reference.child(firebaseAuth.getCurrentUser().getUid())
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                if(!userModel.getName().equals(n))
-                                {
-                                    HashMap map=new HashMap();
-                                    map.put("Name",n);
+                                        UserModel userModel=snapshot.getValue(UserModel.class);
 
-                                    reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
-                                }
-                                if(!userModel.getEmail().equals(e))
-                                {
-                                    firebaseAuth.getCurrentUser().updateEmail(e);
+                                        if(!userModel.getName().equals(n))
+                                        {
+                                            HashMap map=new HashMap();
+                                            map.put("Name",n);
 
-                                    HashMap map=new HashMap();
-                                    map.put("Email",e);
+                                            reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
+                                        }
+                                        if(!userModel.getEmail().equals(e))
+                                        {
+                                            firebaseAuth.getCurrentUser().updateEmail(e);
 
-                                    reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
-                                }
+                                            HashMap map=new HashMap();
+                                            map.put("Email",e);
 
-                                if(imgURI!=null)
-                                {
-                                    storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                                        .child("Profile_Pic")
-                                        .putFile(imgURI)
-                                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
+                                        }
 
-                                                storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                                                    .child("Profile_Pic")
-                                                    .getDownloadUrl()
-                                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                        @Override
-                                                        public void onSuccess(Uri uri) {
+                                        if(imgURI!=null)
+                                        {
+                                            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                                                .child("Profile_Pic")
+                                                .putFile(imgURI)
+                                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                                            HashMap map=new HashMap();
-                                                            map.put("ProfilePic",uri.toString());
+                                                        storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                                                            .child("Profile_Pic")
+                                                            .getDownloadUrl()
+                                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                                @Override
+                                                                public void onSuccess(Uri uri) {
 
-                                                            reference.child(firebaseAuth.getCurrentUser().getUid())
-                                                                    .updateChildren(map);
+                                                                    HashMap map=new HashMap();
+                                                                    map.put("ProfilePic",uri.toString());
 
-                                                            progressDialog.dismiss();
+                                                                    reference.child(firebaseAuth.getCurrentUser().getUid())
+                                                                            .updateChildren(map);
 
-                                                            Snackbar.make(layout,"Profile updated!",Snackbar.LENGTH_SHORT).show();
+                                                                    progressDialog.dismiss();
 
-                                                        }
-                                                    });
+                                                                    Snackbar.make(layout,"Profile updated!",Snackbar.LENGTH_SHORT).show();
 
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
-                                            }
-                                        });
-                                }
+                                                                }
+                                                            });
 
-                            }
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                    }
+                                                });
+                                        }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                progressDialog.dismiss();
-                                DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
-                            }
-                        });
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+                                    }
+                                });
+
+                        }
+
+                    }
+                    else
+                    {
+                        progressDialog.dismiss();
+                        Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                    }
 
                 }
+
+            }
+        });
+
+
+        name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                layoutName.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        email.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                layoutEmail.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
 
             }
         });

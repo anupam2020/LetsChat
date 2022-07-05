@@ -2,8 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="    Wallpaper"
-        android:icon="@drawable/ic_baseline_wallpaper_24"
+        android:title="Wallpaper"
         android:id="@+id/more_wallpaper"/>
 
 </menu>

@@ -46,6 +46,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -55,6 +56,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -91,18 +94,22 @@ public class ChatActivity extends AppCompatActivity {
         weather=findViewById(R.id.chatWeather);
         tabLayout=findViewById(R.id.chatTabLayout);
         viewPager2=findViewById(R.id.viewPager2);
+        layout=findViewById(R.id.relativeChats);
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        layout=findViewById(R.id.relativeChats);
+        reference=FirebaseDatabase.getInstance().getReference("Users");
+        reference.keepSynced(true);
 
-        checkRealTimeNetwork();
+        updateWeather();
 
         adapter=new ChatStateAdapter(getSupportFragmentManager(),getLifecycle());
         viewPager2.setAdapter(adapter);
 
         tabLayout.addTab(tabLayout.newTab().setText("Chats"));
         tabLayout.addTab(tabLayout.newTab().setText("Users"));
+
+        checkRealTimeNetwork();
 
         tabLayout.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
 
@@ -169,11 +176,44 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
 
-                popupMenu.setForceShowIcon(true);
                 popupMenu.show();
 
             }
         });
+
+    }
+
+    private void checkRealTimeNetwork() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+
+                connectedRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean connected = snapshot.getValue(Boolean.class);
+                        if (connected) {
+                            updateWeather();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
+                    }
+                });
+
+            }
+        }, 2000);
+
+    }
+
+
+    public void updateWeather()
+    {
 
         StringRequest request=new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -213,27 +253,6 @@ public class ChatActivity extends AppCompatActivity {
 
         RequestQueue queue= Volley.newRequestQueue(this);
         queue.add(request);
-
-    }
-
-    private void checkRealTimeNetwork()
-    {
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (!connected) {
-                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
-            }
-        });
 
     }
 

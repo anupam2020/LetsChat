@@ -1,8 +1,11 @@
 package com.sbdev.letschat;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,12 +13,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +31,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.ArrayList;
 
@@ -39,7 +48,7 @@ public class ChatFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference;
+    DatabaseReference reference,connectedRef;
 
     ProgressDialog progressDialog;
 
@@ -60,17 +69,15 @@ public class ChatFragment extends Fragment {
         firebaseAuth=FirebaseAuth.getInstance();
 
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
+        reference.keepSynced(true);
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        if(!isNetworkConnected())
-        {
-            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-            progressDialog.dismiss();
-        }
+        checkRealTimeNetwork(view);
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -92,6 +99,26 @@ public class ChatFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
                 progressDialog.dismiss();
                 Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected){
+                    if(!((Activity) getContext()).isFinishing())
+                    {
+                        progressDialog.show();
+                        chatsList();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(getActivity(),error.getMessage(),3000).show();
             }
         });
 
@@ -135,6 +162,45 @@ public class ChatFragment extends Fragment {
         });
 
     }
+
+    private void checkRealTimeNetwork(View view)
+    {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+
+                connectedRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean connected = snapshot.getValue(Boolean.class);
+                        if (connected) {
+                            if(!((Activity) getContext()).isFinishing())
+                            {
+                                progressDialog.show();
+                                chatsList();
+                            }
+                        }
+                        else {
+                            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        progressDialog.dismiss();
+                        DynamicToast.make(getActivity(),error.getMessage(),3000).show();
+                    }
+                });
+
+            }
+        },2000);
+    }
+
+
 
     private boolean isNetworkConnected()
     {

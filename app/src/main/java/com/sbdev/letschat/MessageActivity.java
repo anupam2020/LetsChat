@@ -18,6 +18,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -116,7 +117,9 @@ public class MessageActivity extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
 
         reference=FirebaseDatabase.getInstance().getReference("Users");
+        reference.keepSynced(true);
         chatsRef=FirebaseDatabase.getInstance().getReference("Chats");
+        chatsRef.keepSynced(true);
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
@@ -194,7 +197,6 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 });
 
-                popupMenu.setForceShowIcon(true);
                 popupMenu.show();
 
             }
@@ -268,21 +270,33 @@ public class MessageActivity extends AppCompatActivity {
     private void checkRealTimeNetwork()
     {
 
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (!connected) {
-                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                }
-            }
+            public void run() {
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+
+                connectedRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean connected = snapshot.getValue(Boolean.class);
+                        if (!connected) {
+                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            Snackbar.make(layout,"Your device is online!",Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                    }
+                });
+
             }
-        });
+        },2000);
 
     }
 
