@@ -30,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
@@ -48,7 +49,7 @@ public class ChatFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,connectedRef;
+    DatabaseReference usersRef,reference,connectedRef;
 
     ProgressDialog progressDialog;
 
@@ -68,6 +69,8 @@ public class ChatFragment extends Fragment {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef.keepSynced(true);
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
         reference.keepSynced(true);
         connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
@@ -102,17 +105,15 @@ public class ChatFragment extends Fragment {
             }
         });
 
-        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
         connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
-                    if(!((Activity) getContext()).isFinishing())
-                    {
-                        progressDialog.show();
-                        chatsList();
-                    }
+                    usersRef.child("status").setValue("online");
+                    usersRef.child("status").onDisconnect().setValue("offline");
+
+                    chatsList();
                 }
             }
 
@@ -170,21 +171,14 @@ public class ChatFragment extends Fragment {
             @Override
             public void run() {
 
-                connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
                 connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (connected) {
-                            if(!((Activity) getContext()).isFinishing())
-                            {
-                                progressDialog.show();
-                                chatsList();
-                            }
+                            chatsList();
                         }
                         else {
-                            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                             progressDialog.dismiss();
                         }
                     }

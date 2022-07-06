@@ -12,12 +12,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,13 +35,15 @@ public class UsersFragment extends Fragment {
 
     RecyclerView recyclerView;
 
+    TextInputEditText searchText;
+
     UserAdapter adapter;
 
-    ArrayList<UserModel> arrayList;
+    ArrayList<UserModel> arrayList,filterList;
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,connectedRef;
+    DatabaseReference reference,connectedRef,usersRef;
 
     ProgressDialog progressDialog;
 
@@ -47,7 +52,9 @@ public class UsersFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView=view.findViewById(R.id.usersRecyclerView);
+        searchText=view.findViewById(R.id.usersSearch);
 
+        filterList=new ArrayList<>();
         arrayList=new ArrayList<>();
         adapter=new UserAdapter(arrayList,getActivity());
         recyclerView.setAdapter(adapter);
@@ -58,6 +65,8 @@ public class UsersFragment extends Fragment {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef.keepSynced(true);
         connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
@@ -74,17 +83,56 @@ public class UsersFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
-                    if(!((Activity) getContext()).isFinishing())
-                    {
-                        progressDialog.show();
-                        usersList();
-                    }
+                    usersRef.child("status").setValue("online");
+                    usersRef.child("status").onDisconnect().setValue("offline");
+
+                    usersList();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 DynamicToast.make(getActivity(),error.getMessage(),3000).show();
+            }
+        });
+
+        searchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                filterList.clear();
+
+                if(s.toString().trim().isEmpty())
+                {
+                    adapter=new UserAdapter(arrayList,getActivity());
+                }
+                else
+                {
+
+                    for(UserModel model : arrayList)
+                    {
+                        if(model.getName().toLowerCase().contains(s.toString().toLowerCase()))
+                        {
+                            filterList.add(model);
+                        }
+                    }
+
+                    adapter=new UserAdapter(filterList,getActivity());
+
+                }
+                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
             }
         });
 
@@ -131,20 +179,14 @@ public class UsersFragment extends Fragment {
             @Override
             public void run() {
 
-                connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
                 connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (connected) {
-                            if(!((Activity) getContext()).isFinishing())
-                            {
-                                progressDialog.show();
-                                usersList();
-                            }
+                            usersList();
                         }
                         else {
-                            Snackbar.make(view,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                             progressDialog.dismiss();
                         }
                     }

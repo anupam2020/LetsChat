@@ -73,7 +73,7 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef;
+    DatabaseReference reference,chatsRef,connectedRef,usersRef;
 
     StorageReference storageReference;
 
@@ -92,6 +92,8 @@ public class MessageActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
 
     RelativeLayout layout;
+
+    ValueEventListener seenListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +122,10 @@ public class MessageActivity extends AppCompatActivity {
         reference.keepSynced(true);
         chatsRef=FirebaseDatabase.getInstance().getReference("Chats");
         chatsRef.keepSynced(true);
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef.keepSynced(true);
+
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
@@ -135,11 +141,9 @@ public class MessageActivity extends AppCompatActivity {
 
         checkRealTimeNetwork();
 
-        if(!isNetworkConnected())
-        {
-            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-            progressDialog.dismiss();
-        }
+        loadWallpaper();
+
+        loadProfile();
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,22 +153,17 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        reference.child(friendUID).addListenerForSingleValueEvent(new ValueEventListener() {
+        connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected){
+                    usersRef.child("status").setValue("online");
+                    usersRef.child("status").onDisconnect().setValue("offline");
 
-                UserModel userModel=snapshot.getValue(UserModel.class);
-                userName.setText(userModel.getName());
-
-                Glide.with(MessageActivity.this)
-                        .load(userModel.getProfilePic())
-                        .placeholder(R.drawable.item_user)
-                        .error(R.drawable.item_user)
-                        .into(profilePic);
-
-                recyclerView.scrollToPosition(arrayList.size() - 1);
-                readMsg(myUID,friendUID);
-
+                    loadProfile();
+                    loadWallpaper();
+                }
             }
 
             @Override
@@ -202,42 +201,7 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        storageReference.child(myUID)
-            .child("Wallpaper")
-            .getDownloadUrl()
-            .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
 
-                    Glide.with(MessageActivity.this)
-                            .load(uri)
-                            .into(new CustomTarget<Drawable>() {
-                                @Override
-                                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-
-                                    getWindow().setBackgroundDrawable(resource);
-                                    progressDialog.dismiss();
-
-                                }
-
-                                @Override
-                                public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                                }
-                            });
-
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-
-                    progressDialog.dismiss();
-                    getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
-                    //background.setImageResource(R.drawable.msg_bg);
-
-                }
-            });
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -265,6 +229,40 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+
+        seenMsg(friendUID);
+
+    }
+
+    public void seenMsg(String friendUID)
+    {
+
+        seenListener=chatsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+                {
+
+                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                    if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
+                            && messageModel.getSender().equals(friendUID))
+                    {
+                        HashMap map=new HashMap();
+                        map.put("isSeen","true");
+                        dataSnapshot.getRef().updateChildren(map);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     private void checkRealTimeNetwork()
@@ -282,10 +280,7 @@ public class MessageActivity extends AppCompatActivity {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (!connected) {
                             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
-                            Snackbar.make(layout,"Your device is online!",Snackbar.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
                         }
                     }
 
@@ -297,6 +292,77 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         },2000);
+
+    }
+
+    public void loadWallpaper()
+    {
+
+        storageReference.child(myUID)
+                .child("Wallpaper")
+                .getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+
+                        Glide.with(getApplicationContext())
+                                .load(uri)
+                                .into(new CustomTarget<Drawable>() {
+                                    @Override
+                                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+
+                                        getWindow().setBackgroundDrawable(resource);
+                                        progressDialog.dismiss();
+
+                                    }
+
+                                    @Override
+                                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                    }
+                                });
+
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        progressDialog.dismiss();
+                        getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
+                        //background.setImageResource(R.drawable.msg_bg);
+
+                    }
+                });
+
+    }
+
+    public void loadProfile()
+    {
+
+        reference.child(friendUID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                UserModel userModel=snapshot.getValue(UserModel.class);
+                userName.setText(userModel.getName());
+
+                Glide.with(getApplicationContext())
+                        .load(userModel.getProfilePic())
+                        .placeholder(R.drawable.item_user)
+                        .error(R.drawable.item_user)
+                        .into(profilePic);
+
+                recyclerView.scrollToPosition(arrayList.size() - 1);
+                readMsg(myUID,friendUID);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+            }
+        });
 
     }
 
@@ -343,15 +409,16 @@ public class MessageActivity extends AppCompatActivity {
         map.put("sender",sender);
         map.put("receiver",receiver);
         map.put("text",text);
+        map.put("isSeen","false");
 
         chatsRef.push().setValue(map)
             .addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
 
+                    msgText.setText("");
                     if(task.isSuccessful())
                     {
-                        msgText.setText("");
                         recyclerView.scrollToPosition(arrayList.size() - 1);
                     }
 
@@ -452,6 +519,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        chatsRef.removeEventListener(seenListener);
         checkStatus("offline");
     }
 

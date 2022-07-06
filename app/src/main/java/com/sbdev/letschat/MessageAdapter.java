@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +51,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.msg.setText(messageModel.getText());
 
+        if(position==arrayList.size()-1)
+        {
+            Toast.makeText(context, "Seen Status: "+messageModel.isSeen(), Toast.LENGTH_SHORT).show();
+
+            if(messageModel.isSeen())
+            {
+                holder.seen.setVisibility(View.VISIBLE);
+                holder.seen.setText("Seen");
+            }
+            else
+            {
+                holder.seen.setVisibility(View.VISIBLE);
+                holder.seen.setText("Delivered");
+            }
+        }
+        else
+        {
+            holder.seen.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -59,12 +80,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        TextView msg;
+        TextView msg,seen;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
 
             msg=itemView.findViewById(R.id.showMsg);
+            seen=itemView.findViewById(R.id.textSeen);
 
         }
     }

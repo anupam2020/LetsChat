@@ -69,11 +69,7 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference;
-
-    StorageReference storageReference;
-
-    Handler handler;
+    DatabaseReference reference,connectedRef;
 
     TabLayout tabLayout;
 
@@ -100,6 +96,8 @@ public class ChatActivity extends AppCompatActivity {
 
         reference=FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
+
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         updateWeather();
 
@@ -142,6 +140,22 @@ public class ChatActivity extends AppCompatActivity {
                 tabLayout.selectTab(tabLayout.getTabAt(position));
             }
         });
+
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected){
+                    updateWeather();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
+            }
+        });
+
 
         more.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -189,14 +203,15 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
                 connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (connected) {
                             updateWeather();
+                        }
+                        else {
+                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                         }
                     }
 

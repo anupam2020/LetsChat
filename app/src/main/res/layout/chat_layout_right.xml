@@ -16,4 +16,14 @@
         android:layout_alignParentRight="true"
         android:id="@+id/showMsg"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/showMsg"
+        android:id="@+id/textSeen"
+        android:visibility="gone"
+        android:textSize="12sp"
+        android:textColor="@color/black"
+        android:layout_alignParentRight="true" />
+
 </RelativeLayout>

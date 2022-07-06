@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -57,7 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference;
+    DatabaseReference reference,connectedRef,usersRef;
 
     StorageReference storageReference;
 
@@ -71,8 +72,6 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         back=findViewById(R.id.profileBack);
         profilePic=findViewById(R.id.profileCircleImg);
@@ -90,19 +89,21 @@ public class ProfileActivity extends AppCompatActivity {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef.keepSynced(true);
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
+
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        if(!isNetworkConnected())
-        {
-            progressDialog.dismiss();
-            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-        }
+        reloadProfile();
+
+        checkRealTimeNetwork();
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,44 +122,25 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });*/
 
-        reference.child(firebaseAuth.getCurrentUser().getUid())
-            .addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    UserModel userModel=snapshot.getValue(UserModel.class);
-
-                    name.setText(userModel.getName());
-                    email.setText(userModel.getEmail());
-
-                    ProfileActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Glide.with(ProfileActivity.this)
-                                    .load(userModel.getProfilePic())
-                                    .placeholder(R.drawable.item_user)
-                                    .error(R.drawable.item_user)
-                                    .into(profilePic);
-                        }
-                    });
-
-                    progressDialog.dismiss();
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    progressDialog.dismiss();
-                    DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
-                }
-            });
-
-        editImg.setOnClickListener(new View.OnClickListener() {
+        connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                openGallery();
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected){
+                    usersRef.child("status").setValue("online");
+                    usersRef.child("status").onDisconnect().setValue("offline");
+
+                    reloadProfile();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
             }
         });
+
+
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -317,6 +299,77 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    public void reloadProfile()
+    {
+
+        reference.child(firebaseAuth.getCurrentUser().getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        UserModel userModel=snapshot.getValue(UserModel.class);
+
+                        name.setText(userModel.getName());
+                        email.setText(userModel.getEmail());
+
+                        ProfileActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Glide.with(getApplicationContext())
+                                        .load(userModel.getProfilePic())
+                                        .placeholder(R.drawable.item_user)
+                                        .error(R.drawable.item_user)
+                                        .into(profilePic);
+                            }
+                        });
+
+                        progressDialog.dismiss();
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        progressDialog.dismiss();
+                        DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+                    }
+                });
+
+        editImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGallery();
+            }
+        });
+
+    }
+
+    private void checkRealTimeNetwork() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                connectedRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean connected = snapshot.getValue(Boolean.class);
+                        if (!connected) {
+                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        DynamicToast.make(ProfileActivity.this, error.getMessage(), 3000).show();
+                    }
+                });
+
+            }
+        }, 2000);
 
     }
 
