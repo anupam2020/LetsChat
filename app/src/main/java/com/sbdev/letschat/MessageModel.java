@@ -2,14 +2,13 @@ package com.sbdev.letschat;
 
 public class MessageModel {
 
-    String sender,receiver,text;
-    boolean isSeen;
+    String sender,receiver,text,time;
 
-    public MessageModel(String sender, String receiver, String text, boolean isSeen) {
+    public MessageModel(String sender, String receiver, String text, String time) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
-        this.isSeen = isSeen;
+        this.time = time;
     }
 
     public MessageModel()
@@ -41,11 +40,11 @@ public class MessageModel {
         this.text = text;
     }
 
-    public boolean isSeen() {
-        return isSeen;
+    public String getTime() {
+        return time;
     }
 
-    public void setSeen(boolean seen) {
-        isSeen = seen;
+    public void setTime(String time) {
+        this.time = time;
     }
 }

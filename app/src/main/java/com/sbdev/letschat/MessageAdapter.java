@@ -51,25 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.msg.setText(messageModel.getText());
 
-        if(position==arrayList.size()-1)
-        {
-            Toast.makeText(context, "Seen Status: "+messageModel.isSeen(), Toast.LENGTH_SHORT).show();
-
-            if(messageModel.isSeen())
-            {
-                holder.seen.setVisibility(View.VISIBLE);
-                holder.seen.setText("Seen");
-            }
-            else
-            {
-                holder.seen.setVisibility(View.VISIBLE);
-                holder.seen.setText("Delivered");
-            }
-        }
-        else
-        {
-            holder.seen.setVisibility(View.GONE);
-        }
+        holder.time.setText(messageModel.getTime());
 
     }
 
@@ -80,13 +62,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        TextView msg,seen;
+        TextView msg,time;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
 
             msg=itemView.findViewById(R.id.showMsg);
-            seen=itemView.findViewById(R.id.textSeen);
+            time=itemView.findViewById(R.id.textTime);
 
         }
     }

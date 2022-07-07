@@ -45,6 +45,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -52,8 +53,12 @@ import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -73,7 +78,7 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,connectedRef,usersRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef;
 
     StorageReference storageReference;
 
@@ -122,10 +127,12 @@ public class MessageActivity extends AppCompatActivity {
         reference.keepSynced(true);
         chatsRef=FirebaseDatabase.getInstance().getReference("Chats");
         chatsRef.keepSynced(true);
+        dRef=FirebaseDatabase.getInstance().getReference("Chats");
+        dRef.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
         usersRef.keepSynced(true);
 
-        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
@@ -153,7 +160,7 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -184,11 +191,8 @@ public class MessageActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
 
-                        switch (item.getItemId())
-                        {
-                            case R.id.more_wallpaper:
-                                selectImgAndSetBg();
-                                break;
+                        if (item.getItemId() == R.id.more_wallpaper) {
+                            selectImgAndSetBg();
                         }
 
                         return false;
@@ -204,6 +208,7 @@ public class MessageActivity extends AppCompatActivity {
 
 
         send.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
 
@@ -222,6 +227,7 @@ public class MessageActivity extends AppCompatActivity {
                     }
                     else
                     {
+                        msgText.setText("");
                         addTextToFirebase(myUID,friendUID,text);
                     }
                 }
@@ -230,14 +236,15 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        seenMsg(friendUID);
+        //seenMsg(friendUID);
 
     }
 
     public void seenMsg(String friendUID)
     {
 
-        seenListener=chatsRef.addValueEventListener(new ValueEventListener() {
+        dRef=FirebaseDatabase.getInstance().getReference("Chats");
+        seenListener=dRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -249,11 +256,13 @@ public class MessageActivity extends AppCompatActivity {
                             && messageModel.getSender().equals(friendUID))
                     {
                         HashMap map=new HashMap();
-                        map.put("isSeen","true");
+                        map.put("isSeen",true);
                         dataSnapshot.getRef().updateChildren(map);
                     }
 
                 }
+
+                adapter.notifyDataSetChanged();;
 
             }
 
@@ -401,34 +410,59 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void addTextToFirebase(String sender, String receiver, String text)
     {
 
-        HashMap map=new HashMap();
+        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        serverTimeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-        map.put("sender",sender);
-        map.put("receiver",receiver);
-        map.put("text",text);
-        map.put("isSeen","false");
+                long offset = snapshot.getValue(Long.class);
+                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
 
-        chatsRef.push().setValue(map)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
+                Log.d("Server Time", String.valueOf(estimatedServerTimeMs));
 
-                    msgText.setText("");
-                    if(task.isSuccessful())
-                    {
-                        recyclerView.scrollToPosition(arrayList.size() - 1);
-                    }
+                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                Date date=timestamp;
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMMM dd, yyyy - hh:mm a");
+                String strDateTime=simpleDateFormat.format(date);
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
-                }
-            });
+                Log.d("Date", strDateTime);
+
+                HashMap map=new HashMap();
+
+                map.put("sender",sender);
+                map.put("receiver",receiver);
+                map.put("text",text);
+                map.put("time",strDateTime);
+
+                chatsRef.push().setValue(map)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                                if(task.isSuccessful())
+                                {
+                                    recyclerView.scrollToPosition(arrayList.size() - 1);
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                            }
+                        });
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList").child(sender).child(receiver);
 
@@ -519,9 +553,8 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        chatsRef.removeEventListener(seenListener);
+        //dRef.removeEventListener(seenListener);
         checkStatus("offline");
     }
-
 
 }

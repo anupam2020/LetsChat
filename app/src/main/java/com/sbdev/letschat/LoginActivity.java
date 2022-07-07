@@ -231,6 +231,59 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        forgot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                InputMethodManager imm = (InputMethodManager) LoginActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                progressDialog.show();
+                progressDialog.setContentView(R.layout.progress_dialog_dots);
+                progressDialog.setCancelable(false);
+                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                String e=email.getText().toString().trim();
+
+                if(isNetworkConnected())
+                {
+                    if(e.trim().isEmpty())
+                    {
+                        progressDialog.dismiss();
+                        layout1.setError("Email cannot be empty!");
+                    }
+                    else
+                    {
+                        firebaseAuth.sendPasswordResetEmail(e).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                                if(task.isSuccessful())
+                                {
+                                    progressDialog.dismiss();
+                                    DynamicToast.make(LoginActivity.this,"Password reset link was successfully sent to your mail!",3000).show();
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                progressDialog.dismiss();
+                                DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                            }
+                        });
+                    }
+
+                }
+                else
+                {
+                    progressDialog.dismiss();
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
     }
 
 

@@ -43,7 +43,7 @@ public class UsersFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,connectedRef,usersRef;
+    DatabaseReference reference,usersRef;
 
     ProgressDialog progressDialog;
 
@@ -67,7 +67,8 @@ public class UsersFragment extends Fragment {
         reference.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
         usersRef.keepSynced(true);
-        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+
+        //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
@@ -78,7 +79,7 @@ public class UsersFragment extends Fragment {
 
         usersList();
 
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -179,7 +180,7 @@ public class UsersFragment extends Fragment {
             @Override
             public void run() {
 
-                connectedRef.addValueEventListener(new ValueEventListener() {
+                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);

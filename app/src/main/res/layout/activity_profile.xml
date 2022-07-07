@@ -32,6 +32,16 @@
             android:textColor="@color/white"
             android:textSize="22sp" />
 
+        <ImageView
+            android:id="@+id/profileMore"
+            android:layout_width="25dp"
+            android:layout_height="25sp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            app:tint="@color/white" />
+
     </RelativeLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView

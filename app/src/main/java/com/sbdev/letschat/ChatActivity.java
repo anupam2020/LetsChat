@@ -69,7 +69,7 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,connectedRef;
+    DatabaseReference reference;
 
     TabLayout tabLayout;
 
@@ -97,7 +97,7 @@ public class ChatActivity extends AppCompatActivity {
         reference=FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
 
-        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         updateWeather();
 
@@ -141,7 +141,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -203,7 +203,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                connectedRef.addValueEventListener(new ValueEventListener() {
+                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);

@@ -16,9 +16,11 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
@@ -44,7 +46,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    ImageView back,editImg;
+    ImageView back,editImg,more;
 
     CircleImageView profilePic;
 
@@ -58,7 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,connectedRef,usersRef;
+    DatabaseReference reference,usersRef;
 
     StorageReference storageReference;
 
@@ -82,6 +84,7 @@ public class ProfileActivity extends AppCompatActivity {
         save=findViewById(R.id.profileSave);
         layout=findViewById(R.id.profileRelativeNew);
         editImg=findViewById(R.id.profileEditImg);
+        more=findViewById(R.id.profileMore);
 
         progressDialog=new ProgressDialog(this);
 
@@ -94,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
@@ -122,7 +125,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });*/
 
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -300,6 +303,30 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                PopupMenu popupMenu=new PopupMenu(ProfileActivity.this,v);
+                popupMenu.getMenuInflater().inflate(R.menu.change_pass, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+
+                        if (item.getItemId() == R.id.changePass) {
+                            startActivity(new Intent(ProfileActivity.this, ChangePassword.class));
+                        }
+
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
+
+            }
+        });
+
     }
 
     public void reloadProfile()
@@ -352,7 +379,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                connectedRef.addValueEventListener(new ValueEventListener() {
+                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
@@ -400,6 +427,34 @@ public class ProfileActivity extends AppCompatActivity {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    public void checkStatus(String status)
+    {
+
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+
+        HashMap map=new HashMap();
+        map.put("status",status);
+
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            reference.child(firebaseAuth.getCurrentUser().getUid())
+                    .updateChildren(map);
+        }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkStatus("online");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        checkStatus("offline");
     }
 
 }

@@ -20,10 +20,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/showMsg"
-        android:id="@+id/textSeen"
-        android:visibility="gone"
-        android:textSize="12sp"
-        android:textColor="@color/black"
+        android:id="@+id/textTime"
+        android:textSize="10sp"
+        android:layout_marginTop="5dp"
+        android:text="Jul 07, 2021 - 09:04PM"
+        android:textColor="@color/light_grey"
         android:layout_alignParentRight="true" />
 
 </RelativeLayout>
