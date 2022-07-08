@@ -74,11 +74,11 @@ public class MessageActivity extends AppCompatActivity {
 
     CircleImageView profilePic;
 
-    TextView userName;
+    TextView userName,userStatus;
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,dRef,usersRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef;
 
     StorageReference storageReference;
 
@@ -114,6 +114,7 @@ public class MessageActivity extends AppCompatActivity {
         send=findViewById(R.id.msgSend);
         profilePic=findViewById(R.id.msgProfilePic);
         userName=findViewById(R.id.msgName);
+        userStatus=findViewById(R.id.msgStatus);
         recyclerView=findViewById(R.id.msgRecycler);
         layout=findViewById(R.id.relativeMsg);
 
@@ -139,6 +140,8 @@ public class MessageActivity extends AppCompatActivity {
         friendUID=getIntent().getStringExtra("friendUID");
         myUID=firebaseAuth.getCurrentUser().getUid();
 
+        statusRef= FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
+
         progressDialog=new ProgressDialog(this);
 
         progressDialog.show();
@@ -156,6 +159,21 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+
+        statusRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                UserModel userModel=snapshot.getValue(UserModel.class);
+                String status=userModel.getStatus();
+                userStatus.setText((status.charAt(0)+"").toUpperCase()+status.substring(1));
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
             }
         });
 
