@@ -24,8 +24,10 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -40,6 +42,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -130,8 +135,42 @@ public class ProfileActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
-                    usersRef.child("status").setValue("online");
-                    usersRef.child("status").onDisconnect().setValue("offline");
+                    usersRef.child("status").setValue("Online");
+                    //usersRef.child("status").onDisconnect().setValue("Offline");
+
+                    usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+                                DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+                                serverTimeRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        long offset = snapshot.getValue(Long.class);
+                                        long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                                        Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                                        Date date=timestamp;
+                                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                                        String strDateTime=simpleDateFormat.format(date);
+
+                                        usersRef.child("status").onDisconnect().setValue(strDateTime);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+
+                        }
+                    });
+
 
                     reloadProfile();
                 }
@@ -347,7 +386,7 @@ public class ProfileActivity extends AppCompatActivity {
                             public void run() {
                                 Glide.with(getApplicationContext())
                                         .load(userModel.getProfilePic())
-                                        .placeholder(R.drawable.item_user)
+                                        .placeholder(R.drawable.loading)
                                         .error(R.drawable.item_user)
                                         .into(profilePic);
                             }
@@ -435,12 +474,46 @@ public class ProfileActivity extends AppCompatActivity {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
 
         HashMap map=new HashMap();
-        map.put("status",status);
-
-        if(firebaseAuth.getCurrentUser()!=null)
+        if(status.equals("Offline"))
         {
-            reference.child(firebaseAuth.getCurrentUser().getUid())
-                    .updateChildren(map);
+
+            DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+            serverTimeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    long offset = snapshot.getValue(Long.class);
+                    long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                    Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                    Date date=timestamp;
+                    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                    String strDateTime=simpleDateFormat.format(date);
+
+                    map.put("status",strDateTime);
+                    if(firebaseAuth.getCurrentUser()!=null)
+                    {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                .updateChildren(map);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
+        else
+        {
+            map.put("status",status);
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                reference.child(firebaseAuth.getCurrentUser().getUid())
+                        .updateChildren(map);
+            }
         }
 
     }
@@ -448,13 +521,13 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkStatus("online");
+        checkStatus("Online");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        checkStatus("offline");
+        checkStatus("Offline");
     }
 
 }

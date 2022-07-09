@@ -64,7 +64,8 @@
                 android:drawablePadding="10dp"
                 android:drawableTint="@color/black"
                 android:hint="Enter your email"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:inputType="textCapSentences"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

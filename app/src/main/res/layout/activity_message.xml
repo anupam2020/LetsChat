@@ -95,6 +95,17 @@
         android:layout_marginBottom="5dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+<!--    <ImageView-->
+<!--        android:id="@+id/msgDown"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_above="@id/msgRelativeBottom"-->
+<!--        android:layout_alignParentRight="true"-->
+<!--        android:layout_marginRight="10dp"-->
+<!--        android:layout_marginBottom="15dp"-->
+<!--        android:alpha="0.75"-->
+<!--        android:src="@drawable/down" />-->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -118,7 +129,8 @@
             android:paddingEnd="15dp"
             android:textColor="@color/black"
             android:textCursorDrawable="@null"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:inputType="textCapSentences"/>
 
         <ImageView
             android:id="@+id/msgSend"

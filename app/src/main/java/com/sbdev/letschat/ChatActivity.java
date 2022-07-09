@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,7 +70,7 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference;
+    DatabaseReference reference,usersRef;
 
     TabLayout tabLayout;
 
@@ -96,6 +97,8 @@ public class ChatActivity extends AppCompatActivity {
 
         reference=FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
@@ -242,13 +245,8 @@ public class ChatActivity extends AppCompatActivity {
 
                         JSONObject current=jsonObject.getJSONObject("current");
                         int isDay=current.getInt("is_day");
-                        int temp= (int) current.getDouble("temp_c");
 
-                        JSONObject condition=current.getJSONObject("condition");
-
-                        String text=condition.getString("text");
-
-                        changeWeather(text,isDay,temp);
+                        changeWeather(isDay);
 
 
                     } catch (JSONException e) {
@@ -272,102 +270,16 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    public void changeWeather(String textCondition, int isDay, int temp)
+    public void changeWeather(int isDay)
     {
 
         if(isDay==0)
         {
-
-            textCondition=textCondition.toLowerCase();
-            if(textCondition.contains("fog") || textCondition.contains("mist"))
-            {
-                weather.setImageResource(R.drawable.mist);
-            }
-            else if(textCondition.contains("clear") || textCondition.contains("cloudy"))
-            {
-                if(temp<=20)
-                {
-                    weather.setImageResource(R.drawable.mist);
-                }
-                else
-                {
-                    weather.setImageResource(R.drawable.moon_clear);
-                }
-            }
-            else if(textCondition.contains("rain"))
-            {
-                if(textCondition.contains("light") || textCondition.contains("patchy"))
-                {
-                    weather.setImageResource(R.drawable.light_rain_night);
-                }
-                else if(textCondition.contains("moderate"))
-                {
-                    weather.setImageResource(R.drawable.moderate_rain_night);
-                }
-                else
-                {
-                    weather.setImageResource(R.drawable.heavy_rain_night);
-                }
-            }
-            else if(textCondition.contains("drizzle"))
-            {
-                weather.setImageResource(R.drawable.drizzle_night);
-            }
-
+            weather.setImageResource(R.drawable.moon_clear);
         }
         else
         {
-
-            textCondition=textCondition.toLowerCase();
-            if(textCondition.contains("cloudy"))
-            {
-                if(temp<=25)
-                {
-                    weather.setImageResource(R.drawable.mist);
-                }
-                else
-                {
-                    weather.setImageResource(R.drawable.cloudy);
-                }
-            }
-            if(textCondition.contains("sunny"))
-            {
-                if(temp<=20)
-                {
-                    weather.setImageResource(R.drawable.mist);
-                }
-                else
-                {
-                    weather.setImageResource(R.drawable.clear_sky);
-                }
-            }
-            else if(textCondition.contains("mist") || textCondition.contains("fog"))
-            {
-                weather.setImageResource(R.drawable.mist);
-            }
-            else if(textCondition.contains("rain"))
-            {
-                if(textCondition.contains("light") || textCondition.contains("patchy"))
-                {
-                    weather.setImageResource(R.drawable.light_rain);
-                }
-                else if(textCondition.contains("moderate"))
-                {
-                    weather.setImageResource(R.drawable.moderate_rain);
-                }
-                else
-                {
-                    if(textCondition.contains("heavy"))
-                    {
-                        weather.setImageResource(R.drawable.heavy_rain);
-                    }
-                }
-            }
-            else if(textCondition.contains("drizzle"))
-            {
-                weather.setImageResource(R.drawable.morning_drizzle);
-            }
-
+            weather.setImageResource(R.drawable.cloudy);
         }
 
     }
@@ -401,17 +313,30 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
 
         HashMap map=new HashMap();
-        map.put("status","offline");
+        map.put("status","Offline");
 
         if(firebaseAuth.getCurrentUser()!=null)
         {
             reference.child(firebaseAuth.getCurrentUser().getUid())
-                    .updateChildren(map);
-        }
+                .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
 
-        firebaseAuth.signOut();
-        startActivity(new Intent(ChatActivity.this,MainActivity.class));
-        finishAffinity();
+                        if(task.isSuccessful())
+                        {
+                            firebaseAuth.signOut();
+                            startActivity(new Intent(ChatActivity.this,MainActivity.class));
+                            finishAffinity();
+                        }
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        DynamicToast.make(ChatActivity.this, e.getMessage(), 3000).show();
+                    }
+                });
+        }
 
     }
 
@@ -421,26 +346,61 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
 
         HashMap map=new HashMap();
-        map.put("status",status);
-
-        if(firebaseAuth.getCurrentUser()!=null)
+        if(status.equals("Offline"))
         {
-            reference.child(firebaseAuth.getCurrentUser().getUid())
-                    .updateChildren(map);
+
+            DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+            serverTimeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    long offset = snapshot.getValue(Long.class);
+                    long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                    Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                    Date date=timestamp;
+                    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                    String strDateTime=simpleDateFormat.format(date);
+
+                    map.put("status",strDateTime);
+                    if(firebaseAuth.getCurrentUser()!=null)
+                    {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                .updateChildren(map);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
+                }
+            });
+
         }
+        else
+        {
+            map.put("status",status);
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                reference.child(firebaseAuth.getCurrentUser().getUid())
+                        .updateChildren(map);
+            }
+        }
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkStatus("online");
+        checkStatus("Online");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        checkStatus("offline");
+        checkStatus("Offline");
     }
 
 }

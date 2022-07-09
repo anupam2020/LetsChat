@@ -168,7 +168,15 @@ public class MessageActivity extends AppCompatActivity {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
                 String status=userModel.getStatus();
-                userStatus.setText((status.charAt(0)+"").toUpperCase()+status.substring(1));
+                if(status.equals("Online") || status.equals("Offline"))
+                {
+                    userStatus.setText(status);
+                }
+                else
+                {
+                    userStatus.setText("Last seen "+status);
+                }
+
 
             }
             @Override
@@ -183,8 +191,41 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
-                    usersRef.child("status").setValue("online");
-                    usersRef.child("status").onDisconnect().setValue("offline");
+                    usersRef.child("status").setValue("Online");
+                    //usersRef.child("status").onDisconnect().setValue("Offline");
+
+                    usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+                                DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+                                serverTimeRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        long offset = snapshot.getValue(Long.class);
+                                        long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                                        Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                                        Date date=timestamp;
+                                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                                        String strDateTime=simpleDateFormat.format(date);
+
+                                        usersRef.child("status").onDisconnect().setValue(strDateTime);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+
+                        }
+                    });
 
                     loadProfile();
                     loadWallpaper();
@@ -253,6 +294,18 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        msgText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerView.scrollToPosition(arrayList.size() - 1);
+            }
+        });
+
+//        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+//        if(imm.isActive())
+//        {
+//            recyclerView.scrollToPosition(arrayList.size() - 1);
+//        }
 
         //seenMsg(friendUID);
 
@@ -555,24 +608,62 @@ public class MessageActivity extends AppCompatActivity {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
 
         HashMap map=new HashMap();
-        map.put("status",status);
+        if(status.equals("Offline"))
+        {
 
-        reference.child(firebaseAuth.getCurrentUser().getUid())
-                .updateChildren(map);
+            DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+            serverTimeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    long offset = snapshot.getValue(Long.class);
+                    long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                    Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                    Date date=timestamp;
+                    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                    String strDateTime=simpleDateFormat.format(date);
+
+                    map.put("status",strDateTime);
+                    if(firebaseAuth.getCurrentUser()!=null)
+                    {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                .updateChildren(map);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
+        else
+        {
+            map.put("status",status);
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                reference.child(firebaseAuth.getCurrentUser().getUid())
+                        .updateChildren(map);
+            }
+        }
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkStatus("online");
+        checkStatus("Online");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         //dRef.removeEventListener(seenListener);
-        checkStatus("offline");
+        checkStatus("Offline");
     }
 
 }

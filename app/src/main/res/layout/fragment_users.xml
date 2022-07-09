@@ -29,7 +29,8 @@
                 android:hint="Search Users"
                 android:singleLine="true"
                 android:drawableTint="@color/black"
-                android:drawableStart="@drawable/ic_baseline_search_24"/>
+                android:drawableStart="@drawable/ic_baseline_search_24"
+                android:inputType="textCapSentences"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
