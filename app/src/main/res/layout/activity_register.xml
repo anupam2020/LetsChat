@@ -99,7 +99,7 @@
                 android:drawableTint="@color/black"
                 android:hint="Enter your email"
                 android:singleLine="true"
-                android:inputType="textCapSentences"/>
+                android:inputType="textEmailAddress"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

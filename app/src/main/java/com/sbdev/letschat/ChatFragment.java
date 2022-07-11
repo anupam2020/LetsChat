@@ -48,11 +48,13 @@ public class ChatFragment extends Fragment {
 
     ArrayList<UserModel> mUsers;
 
+    ArrayList<MessageModel> msgList;
+
     ArrayList<ChatsListModel> userList;
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,usersRef;
+    DatabaseReference reference,usersRef,chatsRef;
 
     ProgressDialog progressDialog;
 
@@ -69,6 +71,7 @@ public class ChatFragment extends Fragment {
         progressDialog=new ProgressDialog(getActivity());
 
         userList=new ArrayList<>();
+        msgList=new ArrayList<>();
 
         firebaseAuth=FirebaseAuth.getInstance();
 
@@ -76,6 +79,8 @@ public class ChatFragment extends Fragment {
         usersRef.keepSynced(true);
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
         reference.keepSynced(true);
+        chatsRef= FirebaseDatabase.getInstance().getReference("Chats");
+        chatsRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
@@ -86,6 +91,29 @@ public class ChatFragment extends Fragment {
 
         checkRealTimeNetwork(view);
 
+//        chatsRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+//                {
+//
+//                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+//                    UserModel userModel=dataSnapshot.getValue(UserModel.class);
+//
+//                    if()
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                progressDialog.dismiss();
+//                Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -95,9 +123,11 @@ public class ChatFragment extends Fragment {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
                     ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
+                    Log.d("UIDs", chatsListModel.getUID());
                     userList.add(chatsListModel);
                 }
 
+                Log.d("UsersList", String.valueOf(userList));
                 chatsList();
 
             }
@@ -177,14 +207,18 @@ public class ChatFragment extends Fragment {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
                     UserModel userModel=dataSnapshot.getValue(UserModel.class);
+                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-                    for(ChatsListModel chatsListModel : userList)
-                    {
-                        if(userModel.getUID().equals(chatsListModel.getUID()))
-                        {
-                            mUsers.add(userModel);
-                        }
-                    }
+//                    for(ChatsListModel chatsListModel : userList)
+//                    {
+//                        if(userModel.getUID().equals(chatsListModel.getUID()))
+//                        {
+//                            mUsers.add(userModel);
+//                        }
+//                    }
+
+
+
                 }
 
                 adapter.notifyDataSetChanged();

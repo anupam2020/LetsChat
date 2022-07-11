@@ -127,32 +127,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     {
                         lastMessage=messageModel.getText();
                         msg_icon.setImageResource(R.drawable.curve_down_arrow);
-                        msg_icon.setVisibility(View.VISIBLE);
                     }
                     if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getReceiver().equals(friendUID))
                     {
                         lastMessage=messageModel.getText();
                         msg_icon.setImageResource(R.drawable.curve_up_arrow);
-                        msg_icon.setVisibility(View.VISIBLE);
                     }
-//                    else
-//                    {
-//                        if(status.equals("Offline") || status.equals("Online"))
-//                        {
-//                            last_msg.setText(status);
-//                        }
-//                        else
-//                        {
-//                            last_msg.setText("Last seen "+status);
-//                        }
-//                        msg_icon.setVisibility(View.GONE);
-//                    }
 
                 }
                 if(!lastMessage.trim().isEmpty())
                 {
                     last_msg.setText(lastMessage);
-                    //msg_icon.setVisibility(View.VISIBLE);
+                    msg_icon.setVisibility(View.VISIBLE);
                 }
                 else
                 {
@@ -179,4 +165,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
 }

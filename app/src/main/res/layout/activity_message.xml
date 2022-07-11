@@ -124,13 +124,13 @@
             android:layout_toLeftOf="@id/msgSend"
             android:background="@drawable/text_bg"
             android:hint="Message"
+            android:inputType="textCapSentences"
             android:padding="2dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
             android:textColor="@color/black"
             android:textCursorDrawable="@null"
-            android:textSize="18sp"
-            android:inputType="textCapSentences"/>
+            android:textSize="18sp" />
 
         <ImageView
             android:id="@+id/msgSend"
