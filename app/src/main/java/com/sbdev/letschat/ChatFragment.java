@@ -6,10 +6,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +39,8 @@ import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 
@@ -54,7 +58,7 @@ public class ChatFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,usersRef,chatsRef;
+    DatabaseReference reference,usersRef;
 
     ProgressDialog progressDialog;
 
@@ -79,8 +83,6 @@ public class ChatFragment extends Fragment {
         usersRef.keepSynced(true);
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
         reference.keepSynced(true);
-        chatsRef= FirebaseDatabase.getInstance().getReference("Chats");
-        chatsRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
@@ -90,29 +92,6 @@ public class ChatFragment extends Fragment {
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         checkRealTimeNetwork(view);
-
-//        chatsRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                for(DataSnapshot dataSnapshot : snapshot.getChildren())
-//                {
-//
-//                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-//                    UserModel userModel=dataSnapshot.getValue(UserModel.class);
-//
-//                    if()
-//
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                progressDialog.dismiss();
-//                Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -199,6 +178,7 @@ public class ChatFragment extends Fragment {
         reference=FirebaseDatabase.getInstance().getReference("Users");
 
         reference.addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -207,18 +187,25 @@ public class ChatFragment extends Fragment {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
                     UserModel userModel=dataSnapshot.getValue(UserModel.class);
-                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-//                    for(ChatsListModel chatsListModel : userList)
-//                    {
-//                        if(userModel.getUID().equals(chatsListModel.getUID()))
-//                        {
-//                            mUsers.add(userModel);
-//                        }
-//                    }
+                    for(ChatsListModel chatsListModel : userList)
+                    {
+                        if(userModel.getUID().equals(chatsListModel.getUID()))
+                        {
+                            mUsers.add(userModel);
+                        }
+                    }
 
+                }
 
-
+                if(!mUsers.isEmpty())
+                {
+                    Collections.sort(mUsers, new Comparator<UserModel>() {
+                        @Override
+                        public int compare(UserModel o1, UserModel o2) {
+                            return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+                        }
+                    });
                 }
 
                 adapter.notifyDataSetChanged();

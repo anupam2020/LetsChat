@@ -307,6 +307,8 @@ public class RegisterActivity extends AppCompatActivity {
                         map.put("Name",firebaseAuth.getCurrentUser().getDisplayName());
                         map.put("Email",firebaseAuth.getCurrentUser().getEmail());
                         map.put("UID",firebaseAuth.getCurrentUser().getUid());
+                        map.put("status","Online");
+                        map.put("last_text_time","0");
 
 
                         reference.child(firebaseAuth.getCurrentUser().getUid())
@@ -378,6 +380,8 @@ public class RegisterActivity extends AppCompatActivity {
                     map.put("Name",name);
                     map.put("Email",email);
                     map.put("UID",firebaseAuth.getCurrentUser().getUid());
+                    map.put("status","Online");
+                    map.put("last_text_time","0");
 
                     reference.child(firebaseAuth.getCurrentUser().getUid())
                             .setValue(map)

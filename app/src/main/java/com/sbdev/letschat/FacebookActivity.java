@@ -105,6 +105,8 @@ public class FacebookActivity extends AppCompatActivity {
                             map.put("Name",mAuth.getCurrentUser().getDisplayName());
                             map.put("Email",mAuth.getCurrentUser().getEmail());
                             map.put("UID",mAuth.getCurrentUser().getUid());
+                            map.put("status","Online");
+                            map.put("last_text_time","0");
 
 
                             reference.child(mAuth.getCurrentUser().getUid())

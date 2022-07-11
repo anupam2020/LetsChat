@@ -30,7 +30,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     ArrayList<UserModel> arrayList;
     Context context;
-    String lastMessage;
+    String lastMessage, strTime;
 
     public UserAdapter(ArrayList<UserModel> arrayList, Context context) {
         this.arrayList = arrayList;
@@ -65,7 +65,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             holder.statusIcon.setImageResource(R.drawable.circle_offline);
         }
 
-        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus());
+        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus(), holder.time);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +91,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         CircleImageView profile;
         ImageView statusIcon,msgIcon;
-        TextView name,lastMsg;
+        TextView name,lastMsg,time;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -101,11 +101,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             statusIcon=itemView.findViewById(R.id.userStatusIcon);
             lastMsg=itemView.findViewById(R.id.userLastMsg);
             msgIcon=itemView.findViewById(R.id.userMsgIcon);
+            time=itemView.findViewById(R.id.userTime);
 
         }
     }
 
-    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status)
+    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status, TextView time)
     {
 
         lastMessage="";
@@ -122,15 +123,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                    strTime=messageModel.getTime();
+                    strTime=strTime.substring(0,strTime.indexOf(',')+1) + strTime.substring(strTime.indexOf('-')+1);
 
                     if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()))
                     {
                         lastMessage=messageModel.getText();
+                        time.setText(strTime);
                         msg_icon.setImageResource(R.drawable.curve_down_arrow);
                     }
                     if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getReceiver().equals(friendUID))
                     {
                         lastMessage=messageModel.getText();
+                        time.setText(strTime);
                         msg_icon.setImageResource(R.drawable.curve_up_arrow);
                     }
 
@@ -151,9 +156,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                         last_msg.setText("Last seen "+status);
                     }
                     msg_icon.setVisibility(View.GONE);
+                    time.setText("");
                 }
 
                 lastMessage="";
+                strTime="";
 
             }
 

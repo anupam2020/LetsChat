@@ -34,6 +34,8 @@ import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 public class UsersFragment extends Fragment {
@@ -196,8 +198,14 @@ public class UsersFragment extends Fragment {
                     }
                 }
 
-                adapter.notifyDataSetChanged();
+                Collections.sort(arrayList, new Comparator<UserModel>() {
+                    @Override
+                    public int compare(UserModel o1, UserModel o2) {
+                        return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+                    }
+                });
 
+                adapter.notifyDataSetChanged();
                 progressDialog.dismiss();
 
             }

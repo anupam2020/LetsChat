@@ -509,6 +509,8 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("text",text);
                 map.put("time",strDateTime);
 
+                DatabaseReference friendRef=FirebaseDatabase.getInstance().getReference("Users").child(receiver);
+
                 chatsRef.push().setValue(map)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -516,6 +518,8 @@ public class MessageActivity extends AppCompatActivity {
 
                                 if(task.isSuccessful())
                                 {
+                                    usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+                                    friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                     recyclerView.scrollToPosition(arrayList.size() - 1);
                                 }
 
