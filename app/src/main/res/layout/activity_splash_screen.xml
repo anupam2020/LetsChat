@@ -17,14 +17,21 @@
         android:textColor="@color/black"
         android:textSize="40sp" />
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/splashLottie"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+<!--    <com.airbnb.lottie.LottieAnimationView-->
+<!--        android:id="@+id/splashLottie"-->
+<!--        android:layout_width="350dp"-->
+<!--        android:layout_height="350dp"-->
+<!--        android:layout_centerInParent="true"-->
+<!--        app:lottie_autoPlay="true"-->
+<!--        app:lottie_fileName="splash_chat.json"-->
+<!--        app:lottie_loop="true" />-->
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_centerInParent="true"
-        app:lottie_autoPlay="true"
-        app:lottie_fileName="splash_chat.json"
-        app:lottie_loop="true" />
+        android:id="@+id/splashImg"
+        android:src="@drawable/chat_box2"/>
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/splashLottieBottom"

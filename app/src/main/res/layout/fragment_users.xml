@@ -41,6 +41,7 @@
             android:scrollbars="vertical"
             android:layout_below="@id/userTIL"
             android:layout_marginTop="5dp"
+            android:overScrollMode="never"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     </RelativeLayout>

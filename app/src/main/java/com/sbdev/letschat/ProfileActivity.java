@@ -355,6 +355,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                         if (item.getItemId() == R.id.changePass) {
                             startActivity(new Intent(ProfileActivity.this, ChangePassword.class));
+                            return true;
                         }
 
                         return false;

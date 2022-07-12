@@ -2,29 +2,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp"
     android:layout_marginTop="15dp"
-    android:layout_marginRight="100dp">
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="50dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hi where are you?"
-        android:textSize="15sp"
+        android:orientation="vertical"
         android:background="@drawable/chat_bg_left"
-        android:textColor="@color/black"
-        android:padding="10dp"
-        android:id="@+id/showMsg"/>
+        android:padding="5dp"
+        android:id="@+id/leftLinear">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/showMsg"
-        android:id="@+id/textTime"
-        android:text="Jul 07, 2021 - 09:04PM"
-        android:textColor="@color/light_grey"
-        android:textSize="10sp"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentLeft="true"/>
+        <TextView
+            android:id="@+id/showMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Hi where are you?"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:layout_gravity="start"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textTime"
+            android:text="Jul 07, 2021 - 09:04PM"
+            android:textColor="#8F8F8F"
+            android:textSize="10sp"
+            android:padding="5dp"
+            android:layout_gravity="start"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/heart_1"
+        android:layout_below="@id/leftLinear"
+        android:layout_marginTop="-10dp"
+        android:layout_marginLeft="5dp"
+        android:id="@+id/favChat" />
 
 </RelativeLayout>

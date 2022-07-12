@@ -10,13 +10,14 @@ import android.os.Looper;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class SplashScreen extends AppCompatActivity {
 
     Handler handler;
 
-    TextView chat;
+    ImageView img;
 
     Animation animation;
 
@@ -28,10 +29,11 @@ public class SplashScreen extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.WHITE);
 
-        chat=findViewById(R.id.splashText);
+        img=findViewById(R.id.splashImg);
+
         animation= AnimationUtils.loadAnimation(SplashScreen.this,R.anim.anim);
 
-        chat.setAnimation(animation);
+        img.setAnimation(animation);
 
         handler=new Handler(Looper.getMainLooper());
 
@@ -41,7 +43,7 @@ public class SplashScreen extends AppCompatActivity {
                 startActivity(new Intent(SplashScreen.this,MainActivity.class));
                 finish();
             }
-        },5000);
+        },2500);
 
     }
 }

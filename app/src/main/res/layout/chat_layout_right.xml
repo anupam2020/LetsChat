@@ -2,30 +2,52 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp"
     android:layout_marginTop="15dp"
-    android:layout_marginLeft="100dp">
+    android:layout_marginRight="15dp"
+    android:layout_alignParentRight="true"
+    android:layout_marginLeft="50dp">
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/rightLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="I'm right here dude!"
-        android:textSize="15sp"
-        android:background="@drawable/chat_bg_right"
-        android:textColor="@color/white"
-        android:padding="10dp"
         android:layout_alignParentRight="true"
-        android:id="@+id/showMsg"/>
+        android:background="@drawable/chat_bg_right"
+        android:orientation="vertical"
+        android:padding="5dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/showMsg"
-        android:id="@+id/textTime"
-        android:textSize="10sp"
-        android:layout_marginTop="5dp"
-        android:text="Jul 07, 2021 - 09:04PM"
-        android:textColor="@color/light_grey"
-        android:layout_alignParentRight="true" />
+        <TextView
+            android:id="@+id/showMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:padding="5dp"
+            android:text="Hi!"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/textTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/showMsg"
+            android:layout_gravity="end"
+            android:layout_marginLeft="5dp"
+            android:padding="5dp"
+            android:text="Jul 07, 2021 - 09:04PM"
+            android:textColor="#9A9A9A"
+            android:textSize="10sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/heart_1"
+        android:layout_below="@id/rightLinear"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="-10dp"
+        android:layout_marginRight="5dp"
+        android:id="@+id/favChat" />
 
 </RelativeLayout>

@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -121,6 +122,9 @@ public class MessageActivity extends AppCompatActivity {
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
         recyclerView.setAdapter(adapter);
+
+        msgText.requestFocus();
+        recyclerView.scrollToPosition(arrayList.size() - 1);
 
         firebaseAuth=FirebaseAuth.getInstance();
 
@@ -298,6 +302,14 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 recyclerView.scrollToPosition(arrayList.size() - 1);
+            }
+        });
+
+        msgText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                recyclerView.scrollToPosition(arrayList.size() - 1);
+                return false;
             }
         });
 
@@ -509,9 +521,12 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("text",text);
                 map.put("time",strDateTime);
 
+                String key=chatsRef.push().getKey();
+                map.put("key",key);
+
                 DatabaseReference friendRef=FirebaseDatabase.getInstance().getReference("Users").child(receiver);
 
-                chatsRef.push().setValue(map)
+                chatsRef.child(key).setValue(map)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {

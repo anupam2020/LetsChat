@@ -2,13 +2,15 @@ package com.sbdev.letschat;
 
 public class MessageModel {
 
-    String sender,receiver,text,time;
+    String sender,receiver,text,time,key,favorite;
 
-    public MessageModel(String sender, String receiver, String text, String time) {
+    public MessageModel(String sender, String receiver, String text, String time, String key, String favorite) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
         this.time = time;
+        this.key = key;
+        this.favorite = favorite;
     }
 
     public MessageModel()
@@ -46,5 +48,21 @@ public class MessageModel {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(String favorite) {
+        this.favorite = favorite;
     }
 }
