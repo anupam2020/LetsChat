@@ -2,15 +2,14 @@ package com.sbdev.letschat;
 
 public class UserModel {
 
-    String Email,Name,ProfilePic,UID,status,isDisconnected,lastMsg,last_text_time;
+    String Email,Name,ProfilePic,UID,status,lastMsg,last_text_time;
 
-    public UserModel(String email, String name, String profilePic, String UID, String status, String isDisconnected, String lastMsg, String last_text_time) {
+    public UserModel(String email, String name, String profilePic, String UID, String status, String lastMsg, String last_text_time) {
         Email = email;
         Name = name;
         ProfilePic = profilePic;
         this.UID = UID;
         this.status = status;
-        this.isDisconnected = isDisconnected;
         this.lastMsg = lastMsg;
         this.last_text_time = last_text_time;
     }
@@ -58,14 +57,6 @@ public class UserModel {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getIsDisconnected() {
-        return isDisconnected;
-    }
-
-    public void setIsDisconnected(String isDisconnected) {
-        this.isDisconnected = isDisconnected;
     }
 
     public String getLastMsg() {

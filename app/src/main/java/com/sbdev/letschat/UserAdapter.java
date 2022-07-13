@@ -54,6 +54,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 .error(R.drawable.item_user)
                 .into(holder.profile);
 
+        holder.profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                
+
+            }
+        });
+
         holder.name.setText(model.getName());
 
         if(model.getStatus().equals("Online"))

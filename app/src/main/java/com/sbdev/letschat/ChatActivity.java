@@ -18,12 +18,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -70,7 +73,7 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,usersRef;
+    DatabaseReference reference,usersRef,locationRef;
 
     TabLayout tabLayout;
 
@@ -78,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
 
     ChatStateAdapter adapter;
 
-    String url="https://api.weatherapi.com/v1/current.json?key=ceea495be7374dc6a39174422222906%20&q=India&aqi=no";
+    String city="";
 
     RelativeLayout layout;
 
@@ -99,10 +102,19 @@ public class ChatActivity extends AppCompatActivity {
         reference.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
         usersRef.keepSynced(true);
+        locationRef=FirebaseDatabase.getInstance().getReference("Location");
+        locationRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
-        updateWeather();
+        weather.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ChatActivity.this,WeatherActivity.class));
+            }
+        });
+
+        getCity();
 
         adapter=new ChatStateAdapter(getSupportFragmentManager(),getLifecycle());
         viewPager2.setAdapter(adapter);
@@ -149,7 +161,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
-                    updateWeather();
+                    getCity();
                 }
             }
 
@@ -177,8 +189,8 @@ public class ChatActivity extends AppCompatActivity {
                             case R.id.profile:
                                 startActivity(new Intent(ChatActivity.this,ProfileActivity.class));
                                 break;
-                            case R.id.favMsg:
-                                Toast.makeText(ChatActivity.this, "Fav Msg", Toast.LENGTH_SHORT).show();
+                            case R.id.favMsgMenu:
+                                startActivity(new Intent(ChatActivity.this,FavMsgActivity.class));
                                 break;
                             case R.id.settings:
                                 Toast.makeText(ChatActivity.this, "Settings", Toast.LENGTH_SHORT).show();
@@ -200,6 +212,59 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    public void getCity()
+    {
+
+        locationRef.child(firebaseAuth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if(snapshot.exists())
+                        {
+                            LocationModel locationModel=snapshot.getValue(LocationModel.class);
+                            city=locationModel.getLocation();
+                            updateWeather(city);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
+                    }
+                });
+
+    }
+
+    public void setTimeRealTime(TextView time)
+    {
+
+        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        serverTimeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long offset = snapshot.getValue(Long.class);
+                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                Date date=timestamp;
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("hh:mm a");
+                String strDateTime=simpleDateFormat.format(date);
+
+                time.setText(strDateTime);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
+            }
+        });
+
+    }
+
     private void checkRealTimeNetwork() {
 
         new Handler().postDelayed(new Runnable() {
@@ -211,7 +276,7 @@ public class ChatActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (connected) {
-                            updateWeather();
+                            getCity();
                         }
                         else {
                             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
@@ -230,8 +295,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    public void updateWeather()
+    public void updateWeather(String city)
     {
+
+        String url="https://api.weatherapi.com/v1/current.json?key=ceea495be7374dc6a39174422222906%20&q="+city+"&aqi=no";
 
         StringRequest request=new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -245,9 +312,12 @@ public class ChatActivity extends AppCompatActivity {
 
                         JSONObject current=jsonObject.getJSONObject("current");
                         int isDay=current.getInt("is_day");
+                        int temp= (int) current.getDouble("temp_c");
 
-                        changeWeather(isDay);
+                        JSONObject condition=current.getJSONObject("condition");
+                        String text=condition.getString("text");
 
+                        changeWeather(isDay,text,temp);
 
                     } catch (JSONException e) {
                         //Toast.makeText(ChatActivity.this, "Catch: "+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -270,16 +340,116 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    public void changeWeather(int isDay)
+    public void changeWeather(int isDay,String textCondition,int temp)
     {
 
         if(isDay==0)
         {
-            weather.setImageResource(R.drawable.moon_clear);
+
+            textCondition=textCondition.toLowerCase();
+            if(textCondition.contains("fog") || textCondition.contains("mist"))
+            {
+                weather.setImageResource(R.drawable.mist);
+            }
+            else if(textCondition.contains("clear"))
+            {
+                if(temp<=20)
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.moon_clear);
+                }
+            }
+            else if(textCondition.contains("rain"))
+            {
+                if(textCondition.contains("light") || textCondition.contains("patchy"))
+                {
+                    weather.setImageResource(R.drawable.light_rain_night);
+                }
+                else if(textCondition.contains("moderate"))
+                {
+                    weather.setImageResource(R.drawable.moderate_rain_night);
+                }
+                else
+                {
+                    if(textCondition.contains("heavy"))
+                    {
+                        weather.setImageResource(R.drawable.heavy_rain_night);
+                    }
+                }
+            }
+            else if(textCondition.contains("drizzle"))
+            {
+                weather.setImageResource(R.drawable.drizzle_night);
+            }
+            else if(textCondition.contains("cloudy"))
+            {
+                if(temp<=20)
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.moon_clear);
+                }
+            }
+
         }
         else
         {
-            weather.setImageResource(R.drawable.cloudy);
+
+            textCondition=textCondition.toLowerCase();
+            if(textCondition.contains("cloudy"))
+            {
+                if(temp<=25)
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.cloudy);
+                }
+            }
+            if(textCondition.contains("sunny"))
+            {
+                if(temp<=20)
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.clear_sky);
+                }
+            }
+            else if(textCondition.contains("mist") || textCondition.contains("fog"))
+            {
+                weather.setImageResource(R.drawable.mist);
+            }
+            else if(textCondition.contains("rain"))
+            {
+                if(textCondition.contains("light") || textCondition.contains("patchy"))
+                {
+                    weather.setImageResource(R.drawable.light_rain);
+                }
+                else if(textCondition.contains("moderate"))
+                {
+                    weather.setImageResource(R.drawable.moderate_rain);
+                }
+                else
+                {
+                    if(textCondition.contains("heavy"))
+                    {
+                        weather.setImageResource(R.drawable.heavy_rain);
+                    }
+                }
+            }
+            else if(textCondition.contains("drizzle"))
+            {
+                weather.setImageResource(R.drawable.morning_drizzle);
+            }
+
         }
 
     }

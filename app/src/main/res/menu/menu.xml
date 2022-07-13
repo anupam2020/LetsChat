@@ -6,7 +6,7 @@
         android:title="Profile"/>
 
     <item
-        android:id="@+id/favMsg"
+        android:id="@+id/favMsgMenu"
         android:title="Fav Messages"/>
 
     <item

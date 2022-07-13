@@ -43,7 +43,6 @@
     <ImageView
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/heart_1"
         android:layout_below="@id/rightLinear"
         android:layout_alignParentRight="true"
         android:layout_marginTop="-10dp"

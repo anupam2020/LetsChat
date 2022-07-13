@@ -83,7 +83,7 @@ public class MessageActivity extends AppCompatActivity {
 
     StorageReference storageReference;
 
-    String friendUID,myUID;
+    String friendUID,myUID,receiverStr,senderStr,receiverName,senderName;
 
     private final int reqCode=1;
 
@@ -122,9 +122,6 @@ public class MessageActivity extends AppCompatActivity {
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
         recyclerView.setAdapter(adapter);
-
-        msgText.requestFocus();
-        recyclerView.scrollToPosition(arrayList.size() - 1);
 
         firebaseAuth=FirebaseAuth.getInstance();
 
@@ -305,13 +302,13 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        msgText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                recyclerView.scrollToPosition(arrayList.size() - 1);
-                return false;
-            }
-        });
+//        msgText.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                recyclerView.scrollToPosition(arrayList.size() - 1);
+//                return false;
+//            }
+//        });
 
 //        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
 //        if(imm.isActive())
@@ -320,6 +317,47 @@ public class MessageActivity extends AppCompatActivity {
 //        }
 
         //seenMsg(friendUID);
+
+        DatabaseReference senderRef=FirebaseDatabase.getInstance().getReference("Users").child(myUID);
+        DatabaseReference receiverRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
+
+        senderRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                UserModel userModel=snapshot.getValue(UserModel.class);
+                if(userModel.getProfilePic()!=null)
+                {
+                    senderStr=userModel.getProfilePic();
+                    senderName=userModel.getName();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        receiverRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                UserModel userModel=snapshot.getValue(UserModel.class);
+                if(userModel.getProfilePic()!=null)
+                {
+                    receiverStr=userModel.getProfilePic();
+                    receiverName=userModel.getName();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 
@@ -478,7 +516,7 @@ public class MessageActivity extends AppCompatActivity {
                         arrayList.add(messageModel);
                     }
 
-                    recyclerView.scrollToPosition(arrayList.size() - 1);
+                    //recyclerView.scrollToPosition(arrayList.size() - 1);
                     adapter.notifyDataSetChanged();
 
                 }
@@ -517,9 +555,13 @@ public class MessageActivity extends AppCompatActivity {
                 HashMap map=new HashMap();
 
                 map.put("sender",sender);
+                map.put("senderName",senderName);
                 map.put("receiver",receiver);
+                map.put("receiverName",receiverName);
                 map.put("text",text);
                 map.put("time",strDateTime);
+                map.put("senderPic",senderStr);
+                map.put("receiverPic",receiverStr);
 
                 String key=chatsRef.push().getKey();
                 map.put("key",key);
@@ -533,9 +575,9 @@ public class MessageActivity extends AppCompatActivity {
 
                                 if(task.isSuccessful())
                                 {
+                                    recyclerView.scrollToPosition(arrayList.size() - 1);
                                     usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                     friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
-                                    recyclerView.scrollToPosition(arrayList.size() - 1);
                                 }
 
                             }
@@ -557,21 +599,21 @@ public class MessageActivity extends AppCompatActivity {
         DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList").child(sender).child(receiver);
 
         chatsListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        if(!snapshot.exists())
-                        {
-                            chatsListRef.child("UID").setValue(receiver);
-                        }
+                if(!snapshot.exists())
+                {
+                    chatsListRef.child("UID").setValue(receiver);
+                }
 
-                    }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+            }
+        });
 
     }
 

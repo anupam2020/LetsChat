@@ -1,6 +1,7 @@
 package com.sbdev.letschat;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,7 +31,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
 
-    DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Favorites");
+    DatabaseReference favorites= FirebaseDatabase.getInstance().getReference("Favorites");
+    DatabaseReference chatsRef= FirebaseDatabase.getInstance().getReference("Chats");
 
     public static final int MSG_LEFT=0;
     public static final int MSG_RIGHT=1;
@@ -62,6 +65,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
+        favorites.keepSynced(true);
+        chatsRef.keepSynced(true);
+
         MessageModel messageModel=arrayList.get(holder.getAdapterPosition());
 
         String key=messageModel.getKey();
@@ -70,7 +76,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.time.setText(messageModel.getTime());
 
-        reference.addValueEventListener(new ValueEventListener() {
+        favorites.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -103,14 +109,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                     isFav=true;
 
-                    reference.addValueEventListener(new ValueEventListener() {
+                    favorites.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             if(isFav)
                             {
 
-                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).child(key).hasChild("favorite"))
+                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
                                 {
                                     HashMap map=new HashMap();
                                     map.put("sender",messageModel.getSender());
@@ -118,11 +124,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                     map.put("text",messageModel.getText());
                                     map.put("time",messageModel.getTime());
                                     map.put("key",messageModel.getKey());
-                                    map.put("favorite","true");
+                                    map.put("senderName",messageModel.getSenderName());
+                                    map.put("senderPic",messageModel.getSenderPic());
+                                    map.put("receiverName",messageModel.getReceiverName());
+                                    map.put("receiverPic",messageModel.getReceiverPic());
 
                                     holder.favImg.setImageResource(R.drawable.heart_1);
                                     holder.favImg.setVisibility(View.VISIBLE);
-                                    reference.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
+                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
                                 }
                                 isFav=false;
 
@@ -142,7 +151,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                gestureDetector.onTouchEvent(event);
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    gestureDetector.onTouchEvent(event);
+                }
                 return false;
             }
         });
@@ -163,31 +179,40 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             @Override
             public void onClick(View v) {
 
-                isFav=true;
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else
+                {
 
-                reference.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    isFav=true;
 
-                        if(isFav)
-                        {
+                    favorites.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                            if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).child(key).hasChild("favorite"))
+                            if(isFav)
                             {
-                                holder.favImg.setVisibility(View.GONE);
-                                reference.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+
+                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                {
+                                    holder.favImg.setVisibility(View.GONE);
+                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                }
+                                isFav=false;
+
                             }
-                            isFav=false;
 
                         }
 
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                    });
 
-                    }
-                });
+                }
 
             }
         });
@@ -198,29 +223,66 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             @Override
             public boolean onLongClick(View v) {
 
-                PopupMenu popupMenu=new PopupMenu(context,v);
-                popupMenu.getMenuInflater().inflate(R.menu.text_options,popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else
+                {
 
-                        switch (item.getItemId())
-                        {
-                            case R.id.deleteMsg:
-                                reference.child(key).removeValue();
-                                arrayList.remove(holder.getAdapterPosition());
-                                notifyItemRemoved(holder.getAdapterPosition());
-                                break;
+                    if(firebaseAuth.getCurrentUser().getUid().equals(messageModel.getSender()))
+                    {
 
-                            case R.id.copyMsg:
-                                Toast.makeText(context, "Copy!", Toast.LENGTH_SHORT).show();
-                        }
+                        PopupMenu popupMenu=new PopupMenu(context,v);
+                        popupMenu.getMenuInflater().inflate(R.menu.text_options,popupMenu.getMenu());
+                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
 
-                        return false;
+                                switch (item.getItemId())
+                                {
+                                    case R.id.deleteMsg:
+                                        chatsRef.child(key).removeValue();
+                                        arrayList.remove(holder.getAdapterPosition());
+                                        isFav=true;
+                                        favorites.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                if(isFav)
+                                                {
+                                                    if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                                    {
+                                                        holder.favImg.setVisibility(View.GONE);
+                                                        favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                                    }
+                                                    isFav=false;
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                        //notifyItemRemoved(holder.getAdapterPosition());
+                                        break;
+
+                                    case R.id.copyMsg:
+                                        Toast.makeText(context, "Copy!", Toast.LENGTH_SHORT).show();
+                                        break;
+                                }
+
+                                return false;
+                            }
+                        });
+
+                        popupMenu.show();
+
                     }
-                });
 
-                popupMenu.show();
+                }
 
                 return false;
             }
@@ -265,6 +327,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             return MSG_LEFT;
         }
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
 }
