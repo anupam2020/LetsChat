@@ -5,8 +5,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -66,7 +68,7 @@ import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements LifecycleObserver {
 
     private static final String TAG = "Connection";
     ImageView more,weather;
@@ -562,15 +564,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        checkStatus("Offline");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         checkStatus("Online");
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        checkStatus("Offline");
-    }
+
 
 }

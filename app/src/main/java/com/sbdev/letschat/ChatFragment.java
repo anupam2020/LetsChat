@@ -58,7 +58,7 @@ public class ChatFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,usersRef;
+    DatabaseReference reference,usersRef,dRef;
 
     ProgressDialog progressDialog;
 
@@ -83,6 +83,10 @@ public class ChatFragment extends Fragment {
         usersRef.keepSynced(true);
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
         reference.keepSynced(true);
+        dRef= FirebaseDatabase.getInstance().getReference("Users");
+        dRef.keepSynced(true);
+
+
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 

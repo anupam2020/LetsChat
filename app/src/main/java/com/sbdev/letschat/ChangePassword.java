@@ -92,7 +92,7 @@ public class ChangePassword extends AppCompatActivity {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
 
-                    usersRef.child("status").setValue("online");
+                    usersRef.child("status").setValue("Online");
                     usersRef.child("status").onDisconnect().setValue("offline");
 
                 }
@@ -375,9 +375,16 @@ public class ChangePassword extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        finish();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        checkStatus("online");
+        checkStatus("Online");
     }
 
     @Override

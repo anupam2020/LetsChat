@@ -1,5 +1,7 @@
 package com.sbdev.letschat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.view.GestureDetector;
@@ -23,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -270,7 +273,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                         break;
 
                                     case R.id.copyMsg:
-                                        Toast.makeText(context, "Copy!", Toast.LENGTH_SHORT).show();
+
+                                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                                        ClipData clip = ClipData.newPlainText("Copied Text", messageModel.getText());
+                                        clipboard.setPrimaryClip(clip);
+
+                                        DynamicToast.make(context,"Text copied!",3000).show();
                                         break;
                                 }
 

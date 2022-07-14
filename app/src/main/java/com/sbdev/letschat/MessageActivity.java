@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -32,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -79,7 +83,7 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef;
 
     StorageReference storageReference;
 
@@ -133,6 +137,8 @@ public class MessageActivity extends AppCompatActivity {
         dRef.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
         usersRef.keepSynced(true);
+        typingRef=FirebaseDatabase.getInstance().getReference("Typing");
+        typingRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
@@ -163,28 +169,53 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        statusRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+        typingRef.child(friendUID)
+            .addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                UserModel userModel=snapshot.getValue(UserModel.class);
-                String status=userModel.getStatus();
-                if(status.equals("Online") || status.equals("Offline"))
-                {
-                    userStatus.setText(status);
+                    if(snapshot.exists())
+                    {
+                        TypingModel typingModel=snapshot.getValue(TypingModel.class);
+                        if(typingModel.isTyping())
+                        {
+                            userStatus.setText("Typing...");
+                        }
+                        else
+                        {
+
+                            statusRef.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    UserModel userModel=snapshot.getValue(UserModel.class);
+                                    String status=userModel.getStatus();
+                                    if(status.equals("Online") || status.equals("Offline"))
+                                    {
+                                        userStatus.setText(status);
+                                    }
+                                    else
+                                    {
+                                        userStatus.setText("Last seen "+status);
+                                    }
+
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                }
+                            });
+
+                        }
+                    }
+
                 }
-                else
-                {
-                    userStatus.setText("Last seen "+status);
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
                 }
-
-
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
-            }
-        });
+            });
 
 
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
@@ -302,19 +333,37 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-//        msgText.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                recyclerView.scrollToPosition(arrayList.size() - 1);
-//                return false;
-//            }
-//        });
 
-//        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-//        if(imm.isActive())
-//        {
-//            recyclerView.scrollToPosition(arrayList.size() - 1);
-//        }
+        msgText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s.length()>0)
+                {
+                    typingRef.child(firebaseAuth.getCurrentUser().getUid())
+                            .child("typing")
+                            .setValue(true);
+                }
+                else
+                {
+                    typingRef.child(firebaseAuth.getCurrentUser().getUid())
+                            .child("typing")
+                            .setValue(false);
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
 
         //seenMsg(friendUID);
 
@@ -383,7 +432,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 }
 
-                adapter.notifyDataSetChanged();;
+                adapter.notifyDataSetChanged();
 
             }
 
@@ -470,7 +519,7 @@ public class MessageActivity extends AppCompatActivity {
     public void loadProfile()
     {
 
-        reference.child(friendUID).addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.child(friendUID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -715,16 +764,27 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        checkStatus("Online");
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        typingRef.child(firebaseAuth.getCurrentUser().getUid())
+                .child("typing")
+                .setValue(false);
+
+        finish();
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //dRef.removeEventListener(seenListener);
-        checkStatus("Offline");
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkStatus("Online");
     }
 
 }

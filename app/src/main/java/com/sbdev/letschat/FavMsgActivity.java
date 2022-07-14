@@ -284,6 +284,13 @@ public class FavMsgActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        finish();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         checkStatus("Online");
