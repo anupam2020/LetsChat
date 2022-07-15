@@ -27,11 +27,11 @@
 <!--        app:lottie_loop="true" />-->
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_centerInParent="true"
         android:id="@+id/splashImg"
-        android:src="@drawable/chat_box2"/>
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/chat_box1" />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/splashLottieBottom"

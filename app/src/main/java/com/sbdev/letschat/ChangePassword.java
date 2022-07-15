@@ -34,6 +34,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 public class ChangePassword extends AppCompatActivity {
@@ -93,7 +96,40 @@ public class ChangePassword extends AppCompatActivity {
                 if (connected){
 
                     usersRef.child("status").setValue("Online");
-                    usersRef.child("status").onDisconnect().setValue("offline");
+                    //usersRef.child("status").onDisconnect().setValue("offline");
+
+                    usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+                                DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+                                serverTimeRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        long offset = snapshot.getValue(Long.class);
+                                        long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                                        Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                                        Date date=timestamp;
+                                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                                        String strDateTime=simpleDateFormat.format(date);
+
+                                        usersRef.child("status").onDisconnect().setValue(strDateTime);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+
+                        }
+                    });
 
                 }
             }
@@ -364,13 +400,48 @@ public class ChangePassword extends AppCompatActivity {
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
 
         HashMap map=new HashMap();
-        map.put("status",status);
-
-        if(firebaseAuth.getCurrentUser()!=null)
+        if(status.equals("Offline"))
         {
-            reference.child(firebaseAuth.getCurrentUser().getUid())
-                    .updateChildren(map);
+
+            DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+            serverTimeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    long offset = snapshot.getValue(Long.class);
+                    long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                    Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                    Date date=timestamp;
+                    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                    String strDateTime=simpleDateFormat.format(date);
+
+                    map.put("status",strDateTime);
+                    if(firebaseAuth.getCurrentUser()!=null)
+                    {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                                .updateChildren(map);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    progressDialog.dismiss();
+                }
+            });
+
         }
+        else
+        {
+            map.put("status",status);
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                reference.child(firebaseAuth.getCurrentUser().getUid())
+                        .updateChildren(map);
+            }
+        }
+
 
     }
 
@@ -390,7 +461,7 @@ public class ChangePassword extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        checkStatus("offline");
+        checkStatus("Offline");
     }
 
 }

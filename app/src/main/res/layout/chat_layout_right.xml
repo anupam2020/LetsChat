@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="15dp"
-    android:layout_marginRight="15dp"
-    android:layout_alignParentRight="true"
-    android:layout_marginLeft="50dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/rightLinear"
@@ -14,7 +10,10 @@
         android:layout_alignParentRight="true"
         android:background="@drawable/chat_bg_right"
         android:orientation="vertical"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="10sp"
+        android:layout_marginRight="10sp">
 
         <TextView
             android:id="@+id/showMsg"
@@ -30,7 +29,6 @@
             android:id="@+id/textTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/showMsg"
             android:layout_gravity="end"
             android:layout_marginLeft="5dp"
             android:padding="5dp"
@@ -46,7 +44,8 @@
         android:layout_below="@id/rightLinear"
         android:layout_alignParentRight="true"
         android:layout_marginTop="-10dp"
-        android:layout_marginRight="5dp"
-        android:id="@+id/favChat" />
+        android:layout_marginRight="15dp"
+        android:id="@+id/favChat"
+        android:visibility="invisible"/>
 
 </RelativeLayout>

@@ -2,7 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="Wallpaper"
-        android:id="@+id/more_wallpaper"/>
+        android:title="Wallpaper">
+
+        <menu>
+
+            <item
+                android:title="Change Wallpaper"
+                android:id="@+id/change_wallpaper"/>
+
+            <item
+                android:title="Reset"
+                android:id="@+id/reset_wallpaper"/>
+
+        </menu>
+
+    </item>
 
 </menu>

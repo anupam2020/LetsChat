@@ -194,8 +194,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                             case R.id.favMsgMenu:
                                 startActivity(new Intent(ChatActivity.this,FavMsgActivity.class));
                                 break;
-                            case R.id.settings:
-                                Toast.makeText(ChatActivity.this, "Settings", Toast.LENGTH_SHORT).show();
+                            case R.id.more:
+                                startActivity(new Intent(ChatActivity.this,MoreActivity.class));
                                 break;
                             case R.id.logout:
                                 logoutUser();

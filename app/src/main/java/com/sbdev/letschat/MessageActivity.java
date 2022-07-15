@@ -282,8 +282,32 @@ public class MessageActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
 
-                        if (item.getItemId() == R.id.more_wallpaper) {
+                        if (item.getItemId() == R.id.change_wallpaper) {
                             selectImgAndSetBg();
+                        }
+                        else if(item.getItemId() == R.id.reset_wallpaper)
+                        {
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.progress_dialog_dots);
+                            progressDialog.setCancelable(true);
+                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                            storageReference.child(myUID)
+                                .child("Wallpaper").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(MessageActivity.this,"Wallpaper reset successful!",3000).show();
+                                        getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                                    }
+                                });
                         }
 
                         return false;
@@ -326,12 +350,12 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        msgText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                recyclerView.scrollToPosition(arrayList.size() - 1);
-            }
-        });
+//        msgText.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                recyclerView.scrollToPosition(arrayList.size() - 1);
+//            }
+//        });
 
 
         msgText.addTextChangedListener(new TextWatcher() {
@@ -532,7 +556,6 @@ public class MessageActivity extends AppCompatActivity {
                         .error(R.drawable.item_user)
                         .into(profilePic);
 
-                recyclerView.scrollToPosition(arrayList.size() - 1);
                 readMsg(myUID,friendUID);
 
             }
@@ -565,8 +588,8 @@ public class MessageActivity extends AppCompatActivity {
                         arrayList.add(messageModel);
                     }
 
-                    //recyclerView.scrollToPosition(arrayList.size() - 1);
                     adapter.notifyDataSetChanged();
+                    recyclerView.scrollToPosition(arrayList.size() - 1);
 
                 }
 
@@ -624,7 +647,7 @@ public class MessageActivity extends AppCompatActivity {
 
                                 if(task.isSuccessful())
                                 {
-                                    recyclerView.scrollToPosition(arrayList.size() - 1);
+                                    //recyclerView.scrollToPosition(arrayList.size() - 1);
                                     usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                     friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                 }
@@ -778,7 +801,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        checkStatus("Online");
+        checkStatus("Offline");
     }
 
     @Override

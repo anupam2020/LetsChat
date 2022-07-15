@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -90,7 +91,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
                 else
                 {
-                    holder.favImg.setVisibility(View.GONE);
+                    holder.favImg.setVisibility(View.INVISIBLE);
                 }
 
             }
@@ -119,24 +120,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             if(isFav)
                             {
 
-                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
-                                {
-                                    HashMap map=new HashMap();
-                                    map.put("sender",messageModel.getSender());
-                                    map.put("receiver",messageModel.getReceiver());
-                                    map.put("text",messageModel.getText());
-                                    map.put("time",messageModel.getTime());
-                                    map.put("key",messageModel.getKey());
-                                    map.put("senderName",messageModel.getSenderName());
-                                    map.put("senderPic",messageModel.getSenderPic());
-                                    map.put("receiverName",messageModel.getReceiverName());
-                                    map.put("receiverPic",messageModel.getReceiverPic());
+                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key)) {
+                                    HashMap map = new HashMap();
+                                    map.put("sender", messageModel.getSender());
+                                    map.put("receiver", messageModel.getReceiver());
+                                    map.put("text", messageModel.getText());
+                                    map.put("time", messageModel.getTime());
+                                    map.put("key", messageModel.getKey());
+                                    map.put("senderName", messageModel.getSenderName());
+                                    map.put("senderPic", messageModel.getSenderPic());
+                                    map.put("receiverName", messageModel.getReceiverName());
+                                    map.put("receiverPic", messageModel.getReceiverPic());
 
                                     holder.favImg.setImageResource(R.drawable.heart_1);
                                     holder.favImg.setVisibility(View.VISIBLE);
                                     favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
+                                    isFav=false;
                                 }
-                                isFav=false;
 
                             }
 
@@ -200,10 +200,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                                 if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
                                 {
-                                    holder.favImg.setVisibility(View.GONE);
+                                    holder.favImg.setVisibility(View.INVISIBLE);
                                     favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                    isFav=false;
                                 }
-                                isFav=false;
 
                             }
 
@@ -247,6 +247,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                     case R.id.deleteMsg:
                                         chatsRef.child(key).removeValue();
                                         arrayList.remove(holder.getAdapterPosition());
+
                                         isFav=true;
                                         favorites.addValueEventListener(new ValueEventListener() {
                                             @Override
@@ -256,10 +257,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                                 {
                                                     if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
                                                     {
-                                                        holder.favImg.setVisibility(View.GONE);
+                                                        holder.favImg.setVisibility(View.INVISIBLE);
                                                         favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                                        isFav=false;
                                                     }
-                                                    isFav=false;
                                                 }
 
                                             }

@@ -10,8 +10,8 @@
         android:title="Fav Messages"/>
 
     <item
-        android:id="@+id/settings"
-        android:title="Settings"/>
+        android:id="@+id/more"
+        android:title="More"/>
 
     <item
         android:id="@+id/logout"
