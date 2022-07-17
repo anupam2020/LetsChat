@@ -147,7 +147,8 @@ public class MessageActivity extends AppCompatActivity {
         friendUID=getIntent().getStringExtra("friendUID");
         myUID=firebaseAuth.getCurrentUser().getUid();
 
-        statusRef= FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
+        statusRef= FirebaseDatabase.getInstance().getReference("Users");
+        statusRef.keepSynced(true);
 
         progressDialog=new ProgressDialog(this);
 
@@ -184,29 +185,57 @@ public class MessageActivity extends AppCompatActivity {
                         else
                         {
 
-                            statusRef.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            statusRef.child(friendUID)
+                                    .addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                    UserModel userModel=snapshot.getValue(UserModel.class);
-                                    String status=userModel.getStatus();
-                                    if(status.equals("Online") || status.equals("Offline"))
-                                    {
-                                        userStatus.setText(status);
-                                    }
-                                    else
-                                    {
-                                        userStatus.setText("Last seen "+status);
-                                    }
+                                            UserModel userModel=snapshot.getValue(UserModel.class);
+                                            String status=userModel.getStatus();
+                                            if(status.equals("Online") || status.equals("Offline"))
+                                            {
+                                                userStatus.setText(status);
+                                            }
+                                            else
+                                            {
+                                                userStatus.setText("Last seen "+status);
+                                            }
 
-                                }
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
-                                }
-                            });
+                                        }
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                        }
+                                    });
 
                         }
+                    }
+                    else
+                    {
+
+                        statusRef.child(friendUID)
+                                .addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        UserModel userModel=snapshot.getValue(UserModel.class);
+                                        String status=userModel.getStatus();
+                                        if(status.equals("Online") || status.equals("Offline"))
+                                        {
+                                            userStatus.setText(status);
+                                        }
+                                        else
+                                        {
+                                            userStatus.setText("Last seen "+status);
+                                        }
+
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                    }
+                                });
+
                     }
 
                 }

@@ -56,12 +56,12 @@
                         android:id="@+id/userLastMsg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/grey"
-                        android:textSize="12dp"
-                        android:layout_toRightOf="@id/userMsgIcon"
+                        android:layout_marginRight="15dp"
                         android:layout_toLeftOf="@id/userTime"
+                        android:layout_toRightOf="@id/userMsgIcon"
                         android:singleLine="true"
-                        android:layout_marginRight="15dp"/>
+                        android:textColor="@color/grey"
+                        android:textSize="12dp" />
 
                     <TextView
                         android:id="@+id/userTime"

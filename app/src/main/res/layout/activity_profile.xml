@@ -30,7 +30,7 @@
             android:layout_toRightOf="@id/profileBack"
             android:text="Profile"
             android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/profileMore"

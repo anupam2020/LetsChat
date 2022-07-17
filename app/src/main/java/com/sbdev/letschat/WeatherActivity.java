@@ -88,10 +88,36 @@ public class WeatherActivity extends AppCompatActivity {
 
         checkRealTimeNetwork();
 
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.progress_dialog_dots);
+        progressDialog.setCancelable(true);
+        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+
+        locationRef.child(firebaseAuth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.exists())
+                {
+                    LocationModel locationModel=snapshot.getValue(LocationModel.class);
+                    city.setText(locationModel.getLocation());
+                    progressDialog.dismiss();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
             }
         });
 
@@ -213,6 +239,7 @@ public class WeatherActivity extends AppCompatActivity {
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
+                                    progressDialog.dismiss();
                                     DynamicToast.make(WeatherActivity.this,e.getMessage(),3000).show();
                                 }
                             });
@@ -220,6 +247,7 @@ public class WeatherActivity extends AppCompatActivity {
                 }
                 else
                 {
+                    progressDialog.dismiss();
                     DynamicToast.make(WeatherActivity.this,"City not found!",3000).show();
                 }
 

@@ -30,7 +30,7 @@
             android:layout_toRightOf="@id/weatherBack"
             android:text="Location"
             android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textSize="20sp" />
 
     </RelativeLayout>
 

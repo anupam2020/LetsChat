@@ -37,7 +37,7 @@
             android:layout_toRightOf="@id/favBack"
             android:text="Favorites"
             android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textSize="20sp" />
 
     </RelativeLayout>
 
