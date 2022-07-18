@@ -109,6 +109,11 @@ public class ProfileActivity extends AppCompatActivity {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
+        if(!isNetworkConnected()) {
+            progressDialog.dismiss();
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
+
         reloadProfile();
 
         checkRealTimeNetwork();
@@ -425,7 +430,6 @@ public class ProfileActivity extends AppCompatActivity {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (!connected) {
                             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
                         }
                     }
 

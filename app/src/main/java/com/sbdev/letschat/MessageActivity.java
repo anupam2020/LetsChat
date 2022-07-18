@@ -101,7 +101,7 @@ public class MessageActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    RelativeLayout layout;
+    RelativeLayout layout,topLayout;
 
     ValueEventListener seenListener;
 
@@ -122,6 +122,7 @@ public class MessageActivity extends AppCompatActivity {
         userStatus=findViewById(R.id.msgStatus);
         recyclerView=findViewById(R.id.msgRecycler);
         layout=findViewById(R.id.relativeMsg);
+        topLayout=findViewById(R.id.msgRelativeTop);
 
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
@@ -167,6 +168,17 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+
+        topLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent=new Intent(MessageActivity.this,FriendProfile.class);
+                intent.putExtra("friendUID",friendUID);
+                startActivity(intent);
+
             }
         });
 
