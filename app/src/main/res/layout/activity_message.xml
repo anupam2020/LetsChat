@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MessageActivity"
-    android:id="@+id/relativeMsg">
+    android:id="@+id/relativeMsg"
+    android:background="@drawable/msg_bg">
 
 <!--    <ImageView-->
 <!--        android:id="@+id/msgBackgroundImg"-->
@@ -108,35 +109,52 @@
 <!--        android:src="@drawable/down" />-->
 
     <RelativeLayout
+        android:id="@+id/msgRelativeBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:id="@+id/msgRelativeBottom"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="5dp">
 
-        <EditText
-            android:id="@+id/msgEditText"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_centerVertical="true"
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
             android:layout_toLeftOf="@id/msgSend"
-            android:background="@drawable/text_bg"
-            android:hint="Message"
-            android:inputType="textCapSentences"
-            android:padding="2dp"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
-            android:textColor="@color/black"
-            android:textCursorDrawable="@null"
-            android:textSize="18sp" />
+            android:background="@drawable/text_bg">
+
+            <EditText
+                android:id="@+id/msgEditText"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/msgGallery"
+                android:background="@drawable/text_bg"
+                android:hint="Message"
+                android:inputType="textCapSentences|textMultiLine"
+                android:padding="2dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textColor="@color/black"
+                android:textCursorDrawable="@null"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/msgGallery"
+                android:layout_width="40dp"
+                android:layout_height="40sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/gallery_cool" />
+
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/msgSend"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:src="@drawable/send" />

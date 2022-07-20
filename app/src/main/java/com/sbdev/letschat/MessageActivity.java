@@ -29,6 +29,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -54,6 +56,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.io.FileNotFoundException;
@@ -69,7 +72,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageActivity extends AppCompatActivity {
 
-    ImageView back,more;
+    ImageView back,more,gallery;
 
     //ImageView background;
 
@@ -89,9 +92,9 @@ public class MessageActivity extends AppCompatActivity {
 
     String friendUID,myUID,receiverStr,senderStr,receiverName,senderName;
 
-    private final int reqCode=1;
+    private final int reqCodeWall=1,reqCodeMsg=1;
 
-    Uri imgURI;
+    Uri imgURI,imageURI;
 
     RecyclerView recyclerView;
 
@@ -105,6 +108,10 @@ public class MessageActivity extends AppCompatActivity {
 
     ValueEventListener seenListener;
 
+    Animation animation,animationRemove;
+
+    String downloadURL="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +121,7 @@ public class MessageActivity extends AppCompatActivity {
 
         back=findViewById(R.id.msgBack);
         more=findViewById(R.id.msgMore);
+        gallery=findViewById(R.id.msgGallery);
         //background=findViewById(R.id.msgBackgroundImg);
         msgText=findViewById(R.id.msgEditText);
         send=findViewById(R.id.msgSend);
@@ -171,6 +179,15 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                openGallery();
+
+            }
+        });
+
         topLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,34 +215,6 @@ public class MessageActivity extends AppCompatActivity {
                         {
 
                             statusRef.child(friendUID)
-                                    .addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                            UserModel userModel=snapshot.getValue(UserModel.class);
-                                            String status=userModel.getStatus();
-                                            if(status.equals("Online") || status.equals("Offline"))
-                                            {
-                                                userStatus.setText(status);
-                                            }
-                                            else
-                                            {
-                                                userStatus.setText("Last seen "+status);
-                                            }
-
-                                        }
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-                                            DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
-                                        }
-                                    });
-
-                        }
-                    }
-                    else
-                    {
-
-                        statusRef.child(friendUID)
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -247,6 +236,34 @@ public class MessageActivity extends AppCompatActivity {
                                         DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
                                     }
                                 });
+
+                        }
+                    }
+                    else
+                    {
+
+                        statusRef.child(friendUID)
+                            .addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    UserModel userModel=snapshot.getValue(UserModel.class);
+                                    String status=userModel.getStatus();
+                                    if(status.equals("Online") || status.equals("Offline"))
+                                    {
+                                        userStatus.setText(status);
+                                    }
+                                    else
+                                    {
+                                        userStatus.setText("Last seen "+status);
+                                    }
+
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                }
+                            });
 
                     }
 
@@ -413,12 +430,18 @@ public class MessageActivity extends AppCompatActivity {
                     typingRef.child(firebaseAuth.getCurrentUser().getUid())
                             .child("typing")
                             .setValue(true);
+
+                    gallery.setVisibility(View.GONE);
                 }
                 else
                 {
                     typingRef.child(firebaseAuth.getCurrentUser().getUid())
                             .child("typing")
                             .setValue(false);
+
+                    animation= AnimationUtils.loadAnimation(MessageActivity.this,R.anim.anim_gallery_icon);
+                    gallery.setAnimation(animation);
+                    gallery.setVisibility(View.VISIBLE);;
                 }
 
             }
@@ -472,6 +495,16 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    private void openGallery()
+    {
+
+        Intent intent=new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent,reqCodeMsg);
 
     }
 
@@ -736,7 +769,7 @@ public class MessageActivity extends AppCompatActivity {
         Intent intent=new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,reqCode);
+        startActivityForResult(intent,reqCodeWall);
 
     }
 
@@ -744,7 +777,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==reqCode && resultCode==RESULT_OK && data.getData()!=null)
+        if(requestCode==reqCodeWall && resultCode==RESULT_OK && data.getData()!=null)
         {
 
             imgURI=data.getData();
@@ -766,6 +799,125 @@ public class MessageActivity extends AppCompatActivity {
                     .putFile(imgURI);
 
         }
+        if(requestCode==reqCodeMsg && resultCode==RESULT_OK && data.getData()!=null)
+        {
+
+            imageURI=data.getData();
+
+            String pic_key=chatsRef.push().getKey();
+            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                .child("Chat_Pics")
+                .child(pic_key)
+                .putFile(imageURI).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                                .child("Chat_Pics")
+                                .child(pic_key)
+                                .getDownloadUrl()
+                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+
+                                        downloadURL=uri.toString();
+                                        addImageTextToFirebase(myUID,friendUID,pic_key);
+                                        adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
+                                        adapter.notifyDataSetChanged();
+
+                                    }
+                                });
+
+                        }
+                    });
+
+        }
+
+    }
+
+    public void addImageTextToFirebase(String sender, String receiver, String pic_key)
+    {
+
+        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        serverTimeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long offset = snapshot.getValue(Long.class);
+                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                Log.d("Server Time", String.valueOf(estimatedServerTimeMs));
+
+                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                Date date=timestamp;
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMMM dd, yyyy - hh:mm a");
+                String strDateTime=simpleDateFormat.format(date);
+
+                Log.d("Date", strDateTime);
+
+                HashMap map=new HashMap();
+
+                map.put("sender",sender);
+                map.put("senderName",senderName);
+                map.put("receiver",receiver);
+                map.put("receiverName",receiverName);
+                map.put("text","--Image--");
+                map.put("imgURI",downloadURL);
+                map.put("time",strDateTime);
+                map.put("senderPic",senderStr);
+                map.put("receiverPic",receiverStr);
+
+                //String key=chatsRef.push().getKey();
+                map.put("key",pic_key);
+
+                DatabaseReference friendRef=FirebaseDatabase.getInstance().getReference("Users").child(receiver);
+
+                chatsRef.child(pic_key).setValue(map)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                                if(task.isSuccessful())
+                                {
+                                    //recyclerView.scrollToPosition(arrayList.size() - 1);
+                                    usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+                                    friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                            }
+                        });
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList").child(sender).child(receiver);
+
+        chatsListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(!snapshot.exists())
+                {
+                    chatsListRef.child("UID").setValue(receiver);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 

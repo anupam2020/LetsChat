@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -43,12 +48,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     boolean isFav;
 
+    Animation animation;
+
     ArrayList<MessageModel> arrayList;
     Context context;
+    Uri imgUri;
 
     public MessageAdapter(ArrayList<MessageModel> arrayList, Context context) {
         this.arrayList = arrayList;
         this.context = context;
+    }
+
+    public MessageAdapter(ArrayList<MessageModel> arrayList, Context context, Uri imgUri) {
+        this.arrayList = arrayList;
+        this.context = context;
+        this.imgUri=imgUri;
     }
 
     @NonNull
@@ -79,6 +93,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.msg.setText(messageModel.getText());
 
         holder.time.setText(messageModel.getTime());
+
+        if(messageModel.getText().equals("--Image--"))
+        {
+            holder.msg.setVisibility(View.GONE);
+            Glide.with(context)
+                    .load(messageModel.getImgURI())
+                    .into(holder.msgImg);
+            holder.msgImg.setVisibility(View.VISIBLE);
+        }
 
         favorites.addValueEventListener(new ValueEventListener() {
             @Override
@@ -133,6 +156,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                     map.put("receiverPic", messageModel.getReceiverPic());
 
                                     holder.favImg.setImageResource(R.drawable.heart_1);
+
+//                                    animation= AnimationUtils.loadAnimation(context,R.anim.anim_fav_icon);
+//                                    holder.favImg.setAnimation(animation);
                                     holder.favImg.setVisibility(View.VISIBLE);
                                     favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
                                     isFav=false;
@@ -162,7 +188,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 {
                     gestureDetector.onTouchEvent(event);
                 }
-                return false;
+                return true;
             }
         });
 
@@ -310,7 +336,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         TextView msg,time;
-        ImageView favImg;
+        ImageView favImg,msgImg;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -318,6 +344,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             msg=itemView.findViewById(R.id.showMsg);
             time=itemView.findViewById(R.id.textTime);
             favImg=itemView.findViewById(R.id.favChat);
+            msgImg=itemView.findViewById(R.id.imgMsg);
 
         }
     }

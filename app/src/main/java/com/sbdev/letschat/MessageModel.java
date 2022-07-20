@@ -1,10 +1,12 @@
 package com.sbdev.letschat;
 
+import android.net.Uri;
+
 public class MessageModel {
 
-    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName;
+    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
 
-    public MessageModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName) {
+    public MessageModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
@@ -14,6 +16,7 @@ public class MessageModel {
         this.receiverPic = receiverPic;
         this.senderName = senderName;
         this.receiverName = receiverName;
+        this.imgURI = imgURI;
     }
 
     public MessageModel()
@@ -91,5 +94,13 @@ public class MessageModel {
 
     public void setReceiverName(String receiverName) {
         this.receiverName = receiverName;
+    }
+
+    public String getImgURI() {
+        return imgURI;
+    }
+
+    public void setImgURI(String imgURI) {
+        this.imgURI = imgURI;
     }
 }
