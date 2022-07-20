@@ -2,9 +2,9 @@ package com.sbdev.letschat;
 
 public class FavMsgModel {
 
-    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName;
+    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
 
-    public FavMsgModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName) {
+    public FavMsgModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
@@ -14,6 +14,7 @@ public class FavMsgModel {
         this.receiverPic = receiverPic;
         this.senderName = senderName;
         this.receiverName = receiverName;
+        this.imgURI = imgURI;
     }
 
     public FavMsgModel()
@@ -91,5 +92,13 @@ public class FavMsgModel {
 
     public void setReceiverName(String receiverName) {
         this.receiverName = receiverName;
+    }
+
+    public String getImgURI() {
+        return imgURI;
+    }
+
+    public void setImgURI(String imgURI) {
+        this.imgURI = imgURI;
     }
 }

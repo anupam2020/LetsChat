@@ -23,13 +23,24 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/item_user" />
 
+            <ImageView
+                android:id="@+id/userStatusIcon"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_below="@id/relativeUserItem"
+                android:layout_marginLeft="-15dp"
+                android:layout_marginTop="-15dp"
+                android:layout_toRightOf="@id/userProfilePic"
+                android:src="@drawable/circle_offline" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_toRightOf="@id/userProfilePic"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:id="@+id/relativeUserItem">
+                android:id="@+id/relativeUserItem"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/userName"
@@ -63,6 +74,15 @@
                         android:textColor="@color/grey"
                         android:textSize="12dp" />
 
+                    <ImageView
+                        android:id="@+id/userImgSent"
+                        android:layout_width="20sp"
+                        android:layout_height="20sp"
+                        android:layout_toRightOf="@id/userMsgIcon"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/image_sent"
+                        android:visibility="gone"/>
+
                     <TextView
                         android:id="@+id/userTime"
                         android:layout_width="wrap_content"
@@ -76,16 +96,6 @@
                 </RelativeLayout>
 
             </RelativeLayout>
-
-            <ImageView
-                android:id="@+id/userStatusIcon"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_below="@id/relativeUserItem"
-                android:layout_marginLeft="-15dp"
-                android:layout_marginTop="-10dp"
-                android:layout_toRightOf="@id/userProfilePic"
-                android:src="@drawable/circle_offline" />
 
         </RelativeLayout>
 

@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MessageActivity"
-    android:id="@+id/relativeMsg"
-    android:background="@drawable/msg_bg">
+    android:id="@+id/relativeMsg">
 
 <!--    <ImageView-->
 <!--        android:id="@+id/msgBackgroundImg"-->

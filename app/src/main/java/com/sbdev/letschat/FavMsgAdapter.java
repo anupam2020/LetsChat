@@ -65,6 +65,22 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
         holder.msgText.setText(favMsgModel.getText());
         holder.msgTime.setText(favMsgModel.getTime());
 
+        if(favMsgModel.getText().equals("--Image--"))
+        {
+            Glide.with(context)
+                    .load(favMsgModel.getImgURI())
+                    .placeholder(R.drawable.loading)
+                    .error(R.drawable.loading)
+                    .into(holder.favImg);
+            holder.favImg.setVisibility(View.VISIBLE);
+            holder.msgText.setVisibility(View.GONE);
+        }
+        else
+        {
+            holder.favImg.setVisibility(View.GONE);
+            holder.msgText.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
@@ -75,6 +91,7 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
     public class FavMsgViewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView profileImg;
+        ImageView favImg;
         TextView nameText,msgText,msgTime;
         LinearLayout layout;
 
@@ -86,6 +103,7 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
             msgText=itemView.findViewById(R.id.favMsg);
             msgTime=itemView.findViewById(R.id.favTime);
             layout=itemView.findViewById(R.id.favLinearLayout);
+            favImg=itemView.findViewById(R.id.imgFavMsg);
 
         }
     }

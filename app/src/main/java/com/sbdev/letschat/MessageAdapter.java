@@ -53,6 +53,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     ArrayList<MessageModel> arrayList;
     Context context;
     Uri imgUri;
+    View view;
 
     public MessageAdapter(ArrayList<MessageModel> arrayList, Context context) {
         this.arrayList = arrayList;
@@ -94,11 +95,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.time.setText(messageModel.getTime());
 
+        holder.msgImg.setVisibility(View.GONE);
+        holder.msg.setVisibility(View.VISIBLE);
         if(messageModel.getText().equals("--Image--"))
         {
             holder.msg.setVisibility(View.GONE);
             Glide.with(context)
                     .load(messageModel.getImgURI())
+                    .placeholder(R.drawable.loading)
+                    .error(R.drawable.loading)
                     .into(holder.msgImg);
             holder.msgImg.setVisibility(View.VISIBLE);
         }
@@ -132,137 +137,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             GestureDetector gestureDetector=new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
 
                 @Override
-                public boolean onDoubleTap(MotionEvent e) {
-
-                    isFav=true;
-
-                    favorites.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                            if(isFav)
-                            {
-
-                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key)) {
-                                    HashMap map = new HashMap();
-                                    map.put("sender", messageModel.getSender());
-                                    map.put("receiver", messageModel.getReceiver());
-                                    map.put("text", messageModel.getText());
-                                    map.put("time", messageModel.getTime());
-                                    map.put("key", messageModel.getKey());
-                                    map.put("senderName", messageModel.getSenderName());
-                                    map.put("senderPic", messageModel.getSenderPic());
-                                    map.put("receiverName", messageModel.getReceiverName());
-                                    map.put("receiverPic", messageModel.getReceiverPic());
-
-                                    holder.favImg.setImageResource(R.drawable.heart_1);
-
-//                                    animation= AnimationUtils.loadAnimation(context,R.anim.anim_fav_icon);
-//                                    holder.favImg.setAnimation(animation);
-                                    holder.favImg.setVisibility(View.VISIBLE);
-                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
-                                    isFav=false;
-                                }
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                    return super.onDoubleTap(e);
-                }
-            });
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                if(!isNetworkConnected())
-                {
-                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    gestureDetector.onTouchEvent(event);
-                }
-                return true;
-            }
-        });
-
-
-
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // On Click
-
-            }
-        });
-
-        holder.favImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(!isNetworkConnected())
-                {
-                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                }
-                else
-                {
-
-                    isFav=true;
-
-                    favorites.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                            if(isFav)
-                            {
-
-                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
-                                {
-                                    holder.favImg.setVisibility(View.INVISIBLE);
-                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
-                                    isFav=false;
-                                }
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                }
-
-            }
-        });
-
-
-
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-
-                if(!isNetworkConnected())
-                {
-                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                }
-                else
-                {
+                public void onLongPress(MotionEvent e) {
+                    super.onLongPress(e);
 
                     if(firebaseAuth.getCurrentUser().getUid().equals(messageModel.getSender()))
                     {
 
-                        PopupMenu popupMenu=new PopupMenu(context,v);
+                        PopupMenu popupMenu=new PopupMenu(context,holder.itemView);
                         popupMenu.getMenuInflater().inflate(R.menu.text_options,popupMenu.getMenu());
                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
@@ -318,6 +199,136 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     }
 
                 }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+
+                    isFav=true;
+
+                    favorites.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if(isFav)
+                            {
+
+                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key)) {
+                                    HashMap map = new HashMap();
+                                    map.put("sender", messageModel.getSender());
+                                    map.put("receiver", messageModel.getReceiver());
+                                    map.put("text", messageModel.getText());
+                                    map.put("time", messageModel.getTime());
+                                    map.put("key", messageModel.getKey());
+                                    map.put("senderName", messageModel.getSenderName());
+                                    map.put("senderPic", messageModel.getSenderPic());
+                                    map.put("receiverName", messageModel.getReceiverName());
+                                    map.put("receiverPic", messageModel.getReceiverPic());
+
+                                    if(messageModel.getText().equals("--Image--"))
+                                    {
+                                        map.put("imgURI",messageModel.getImgURI());
+                                    }
+
+                                    holder.favImg.setImageResource(R.drawable.heart_1);
+
+//                                    animation= AnimationUtils.loadAnimation(context,R.anim.anim_fav_icon);
+//                                    holder.favImg.setAnimation(animation);
+                                    holder.favImg.setVisibility(View.VISIBLE);
+                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
+                                    isFav=false;
+                                }
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    return super.onDoubleTap(e);
+                }
+            });
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    gestureDetector.onTouchEvent(event);
+                }
+                return true;
+            }
+        });
+
+
+
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // On Click
+
+                Toast.makeText(context, "Clicked!", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        holder.favImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(v,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else
+                {
+
+                    isFav=true;
+
+                    favorites.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if(isFav)
+                            {
+
+                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                {
+                                    holder.favImg.setVisibility(View.INVISIBLE);
+                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                    isFav=false;
+                                }
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                }
+
+            }
+        });
+
+
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                // Long-click
 
                 return false;
             }

@@ -92,7 +92,7 @@ public class MessageActivity extends AppCompatActivity {
 
     String friendUID,myUID,receiverStr,senderStr,receiverName,senderName;
 
-    private final int reqCodeWall=1,reqCodeMsg=1;
+    private final int reqCodeWall=1,reqCodeMsg=2;
 
     Uri imgURI,imageURI;
 
@@ -108,7 +108,7 @@ public class MessageActivity extends AppCompatActivity {
 
     ValueEventListener seenListener;
 
-    Animation animation,animationRemove;
+    Animation animation,animationClick;
 
     String downloadURL="";
 
@@ -182,9 +182,15 @@ public class MessageActivity extends AppCompatActivity {
         gallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                openGallery();
-
+                if(!isNetworkConnected())
+                {
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                }
+                else
+                {
+                    openGallery();
+                }
             }
         });
 
@@ -319,6 +325,10 @@ public class MessageActivity extends AppCompatActivity {
 
                     loadProfile();
                     loadWallpaper();
+                }
+                else
+                {
+                    progressDialog.dismiss();
                 }
             }
 
@@ -802,18 +812,22 @@ public class MessageActivity extends AppCompatActivity {
         if(requestCode==reqCodeMsg && resultCode==RESULT_OK && data.getData()!=null)
         {
 
+            Snackbar.make(layout,"Please wait! We are uploading your image...",Snackbar.LENGTH_LONG).show();
+
             imageURI=data.getData();
 
             String pic_key=chatsRef.push().getKey();
-            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+            storageReference
                 .child("Chat_Pics")
+                .child(firebaseAuth.getCurrentUser().getUid())
                 .child(pic_key)
                 .putFile(imageURI).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                            storageReference
                                 .child("Chat_Pics")
+                                .child(firebaseAuth.getCurrentUser().getUid())
                                 .child(pic_key)
                                 .getDownloadUrl()
                                 .addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -826,8 +840,20 @@ public class MessageActivity extends AppCompatActivity {
                                         adapter.notifyDataSetChanged();
 
                                     }
-                                });
+                                }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                                            progressDialog.dismiss();
+                                        }
+                                    });
 
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                            progressDialog.dismiss();
                         }
                     });
 

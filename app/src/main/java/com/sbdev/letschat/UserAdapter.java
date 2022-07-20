@@ -74,7 +74,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             holder.statusIcon.setImageResource(R.drawable.circle_offline);
         }
 
-        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus(), holder.time);
+        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus(), holder.time, holder.imgSentIcon);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +99,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public class UserViewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView profile;
-        ImageView statusIcon,msgIcon;
+        ImageView statusIcon,msgIcon,imgSentIcon;
         TextView name,lastMsg,time;
 
         public UserViewHolder(@NonNull View itemView) {
@@ -111,11 +111,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             lastMsg=itemView.findViewById(R.id.userLastMsg);
             msgIcon=itemView.findViewById(R.id.userMsgIcon);
             time=itemView.findViewById(R.id.userTime);
+            imgSentIcon=itemView.findViewById(R.id.userImgSent);
 
         }
     }
 
-    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status, TextView time)
+    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status, TextView time, ImageView imageIconSent)
     {
 
         lastMessage="";
@@ -166,6 +167,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     }
                     msg_icon.setVisibility(View.GONE);
                     time.setText("");
+                }
+
+                if(lastMessage.equals("--Image--"))
+                {
+                    last_msg.setVisibility(View.GONE);
+                    imageIconSent.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    last_msg.setVisibility(View.VISIBLE);
+                    imageIconSent.setVisibility(View.GONE);
                 }
 
                 lastMessage="";
