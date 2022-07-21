@@ -392,7 +392,7 @@ public class ProfileActivity extends AppCompatActivity {
                             public void run() {
                                 Glide.with(getApplicationContext())
                                         .load(userModel.getProfilePic())
-                                        .placeholder(R.drawable.loading)
+                                        .placeholder(R.drawable.bw_loading1)
                                         .error(R.drawable.item_user)
                                         .into(profilePic);
                             }
@@ -540,6 +540,18 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         checkStatus("Offline");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkStatus("Online");
     }
 
 }

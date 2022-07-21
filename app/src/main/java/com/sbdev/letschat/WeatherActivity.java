@@ -368,4 +368,16 @@ public class WeatherActivity extends AppCompatActivity {
         checkStatus("Offline");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkStatus("Online");
+    }
+
 }

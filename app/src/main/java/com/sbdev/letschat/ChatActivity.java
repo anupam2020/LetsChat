@@ -163,6 +163,41 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected){
+                    usersRef.child("status").setValue("Online");
+                    //usersRef.child("status").onDisconnect().setValue("Offline");
+
+                    usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+                                DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+                                serverTimeRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        long offset = snapshot.getValue(Long.class);
+                                        long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                                        Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                                        Date date=timestamp;
+                                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                                        String strDateTime=simpleDateFormat.format(date);
+
+                                        usersRef.child("status").onDisconnect().setValue(strDateTime);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+
+                        }
+                    });
                     getCity();
                 }
             }
@@ -278,10 +313,42 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (connected) {
+                            usersRef.child("status").setValue("Online");
+                            //usersRef.child("status").onDisconnect().setValue("Offline");
+
+                            usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    if(task.isSuccessful())
+                                    {
+                                        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+                                        serverTimeRef.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                long offset = snapshot.getValue(Long.class);
+                                                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                                                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                                                Date date=timestamp;
+                                                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
+                                                String strDateTime=simpleDateFormat.format(date);
+
+                                                usersRef.child("status").onDisconnect().setValue(strDateTime);
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+
+                                }
+                            });
                             getCity();
-                        }
-                        else {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                         }
                     }
 
@@ -575,6 +642,15 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         checkStatus("Online");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkStatus("Online");
+    }
 
-
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkStatus("Online");
+    }
 }

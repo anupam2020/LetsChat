@@ -106,11 +106,9 @@ public class ChatFragment extends Fragment {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
                     ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
-                    Log.d("UIDs", chatsListModel.getUID());
                     userList.add(chatsListModel);
                 }
 
-                Log.d("UsersList", String.valueOf(userList));
                 chatsList();
 
             }

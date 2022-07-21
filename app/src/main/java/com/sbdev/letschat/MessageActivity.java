@@ -172,6 +172,8 @@ public class MessageActivity extends AppCompatActivity {
 
         loadProfile();
 
+        //recyclerView.scrollToPosition(arrayList.size() - 1);
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -323,8 +325,8 @@ public class MessageActivity extends AppCompatActivity {
                         }
                     });
 
-                    loadProfile();
-                    loadWallpaper();
+                    //loadProfile();
+                    //loadWallpaper();
                 }
                 else
                 {
@@ -463,7 +465,7 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        //seenMsg(friendUID);
+        seenMsg(friendUID);
 
         DatabaseReference senderRef=FirebaseDatabase.getInstance().getReference("Users").child(myUID);
         DatabaseReference receiverRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
@@ -521,8 +523,8 @@ public class MessageActivity extends AppCompatActivity {
     public void seenMsg(String friendUID)
     {
 
-        dRef=FirebaseDatabase.getInstance().getReference("Chats");
-        seenListener=dRef.addValueEventListener(new ValueEventListener() {
+        //dRef=FirebaseDatabase.getInstance().getReference("Chats");
+        dRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -530,9 +532,14 @@ public class MessageActivity extends AppCompatActivity {
                 {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                    Log.d("Receiver UID",messageModel.getReceiver());
+                    Log.d("Auth UID",firebaseAuth.getCurrentUser().getUid());
+                    Log.d("Sender UID",messageModel.getSender());
+                    Log.d("Friend UID",friendUID);
                     if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
                             && messageModel.getSender().equals(friendUID))
                     {
+
                         HashMap map=new HashMap();
                         map.put("isSeen",true);
                         dataSnapshot.getRef().updateChildren(map);
@@ -640,7 +647,9 @@ public class MessageActivity extends AppCompatActivity {
                         .error(R.drawable.item_user)
                         .into(profilePic);
 
+                //recyclerView.scrollToPosition(arrayList.size() - 1);
                 readMsg(myUID,friendUID);
+                //recyclerView.scrollToPosition(arrayList.size() - 1);
 
             }
 
@@ -673,7 +682,12 @@ public class MessageActivity extends AppCompatActivity {
                     }
 
                     adapter.notifyDataSetChanged();
-                    recyclerView.scrollToPosition(arrayList.size() - 1);
+                    MessageActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.scrollToPosition(arrayList.size() - 1);
+                        }
+                    });
 
                 }
 
@@ -718,6 +732,7 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("time",strDateTime);
                 map.put("senderPic",senderStr);
                 map.put("receiverPic",receiverStr);
+                map.put("isSeen",false);
 
                 String key=chatsRef.push().getKey();
                 map.put("key",key);
@@ -892,6 +907,7 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("time",strDateTime);
                 map.put("senderPic",senderStr);
                 map.put("receiverPic",receiverStr);
+                map.put("isSeen",false);
 
                 //String key=chatsRef.push().getKey();
                 map.put("key",pic_key);
@@ -1020,12 +1036,25 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        //friendUID="";
         checkStatus("Offline");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         checkStatus("Online");
     }
 

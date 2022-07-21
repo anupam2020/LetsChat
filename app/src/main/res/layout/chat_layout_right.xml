@@ -4,17 +4,28 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ImageView
+        android:layout_width="15dp"
+        android:layout_height="15sp"
+        android:id="@+id/imgTick"
+        android:src="@drawable/single_tick"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/rightLinear"
+        android:layout_marginTop="-15dp"
+        android:layout_marginRight="5dp" />
+
     <LinearLayout
         android:id="@+id/rightLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:background="@drawable/chat_bg_right"
         android:orientation="vertical"
         android:padding="5dp"
+        android:layout_alignParentRight="true"
         android:layout_marginLeft="50dp"
         android:layout_marginTop="10sp"
-        android:layout_marginRight="10sp">
+        android:layout_toLeftOf="@id/imgTick"
+        android:layout_marginRight="25dp">
 
         <TextView
             android:id="@+id/showMsg"
@@ -60,8 +71,8 @@
         android:layout_below="@id/rightLinear"
         android:layout_alignParentRight="true"
         android:layout_marginTop="-10dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginRight="30dp"
         android:id="@+id/favChat"
-        android:visibility="invisible"/>
+        android:visibility="gone"/>
 
 </RelativeLayout>

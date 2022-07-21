@@ -45,6 +45,8 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
 
         Glide.with(context)
                 .load(favMsgModel.getReceiverPic())
+                .placeholder(R.drawable.item_user)
+                .error(R.drawable.item_user)
                 .into(holder.profileImg);
         if(firebaseAuth.getCurrentUser().getUid().equals(favMsgModel.getSender()))
         {
@@ -69,8 +71,8 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
         {
             Glide.with(context)
                     .load(favMsgModel.getImgURI())
-                    .placeholder(R.drawable.loading)
-                    .error(R.drawable.loading)
+                    .placeholder(R.drawable.spin_coffee)
+                    .error(R.drawable.spin_coffee)
                     .into(holder.favImg);
             holder.favImg.setVisibility(View.VISIBLE);
             holder.msgText.setVisibility(View.GONE);

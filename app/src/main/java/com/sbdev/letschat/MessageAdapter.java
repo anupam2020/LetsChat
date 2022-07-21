@@ -30,6 +30,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.net.URI;
@@ -42,6 +44,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     DatabaseReference favorites= FirebaseDatabase.getInstance().getReference("Favorites");
     DatabaseReference chatsRef= FirebaseDatabase.getInstance().getReference("Chats");
+    StorageReference storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
     public static final int MSG_LEFT=0;
     public static final int MSG_RIGHT=1;
@@ -102,16 +105,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.msg.setVisibility(View.GONE);
             Glide.with(context)
                     .load(messageModel.getImgURI())
-                    .placeholder(R.drawable.loading)
-                    .error(R.drawable.loading)
+                    .placeholder(R.drawable.bw_loading1)
+                    .error(R.drawable.bw_loading1)
                     .into(holder.msgImg);
             holder.msgImg.setVisibility(View.VISIBLE);
         }
 
+        holder.favImg.setVisibility(View.GONE);
         favorites.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                //holder.favImg.setVisibility(View.INVISIBLE);
                 if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
                 {
                     holder.favImg.setImageResource(R.drawable.heart_1);
@@ -119,7 +124,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 }
                 else
                 {
-                    holder.favImg.setVisibility(View.INVISIBLE);
+                    holder.favImg.setVisibility(View.GONE);
                 }
 
             }
@@ -130,7 +135,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
-
+        if(messageModel.isSeen)
+        {
+            holder.tick.setImageResource(R.drawable.double_tick);
+        }
+        else
+        {
+            holder.tick.setImageResource(R.drawable.single_tick);
+        }
 
         holder.itemView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -152,31 +164,43 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                 switch (item.getItemId())
                                 {
                                     case R.id.deleteMsg:
-                                        chatsRef.child(key).removeValue();
                                         arrayList.remove(holder.getAdapterPosition());
+                                        notifyItemRemoved(holder.getAdapterPosition());
 
-                                        isFav=true;
-                                        favorites.addValueEventListener(new ValueEventListener() {
+                                        new Handler().postDelayed(new Runnable() {
                                             @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            public void run() {
 
-                                                if(isFav)
-                                                {
-                                                    if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
-                                                    {
-                                                        holder.favImg.setVisibility(View.INVISIBLE);
-                                                        favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
-                                                        isFav=false;
+                                                chatsRef.child(key).removeValue();
+                                                storageReference.child("Chat_Pics").child(firebaseAuth.getCurrentUser().getUid()).child(key).delete();
+
+                                                isFav=true;
+                                                favorites.addValueEventListener(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                        if(isFav)
+                                                        {
+                                                            if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                                            {
+                                                                holder.favImg.setVisibility(View.GONE);
+                                                                favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                                                isFav=false;
+                                                            }
+                                                        }
+
                                                     }
-                                                }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                    }
+                                                });
 
                                             }
+                                        },500);
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                            }
-                                        });
                                         //notifyItemRemoved(holder.getAdapterPosition());
                                         break;
 
@@ -302,7 +326,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                                 if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
                                 {
-                                    holder.favImg.setVisibility(View.INVISIBLE);
+                                    holder.favImg.setVisibility(View.GONE);
                                     favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
                                     isFav=false;
                                 }
@@ -347,7 +371,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         TextView msg,time;
-        ImageView favImg,msgImg;
+        ImageView favImg,msgImg,tick;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -356,6 +380,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             time=itemView.findViewById(R.id.textTime);
             favImg=itemView.findViewById(R.id.favChat);
             msgImg=itemView.findViewById(R.id.imgMsg);
+            tick=itemView.findViewById(R.id.imgTick);
 
         }
     }
