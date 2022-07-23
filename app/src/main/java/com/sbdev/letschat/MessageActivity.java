@@ -86,7 +86,7 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef,seenRef;
 
     StorageReference storageReference;
 
@@ -148,12 +148,15 @@ public class MessageActivity extends AppCompatActivity {
         usersRef.keepSynced(true);
         typingRef=FirebaseDatabase.getInstance().getReference("Typing");
         typingRef.keepSynced(true);
+        seenRef=FirebaseDatabase.getInstance().getReference("Seen");
+        seenRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
         friendUID=getIntent().getStringExtra("friendUID");
+        seenRef.child(firebaseAuth.getCurrentUser().getUid()).child(friendUID).setValue("In chat");
         myUID=firebaseAuth.getCurrentUser().getUid();
 
         statusRef= FirebaseDatabase.getInstance().getReference("Users");
@@ -465,8 +468,6 @@ public class MessageActivity extends AppCompatActivity {
         });
 
 
-        seenMsg(friendUID);
-
         DatabaseReference senderRef=FirebaseDatabase.getInstance().getReference("Users").child(myUID);
         DatabaseReference receiverRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
 
@@ -508,6 +509,8 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        seenMsg(getIntent().getStringExtra("friendUID"));
+
     }
 
     private void openGallery()
@@ -520,11 +523,11 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void seenMsg(String friendUID)
+    public void seenMsg(final String friendUID)
     {
 
         //dRef=FirebaseDatabase.getInstance().getReference("Chats");
-        dRef.addValueEventListener(new ValueEventListener() {
+        seenListener=dRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -532,13 +535,13 @@ public class MessageActivity extends AppCompatActivity {
                 {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                    Log.d("Receiver UID",messageModel.getReceiver());
-                    Log.d("Auth UID",firebaseAuth.getCurrentUser().getUid());
-                    Log.d("Sender UID",messageModel.getSender());
-                    Log.d("Friend UID",friendUID);
                     if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
                             && messageModel.getSender().equals(friendUID))
                     {
+                        Log.d("Receiver UID",messageModel.getReceiver());
+                        Log.d("Auth UID",firebaseAuth.getCurrentUser().getUid());
+                        Log.d("Sender UID",messageModel.getSender());
+                        Log.d("Friend UID",friendUID);
 
                         HashMap map=new HashMap();
                         map.put("isSeen",true);
@@ -547,7 +550,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 }
 
-                adapter.notifyDataSetChanged();
+                //adapter.notifyDataSetChanged();
 
             }
 
@@ -785,6 +788,8 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
+
+
 
     }
 
@@ -1037,6 +1042,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         //friendUID="";
+        reference.removeEventListener(seenListener);
         checkStatus("Offline");
     }
 

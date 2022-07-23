@@ -229,6 +229,9 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                             case R.id.favMsgMenu:
                                 startActivity(new Intent(ChatActivity.this,FavMsgActivity.class));
                                 break;
+                            case R.id.notifications:
+                                startActivity(new Intent(ChatActivity.this,Notifications.class));
+                                break;
                             case R.id.more:
                                 startActivity(new Intent(ChatActivity.this,MoreActivity.class));
                                 break;
