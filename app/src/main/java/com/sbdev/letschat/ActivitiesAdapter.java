@@ -86,7 +86,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
                                             .removeValue();
 
                                 }
-                            },500);
+                            },1000);
 
                         }
 
