@@ -1,6 +1,7 @@
 package com.sbdev.letschat;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
@@ -24,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.sql.Timestamp;
@@ -49,6 +51,8 @@ public class FriendProfile extends AppCompatActivity {
     RelativeLayout layout;
 
     ProgressDialog progressDialog;
+
+    String profilePicLink="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +149,28 @@ public class FriendProfile extends AppCompatActivity {
             }
         });
 
+
+        profileImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ZoomageView profile=new ZoomageView(FriendProfile.this);
+                profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                profile.setAdjustViewBounds(true);
+
+                Glide.with(getApplicationContext())
+                        .load(profilePicLink)
+                        .placeholder(R.drawable.item_user)
+                        .error(R.drawable.item_user)
+                        .into(profile);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(FriendProfile.this).setView(profile);
+                builder.show();
+
+            }
+        });
+
+
     }
 
     public void reloadFriendProfile()
@@ -159,6 +185,8 @@ public class FriendProfile extends AppCompatActivity {
                         name.setText(userModel.getName());
                         email.setText(userModel.getEmail());
                         friendName.setText(userModel.getName()+"'s profile");
+
+                        profilePicLink=userModel.getProfilePic();
 
                         Glide.with(getApplicationContext())
                                 .load(userModel.getProfilePic())

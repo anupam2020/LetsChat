@@ -23,12 +23,17 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/gray_stroke.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/green_online_bg.xml" value="0.2195" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/grey_online_bg.xml" value="0.2195" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.22" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/ic_baseline_chat_24.xml" value="0.22" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/ic_baseline_cloud_24.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/ic_baseline_cloud_24_white.xml" value="0.2115" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/ic_baseline_info_24.xml" value="0.22" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/profile_pic_zoom.xml" value="0.2195" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/progress_dialog.xml" value="0.2115" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/text_bg.xml" value="0.2" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/drawable/white_box.xml" value="0.2115" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activities_item_layout.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_activities.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_change_password.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_chat.xml" value="0.264" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_facebook.xml" value="0.25364583333333335" />
@@ -38,6 +43,7 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_message.xml" value="0.264" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_more.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_notifications.xml" value="0.17844202898550723" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_profile.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_profile_pic.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/activity_register.xml" value="0.25364583333333335" />
@@ -51,6 +57,7 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/chat_layout_right.xml" value="0.264" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/fragment_chat.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/fragment_users.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/profile_pic_dialog.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/profile_pic_zoom.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/progress_dialog.xml" value="0.189453125" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/progress_dialog_dots.xml" value="0.25364583333333335" />
@@ -58,6 +65,7 @@
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/sample.xml" value="0.2526041666666667" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/layout/user_item_layout.xml" value="0.264" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/change_pass.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/delete.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/menu.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/msg_more.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/ASUS/AndroidStudioProjects/LetsChat/app/src/main/res/menu/text_options.xml" value="0.25364583333333335" />

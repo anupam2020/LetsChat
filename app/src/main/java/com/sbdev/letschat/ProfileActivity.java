@@ -2,6 +2,7 @@ package com.sbdev.letschat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
@@ -40,6 +41,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.sql.Timestamp;
@@ -74,6 +76,8 @@ public class ProfileActivity extends AppCompatActivity {
     Uri imgURI;
 
     public static final int reqCode=1;
+
+    String profilePicLink="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,6 +188,26 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+            }
+        });
+
+        profilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ZoomageView profile=new ZoomageView(ProfileActivity.this);
+                profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                profile.setAdjustViewBounds(true);
+
+                Glide.with(getApplicationContext())
+                        .load(profilePicLink)
+                        .placeholder(R.drawable.item_user)
+                        .error(R.drawable.item_user)
+                        .into(profile);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this).setView(profile);
+                builder.show();
+
             }
         });
 
@@ -386,6 +410,8 @@ public class ProfileActivity extends AppCompatActivity {
 
                         name.setText(userModel.getName());
                         email.setText(userModel.getEmail());
+
+                        profilePicLink=userModel.getProfilePic();
 
                         ProfileActivity.this.runOnUiThread(new Runnable() {
                             @Override

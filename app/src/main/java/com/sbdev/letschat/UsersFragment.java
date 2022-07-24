@@ -198,12 +198,15 @@ public class UsersFragment extends Fragment {
                     }
                 }
 
-                Collections.sort(arrayList, new Comparator<UserModel>() {
-                    @Override
-                    public int compare(UserModel o1, UserModel o2) {
-                        return o2.getLast_text_time().compareTo(o1.getLast_text_time());
-                    }
-                });
+                if(!arrayList.isEmpty())
+                {
+                    Collections.sort(arrayList, new Comparator<UserModel>() {
+                        @Override
+                        public int compare(UserModel o1, UserModel o2) {
+                            return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+                        }
+                    });
+                }
 
                 adapter.notifyDataSetChanged();
                 progressDialog.dismiss();

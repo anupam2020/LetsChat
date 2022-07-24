@@ -1,32 +1,55 @@
 package com.sbdev.letschat;
 
+import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+
+    FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
+
+    DatabaseReference statusRef=FirebaseDatabase.getInstance().getReference("Status");
+
+    String myName,myProfilePic;
 
     ArrayList<UserModel> arrayList;
     Context context;
@@ -58,7 +81,94 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             @Override
             public void onClick(View v) {
 
-                
+
+                DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users")
+                        .child(firebaseAuth.getCurrentUser().getUid());
+
+                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        UserModel userModel=snapshot.getValue(UserModel.class);
+                        myName=userModel.getName();
+                        myProfilePic=userModel.getProfilePic();
+
+                        String key=statusRef.push().getKey();
+                        uploadStatus(myName,myProfilePic,key,model.getUID(),"view");
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
+
+                ZoomageView profile=new ZoomageView(context);
+                profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                profile.setAdjustViewBounds(true);
+
+                Glide.with(context)
+                        .load(model.getProfilePic())
+                        .placeholder(R.drawable.item_user)
+                        .error(R.drawable.item_user)
+                        .into(profile);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                        .setView(profile)
+                        .setNegativeButton("",new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Intent intent=new Intent(context,MessageActivity.class);
+                                intent.putExtra("friendUID",model.getUID());
+                                context.startActivity(intent);
+
+                            }
+                        })
+                        .setNegativeButtonIcon(context.getDrawable(R.drawable.messenger_new))
+                        .setPositiveButton("", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Intent intent=new Intent(context,FriendProfile.class);
+                                intent.putExtra("friendUID",model.getUID());
+                                context.startActivity(intent);
+
+                            }
+                        })
+                        .setPositiveButtonIcon(context.getDrawable(R.drawable.info2_new))
+                        .setNeutralButton("",new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users")
+                                        .child(firebaseAuth.getCurrentUser().getUid());
+
+                                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                        UserModel userModel=snapshot.getValue(UserModel.class);
+                                        myName=userModel.getName();
+                                        myProfilePic=userModel.getProfilePic();
+                                        String key=statusRef.push().getKey();
+                                        uploadStatus(myName,myProfilePic,key,model.getUID(),"download");
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                        })
+                        .setNeutralButtonIcon(context.getDrawable(R.drawable.download_new));
+
+                builder.show();
 
             }
         });
@@ -197,4 +307,61 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public int getItemViewType(int position) {
         return position;
     }
+
+    private void downloadURL(String url, String name) {
+
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name+"_dp" + ".jpg");
+
+        downloadManager.enqueue(request);
+
+        DynamicToast.make(context,"Downloading profile picture!",3000).show();
+
+    }
+
+    public void uploadStatus(String name, String profile, String key, String uid, String status)
+    {
+        if(status.equals("download"))
+        {
+            downloadURL(profile, name);
+        }
+
+        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        serverTimeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long offset = snapshot.getValue(Long.class);
+                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
+                Date date=timestamp;
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMMM dd, yyyy - hh:mm a");
+                String strDateTime=simpleDateFormat.format(date);
+
+                HashMap map=new HashMap();
+                map.put("name",name);
+                map.put("profilePic",profile);
+                map.put("UID",uid);
+                map.put("status",status);
+                map.put("key",key);
+                map.put("dateTime",strDateTime);
+                map.put("timestamp",Long.toString(estimatedServerTimeMs));
+                statusRef.child(uid).child(key).setValue(map);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
 }

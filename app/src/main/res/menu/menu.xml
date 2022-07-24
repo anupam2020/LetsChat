@@ -10,6 +10,10 @@
         android:title="Fav Messages"/>
 
     <item
+        android:id="@+id/activities"
+        android:title="Activities"/>
+
+    <item
         android:id="@+id/notifications"
         android:title="Notifications"/>
 

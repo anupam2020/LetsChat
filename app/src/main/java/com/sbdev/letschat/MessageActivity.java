@@ -86,11 +86,11 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef,seenRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef,seenRef,friendRef;
 
     StorageReference storageReference;
 
-    String friendUID,myUID,receiverStr,senderStr,receiverName,senderName;
+    String myUID,receiverStr,senderStr,receiverName,senderName,fUID;
 
     private final int reqCodeWall=1,reqCodeMsg=2;
 
@@ -155,8 +155,9 @@ public class MessageActivity extends AppCompatActivity {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        friendUID=getIntent().getStringExtra("friendUID");
-        seenRef.child(firebaseAuth.getCurrentUser().getUid()).child(friendUID).setValue("In chat");
+        final String friendUID=getIntent().getStringExtra("friendUID");
+        fUID=friendUID;
+        friendRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
         myUID=firebaseAuth.getCurrentUser().getUid();
 
         statusRef= FirebaseDatabase.getInstance().getReference("Users");
@@ -173,7 +174,7 @@ public class MessageActivity extends AppCompatActivity {
 
         loadWallpaper();
 
-        loadProfile();
+        loadProfile(friendUID);
 
         //recyclerView.scrollToPosition(arrayList.size() - 1);
 
@@ -509,7 +510,25 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        seenMsg(getIntent().getStringExtra("friendUID"));
+//        seenRef.addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                    if(snapshot.child(friendUID).child(firebaseAuth.getCurrentUser().getUid()).exists())
+//                    {
+//                        seenMsg(getIntent().getStringExtra("friendUID"));
+//                    }
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError error) {
+//
+//                }
+//            });
+
+
+        seenMsg(friendUID);
 
     }
 
@@ -526,39 +545,43 @@ public class MessageActivity extends AppCompatActivity {
     public void seenMsg(final String friendUID)
     {
 
-        //dRef=FirebaseDatabase.getInstance().getReference("Chats");
-        seenListener=dRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                {
+            seenListener=dRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                    if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
-                            && messageModel.getSender().equals(friendUID))
+                    for(DataSnapshot dataSnapshot : snapshot.getChildren())
                     {
+
+                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
                         Log.d("Receiver UID",messageModel.getReceiver());
                         Log.d("Auth UID",firebaseAuth.getCurrentUser().getUid());
                         Log.d("Sender UID",messageModel.getSender());
                         Log.d("Friend UID",friendUID);
+                        if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
+                                && messageModel.getSender().equals(friendUID))
+                        {
 
-                        HashMap map=new HashMap();
-                        map.put("isSeen",true);
-                        dataSnapshot.getRef().updateChildren(map);
+                            HashMap map=new HashMap();
+                            map.put("isSeen",true);
+                            dataSnapshot.getRef().updateChildren(map);
+                        }
+
                     }
+
+                    //adapter.notifyDataSetChanged();
 
                 }
 
-                //adapter.notifyDataSetChanged();
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
+                }
+            });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+        //dRef=FirebaseDatabase.getInstance().getReference("Chats");
+
 
     }
 
@@ -634,7 +657,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void loadProfile()
+    public void loadProfile(String friendUID)
     {
 
         reference.child(friendUID).addValueEventListener(new ValueEventListener() {
@@ -855,7 +878,7 @@ public class MessageActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
 
                                         downloadURL=uri.toString();
-                                        addImageTextToFirebase(myUID,friendUID,pic_key);
+                                        addImageTextToFirebase(myUID,fUID,pic_key);
                                         adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
                                         adapter.notifyDataSetChanged();
 
@@ -1030,6 +1053,8 @@ public class MessageActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
+        //friendUID="";
+
         typingRef.child(firebaseAuth.getCurrentUser().getUid())
                 .child("typing")
                 .setValue(false);
@@ -1042,7 +1067,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         //friendUID="";
-        reference.removeEventListener(seenListener);
+        friendRef.removeEventListener(seenListener);
         checkStatus("Offline");
     }
 
