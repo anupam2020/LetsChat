@@ -40,8 +40,8 @@
         android:layout_height="75dp"
         android:layout_below="@id/moreRelativeTop"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/chat_box1"
-        android:layout_marginTop="25dp"/>
+        android:layout_marginTop="30dp"
+        android:src="@drawable/chat_box1" />
 
     <TextView
         android:id="@+id/moreChatText"
@@ -60,8 +60,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/moreChatText"
         android:layout_centerHorizontal="true"
-        android:text="@string/version"
         android:layout_marginTop="2dp"
+        android:text="@string/version"
         android:textSize="13dp" />
 
         <androidx.core.widget.NestedScrollView

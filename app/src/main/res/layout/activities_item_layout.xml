@@ -6,7 +6,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="75dp"
+        android:layout_height="85dp"
         android:layout_margin="5dp"
         app:cardCornerRadius="10dp"
         android:elevation="5dp">
@@ -24,35 +24,35 @@
                 android:src="@drawable/me"/>
 
             <TextView
+                android:id="@+id/activitiesName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:text="Anupam Basak downloaded your profile picture."
-                android:textSize="15sp"
-                android:layout_toRightOf="@id/activitiesCircleImg"
-                android:layout_toLeftOf="@id/activitiesMore"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:id="@+id/activitiesName" />
+                android:layout_toLeftOf="@id/activitiesMore"
+                android:layout_toRightOf="@id/activitiesCircleImg"
+                android:text="Anupam Basak downloaded your profile picture."
+                android:textColor="@color/black"
+                android:textSize="15sp" />
 
             <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25sp"
+                android:layout_width="20dp"
+                android:layout_height="20sp"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:src="@drawable/ic_baseline_more_vert_24"
                 android:id="@+id/activitiesMore"/>
 
             <TextView
+                android:id="@+id/activitiesDataTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:text="Jul 07, 2021 - 09:04PM"
                 android:textColor="#8F8F8F"
-                android:textSize="10sp"
-                android:id="@+id/activitiesDataTime"/>
+                android:textSize="10sp" />
 
         </RelativeLayout>
 

@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Notifications"
-    android:id="@+id/notificationsRelative">
+    tools:context=".PrivacyPolicy"
+    android:id="@+id/privacyRelative">
 
     <RelativeLayout
-        android:id="@+id/notificationsRelativeTop"
+        android:id="@+id/privacyRelativeTop"
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:background="@drawable/black_box_round">
 
         <ImageView
-            android:id="@+id/notificationsBack"
+            android:id="@+id/privacyBack"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_centerVertical="true"
@@ -27,11 +27,19 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@id/notificationsBack"
-            android:text="Notifications"
+            android:layout_toRightOf="@id/privacyBack"
+            android:text="Privacy Policy"
             android:textColor="@color/white"
             android:textSize="20sp" />
 
     </RelativeLayout>
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/privacyWebView"
+        android:layout_below="@id/privacyRelativeTop"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="15dp"/>
 
 </RelativeLayout>

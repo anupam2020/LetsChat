@@ -128,7 +128,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
                             }
                         })
-                        .setNegativeButtonIcon(context.getDrawable(R.drawable.messenger_new))
+                        .setNegativeButtonIcon(context.getDrawable(R.drawable.chat_black_new))
                         .setPositiveButton("", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -139,7 +139,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
                             }
                         })
-                        .setPositiveButtonIcon(context.getDrawable(R.drawable.info2_new))
+                        .setPositiveButtonIcon(context.getDrawable(R.drawable.info1_black_new))
                         .setNeutralButton("",new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -166,7 +166,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                 });
                             }
                         })
-                        .setNeutralButtonIcon(context.getDrawable(R.drawable.download_new));
+                        .setNeutralButtonIcon(context.getDrawable(R.drawable.download_black_new));
 
                 builder.show();
 

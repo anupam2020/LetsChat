@@ -1,11 +1,16 @@
 package com.sbdev.letschat;
 
+import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -32,10 +38,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.net.URI;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
@@ -274,6 +284,44 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                     return super.onDoubleTap(e);
                 }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+
+                    if(messageModel.getImgURI()!=null)
+                    {
+
+                        ZoomageView profile=new ZoomageView(context);
+                        profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        profile.setAdjustViewBounds(true);
+
+                        Glide.with(context)
+                                .load(messageModel.getImgURI())
+                                .placeholder(R.drawable.blue_img_gallery)
+                                .error(R.drawable.blue_img_gallery)
+                                .into(profile);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context).setView(profile)
+                                .setPositiveButton("", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        downloadURL(messageModel.getImgURI());
+                                    }
+                                })
+                                .setPositiveButtonIcon(context.getDrawable(R.drawable.download_black_new))
+                                .setNeutralButton("",new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setNeutralButtonIcon(context.getDrawable(R.drawable.return_black_new));
+                        builder.show();
+
+                    }
+
+                    return super.onSingleTapConfirmed(e);
+                }
             });
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -290,19 +338,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
-
-
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // On Click
-
-                Toast.makeText(context, "Clicked!", Toast.LENGTH_SHORT).show();
-
-            }
-        });
 
         holder.favImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -406,6 +441,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    private void downloadURL(String url) {
+
+        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        serverTimeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                long offset = snapshot.getValue(Long.class);
+                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
+
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+
+                DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, estimatedServerTimeMs + ".jpg");
+
+                downloadManager.enqueue(request);
+
+                DynamicToast.make(context,"Downloading file!",3000).show();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
 }

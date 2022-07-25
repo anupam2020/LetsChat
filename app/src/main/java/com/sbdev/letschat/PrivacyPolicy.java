@@ -2,14 +2,13 @@ package com.sbdev.letschat;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -26,102 +25,43 @@ import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
-public class Activities extends AppCompatActivity {
+public class PrivacyPolicy extends AppCompatActivity {
 
     ImageView back;
 
-    RecyclerView recyclerView;
+    RelativeLayout layout;
 
-    ActivitiesAdapter adapter;
-
-    ArrayList<ActivitiesModel> arrayList;
+    WebView webView;
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,statusRef,usersRef;
-
-    RelativeLayout layout;
-
-    ProgressDialog progressDialog;
+    DatabaseReference usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_activities);
+        setContentView(R.layout.activity_privacy_policy);
 
-        back=findViewById(R.id.activitiesBack);
-        recyclerView=findViewById(R.id.activitiesRecycler);
-
-        arrayList=new ArrayList<>();
-        adapter=new ActivitiesAdapter(arrayList,this);
-        recyclerView.setAdapter(adapter);
+        back=findViewById(R.id.privacyBack);
+        layout=findViewById(R.id.privacyRelative);
+        webView=findViewById(R.id.privacyWebView);
 
         firebaseAuth=FirebaseAuth.getInstance();
-
-        reference= FirebaseDatabase.getInstance().getReference("Users");
-        reference.keepSynced(true);
 
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
         usersRef.keepSynced(true);
 
-        statusRef=FirebaseDatabase.getInstance().getReference("Status");
-        statusRef.keepSynced(true);
-
-        progressDialog=new ProgressDialog(this);
-
-        progressDialog.show();
-        progressDialog.setContentView(R.layout.progress_dialog_dots);
-        progressDialog.setCancelable(true);
-        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        webView.loadUrl("file:///android_asset/privacy_policy.html");
 
         checkRealTimeNetwork();
 
         if(!isNetworkConnected())
         {
-            progressDialog.dismiss();
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
-
-        statusRef.child(firebaseAuth.getCurrentUser().getUid())
-            .addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    arrayList.clear();
-
-                    for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                    {
-                        ActivitiesModel activitiesModel=dataSnapshot.getValue(ActivitiesModel.class);
-                        arrayList.add(activitiesModel);
-                    }
-
-                    if(arrayList.size()>0)
-                    {
-                        Collections.sort(arrayList, new Comparator<ActivitiesModel>() {
-                            @Override
-                            public int compare(ActivitiesModel o1, ActivitiesModel o2) {
-                                return o2.getTimestamp().compareTo(o1.getTimestamp());
-                            }
-                        });
-                    }
-
-                    adapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    progressDialog.dismiss();
-                }
-            });
-
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,17 +110,12 @@ public class Activities extends AppCompatActivity {
 
                         }
                     });
-
-                }
-                else
-                {
-                    progressDialog.dismiss();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(Activities.this,error.getMessage(),3000).show();
+                DynamicToast.make(PrivacyPolicy.this,error.getMessage(),3000).show();
             }
         });
 
@@ -201,19 +136,24 @@ public class Activities extends AppCompatActivity {
                         boolean connected = snapshot.getValue(Boolean.class);
                         if (!connected) {
                             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(Activities.this,error.getMessage(),3000).show();
+                        DynamicToast.make(PrivacyPolicy.this,error.getMessage(),3000).show();
                     }
                 });
 
             }
         },2000);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     private boolean isNetworkConnected()
@@ -272,13 +212,6 @@ public class Activities extends AppCompatActivity {
         }
 
 
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
-        finish();
     }
 
     @Override

@@ -3,8 +3,11 @@ package com.sbdev.letschat;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -35,7 +38,7 @@ public class MoreActivity extends AppCompatActivity {
 
     DatabaseReference usersRef;
 
-    RelativeLayout layout;
+    RelativeLayout layout,aboutLayout,termsLayout,privacyLayout,websiteLayout,shareLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,11 @@ public class MoreActivity extends AppCompatActivity {
 
         back=findViewById(R.id.moreBack);
         layout=findViewById(R.id.moreRelative);
+        aboutLayout=findViewById(R.id.moreRelative1);
+        termsLayout=findViewById(R.id.moreRelative2);
+        privacyLayout=findViewById(R.id.moreRelative3);
+        websiteLayout=findViewById(R.id.moreRelative4);
+        shareLayout=findViewById(R.id.moreRelative5);
 
         firebaseAuth=FirebaseAuth.getInstance();
 
@@ -59,6 +67,10 @@ public class MoreActivity extends AppCompatActivity {
             }
         });
 
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
 
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -109,6 +121,62 @@ public class MoreActivity extends AppCompatActivity {
             }
         });
 
+        aboutLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MoreActivity.this,AboutUsActivity.class));
+            }
+        });
+
+        termsLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MoreActivity.this,TermsConditions.class));
+            }
+        });
+
+        privacyLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MoreActivity.this,PrivacyPolicy.class));
+            }
+        });
+
+        websiteLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String urlString = "https://linktr.ee/anupambasak";
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setPackage("com.android.chrome");
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException ex) {
+                    // Chrome browser presumably not installed so allow user to choose instead
+                    intent.setPackage(null);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        shareLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    final String appPackageName = getPackageName();
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Check out the App at: https://play.google.com/store/apps/details?id=" + appPackageName);
+                    sendIntent.setType("text/plain");
+                    startActivity(sendIntent);
+                } catch(Exception e) {
+                    DynamicToast.makeError(MoreActivity.this,e.getMessage(),2000).show();
+                }
+
+            }
+        });
 
     }
 
