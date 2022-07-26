@@ -38,6 +38,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ChangePassword extends AppCompatActivity {
 
@@ -77,7 +78,7 @@ public class ChangePassword extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         checkRealTimeNetwork();
@@ -149,7 +150,7 @@ public class ChangePassword extends AppCompatActivity {
 
                 progressDialog.show();
                 progressDialog.setContentView(R.layout.progress_dialog_dots);
-                progressDialog.setCancelable(true);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 if(!isNetworkConnected())
@@ -265,7 +266,7 @@ public class ChangePassword extends AppCompatActivity {
 
                 progressDialog.show();
                 progressDialog.setContentView(R.layout.progress_dialog_dots);
-                progressDialog.setCancelable(true);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 if(!isNetworkConnected())
@@ -313,49 +314,44 @@ public class ChangePassword extends AppCompatActivity {
     private void updatePassword(String npass,String opass)
     {
 
-        if(firebaseAuth.getCurrentUser().getEmail()!=null)
-        {
+        AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getEmail()),opass);
 
-            AuthCredential credential = EmailAuthProvider.getCredential(firebaseAuth.getCurrentUser().getEmail(),opass);
+        firebaseAuth.getCurrentUser().reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
 
-            firebaseAuth.getCurrentUser().reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                {
 
-                    if(task.isSuccessful())
-                    {
+                    firebaseAuth.getCurrentUser().updatePassword(npass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
 
-                        firebaseAuth.getCurrentUser().updatePassword(npass).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-
-                                if(task.isSuccessful())
-                                {
-                                    progressDialog.dismiss();
-                                    DynamicToast.make(ChangePassword.this,"Password was successfully changed!",3000).show();
-                                }
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
+                            if(task.isSuccessful())
+                            {
                                 progressDialog.dismiss();
-                                DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+                                DynamicToast.make(ChangePassword.this,"Password was successfully changed!",3000).show();
                             }
-                        });
 
-                    }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+                        }
+                    });
 
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                    DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
-                }
-            });
 
-        }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+                DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+            }
+        });
 
 
 

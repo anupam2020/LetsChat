@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -83,13 +84,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
 
                 DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users")
-                        .child(firebaseAuth.getCurrentUser().getUid());
+                        .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
 
                 reference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         UserModel userModel=snapshot.getValue(UserModel.class);
+                        assert userModel != null;
                         myName=userModel.getName();
                         myProfilePic=userModel.getProfilePic();
 
@@ -152,6 +154,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                                         UserModel userModel=snapshot.getValue(UserModel.class);
+                                        assert userModel != null;
                                         myName=userModel.getName();
                                         myProfilePic=userModel.getProfilePic();
                                         String key=statusRef.push().getKey();
@@ -243,16 +246,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                    assert messageModel != null;
                     strTime=messageModel.getTime();
                     strTime=strTime.substring(0,strTime.indexOf(',')+1) + strTime.substring(strTime.indexOf('-')+1);
 
-                    if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()))
+                    if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
                     {
                         lastMessage=messageModel.getText();
                         time.setText(strTime);
                         msg_icon.setImageResource(R.drawable.curve_down_arrow);
                     }
-                    if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getReceiver().equals(friendUID))
+                    if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()) && messageModel.getReceiver().equals(friendUID))
                     {
                         lastMessage=messageModel.getText();
                         time.setText(strTime);

@@ -25,6 +25,7 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
+import com.facebook.login.Login;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,6 +33,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +51,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -79,6 +83,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     String profilePicLink="";
 
+    private boolean isUpdated=false,isEmailChanged=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +107,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
@@ -217,12 +223,15 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                isUpdated=false;
+                isEmailChanged=false;
+
                 InputMethodManager imm = (InputMethodManager) ProfileActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
                 progressDialog.show();
                 progressDialog.setContentView(R.layout.progress_dialog_dots);
-                progressDialog.setCancelable(true);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 if(!isNetworkConnected())
@@ -258,21 +267,120 @@ public class ProfileActivity extends AppCompatActivity {
 
                                         UserModel userModel=snapshot.getValue(UserModel.class);
 
+                                        assert userModel != null;
                                         if(!userModel.getName().equals(n))
                                         {
                                             HashMap map=new HashMap();
                                             map.put("Name",n);
 
                                             reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
+
+                                            isUpdated=true;
                                         }
                                         if(!userModel.getEmail().equals(e))
                                         {
-                                            firebaseAuth.getCurrentUser().updateEmail(e);
 
-                                            HashMap map=new HashMap();
-                                            map.put("Email",e);
+                                            AlertDialog.Builder builder=new AlertDialog.Builder(ProfileActivity.this);
+                                            builder.setTitle("Update Email");
+                                            View view=getLayoutInflater().inflate(R.layout.password_layout,null);
+                                            builder.setView(view);
 
-                                            reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
+                                            AlertDialog dialog=builder.create();
+
+                                            dialog.show();
+
+                                            TextInputLayout textInputLayout=view.findViewById(R.id.passwordLayout1);
+                                            TextInputEditText editText=view.findViewById(R.id.passwordET1);
+                                            AppCompatButton submit=view.findViewById(R.id.passwordSubmit);
+
+                                            submit.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+
+                                                    progressDialog.show();
+                                                    progressDialog.setContentView(R.layout.progress_dialog_dots);
+                                                    progressDialog.setCancelable(false);
+                                                    progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                                                    if(!isNetworkConnected())
+                                                    {
+                                                        dialog.dismiss();
+                                                        progressDialog.dismiss();
+                                                        Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                                                    }
+                                                    else
+                                                    {
+
+                                                        String pass=editText.getText().toString().trim();
+                                                        if(pass.isEmpty())
+                                                        {
+                                                            progressDialog.dismiss();
+                                                            textInputLayout.setError("Password cannot be empty!");
+                                                        }
+                                                        else
+                                                        {
+                                                            if(firebaseAuth.getCurrentUser().getEmail()!=null)
+                                                            {
+
+                                                                AuthCredential credential = EmailAuthProvider
+                                                                    .getCredential(firebaseAuth.getCurrentUser()
+                                                                            .getEmail(),pass);
+
+                                                                firebaseAuth.getCurrentUser().reauthenticate(credential)
+                                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+
+                                                                            if(task.isSuccessful())
+                                                                            {
+                                                                                firebaseAuth.getCurrentUser().updateEmail(e);
+
+                                                                                HashMap map=new HashMap();
+                                                                                map.put("Email",e);
+
+                                                                                reference.child(firebaseAuth.getCurrentUser().getUid()).updateChildren(map);
+
+                                                                                dialog.dismiss();
+                                                                                progressDialog.dismiss();
+
+                                                                                Snackbar.make(layout,"Profile successfully updated!",Snackbar.LENGTH_SHORT).show();
+                                                                            }
+
+                                                                        }
+                                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                                        @Override
+                                                                        public void onFailure(@NonNull Exception e) {
+                                                                            progressDialog.dismiss();
+                                                                            DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                                        }
+                                                                    });
+
+                                                            }
+                                                        }
+
+                                                    }
+
+                                                }
+                                            });
+
+                                            editText.addTextChangedListener(new TextWatcher() {
+                                                @Override
+                                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                                }
+
+                                                @Override
+                                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                    textInputLayout.setErrorEnabled(false);
+                                                }
+
+                                                @Override
+                                                public void afterTextChanged(Editable s) {
+
+                                                }
+                                            });
+                                            isEmailChanged=true;
+                                            isUpdated=true;
                                         }
 
                                         if(imgURI!=null)
@@ -297,9 +405,8 @@ public class ProfileActivity extends AppCompatActivity {
                                                                     reference.child(firebaseAuth.getCurrentUser().getUid())
                                                                             .updateChildren(map);
 
+                                                                    imgURI=null;
                                                                     progressDialog.dismiss();
-
-                                                                    Snackbar.make(layout,"Profile updated!",Snackbar.LENGTH_SHORT).show();
 
                                                                 }
                                                             });
@@ -311,6 +418,21 @@ public class ProfileActivity extends AppCompatActivity {
                                                         DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
                                                     }
                                                 });
+                                            isUpdated=true;
+                                        }
+
+                                        if(isUpdated)
+                                        {
+                                            if(!isEmailChanged)
+                                            {
+                                                progressDialog.dismiss();
+                                                Snackbar.make(layout,"Profile successfully updated!",Snackbar.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Snackbar.make(layout,"No changes found!",Snackbar.LENGTH_SHORT).show();
+                                            progressDialog.dismiss();
                                         }
 
                                     }
@@ -382,9 +504,106 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
 
-                        if (item.getItemId() == R.id.changePass) {
-                            startActivity(new Intent(ProfileActivity.this, ChangePassword.class));
-                            return true;
+                        switch (item.getItemId())
+                        {
+
+                            case R.id.changePass:
+                                startActivity(new Intent(ProfileActivity.this, ChangePassword.class));
+                                break;
+
+                            case R.id.deleteAccount:
+
+                                AlertDialog.Builder builder=new AlertDialog.Builder(ProfileActivity.this);
+                                builder.setTitle("Delete Account");
+                                View view=getLayoutInflater().inflate(R.layout.password_layout,null);
+                                builder.setView(view);
+
+                                AlertDialog dialog=builder.create();
+
+                                dialog.show();
+
+                                TextInputLayout textInputLayout=view.findViewById(R.id.passwordLayout1);
+                                TextInputEditText editText=view.findViewById(R.id.passwordET1);
+                                AppCompatButton submit=view.findViewById(R.id.passwordSubmit);
+
+                                submit.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+
+                                        progressDialog.show();
+                                        progressDialog.setContentView(R.layout.progress_dialog_dots);
+                                        progressDialog.setCancelable(false);
+                                        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                                        if(!isNetworkConnected())
+                                        {
+                                            dialog.dismiss();
+                                            progressDialog.dismiss();
+                                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                                        }
+                                        else
+                                        {
+
+                                            String pass=editText.getText().toString().trim();
+                                            if(pass.isEmpty())
+                                            {
+                                                progressDialog.dismiss();
+                                                textInputLayout.setError("Password cannot be empty!");
+                                            }
+                                            else
+                                            {
+                                                if(firebaseAuth.getCurrentUser().getEmail()!=null)
+                                                {
+
+                                                    AuthCredential credential = EmailAuthProvider
+                                                            .getCredential(firebaseAuth.getCurrentUser()
+                                                            .getEmail(),pass);
+
+                                                    firebaseAuth.getCurrentUser().reauthenticate(credential)
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+
+                                                                if(task.isSuccessful())
+                                                                {
+                                                                    deleteAccount();
+                                                                }
+
+                                                            }
+                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                progressDialog.dismiss();
+                                                                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                            }
+                                                        });
+
+                                                }
+                                            }
+
+                                        }
+
+                                    }
+                                });
+
+                                editText.addTextChangedListener(new TextWatcher() {
+                                    @Override
+                                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                    }
+
+                                    @Override
+                                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                        textInputLayout.setErrorEnabled(false);
+                                    }
+
+                                    @Override
+                                    public void afterTextChanged(Editable s) {
+
+                                    }
+                                });
+                                break;
+
                         }
 
                         return false;
@@ -398,16 +617,66 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    private void deleteAccount()
+    {
+
+        String currentUID= Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
+        firebaseAuth.getCurrentUser().delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if(task.isSuccessful())
+                {
+
+                    //FirebaseDatabase.getInstance().getReference("Users").child(currentUID).removeValue();
+                    FirebaseDatabase.getInstance().getReference("Location").child(currentUID).removeValue();
+                    FirebaseDatabase.getInstance().getReference("Typing").child(currentUID).removeValue();
+                    FirebaseDatabase.getInstance().getReference("Favorites").child(currentUID).removeValue();
+                    FirebaseDatabase.getInstance().getReference("ChatsList").child(currentUID).removeValue();
+
+                    FirebaseStorage.getInstance().getReference("Pictures")
+                            .child(currentUID)
+                            .child("Wallpaper")
+                            .delete();
+
+                    FirebaseStorage.getInstance().getReference("Pictures")
+                        .child(currentUID)
+                        .child("Profile_Pic")
+                        .delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+
+                                progressDialog.dismiss();
+                                DynamicToast.make(ProfileActivity.this,"Account successfully deleted!",3000).show();
+                                startActivity(new Intent(ProfileActivity.this,MainActivity.class));
+
+                            }
+                        });
+
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+            }
+        });
+
+    }
+
     public void reloadProfile()
     {
 
-        reference.child(firebaseAuth.getCurrentUser().getUid())
+        reference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         UserModel userModel=snapshot.getValue(UserModel.class);
 
+                        assert userModel != null;
                         name.setText(userModel.getName());
                         email.setText(userModel.getEmail());
 

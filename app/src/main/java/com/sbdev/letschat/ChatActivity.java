@@ -65,6 +65,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -102,7 +103,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         reference=FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
         locationRef=FirebaseDatabase.getInstance().getReference("Location");
         locationRef.keepSynced(true);
@@ -258,7 +259,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
     public void getCity()
     {
 
-        locationRef.child(firebaseAuth.getCurrentUser().getUid())
+        locationRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -266,6 +267,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                         if(snapshot.exists())
                         {
                             LocationModel locationModel=snapshot.getValue(LocationModel.class);
+                            assert locationModel != null;
                             city=locationModel.getLocation();
                             updateWeather(city);
                         }

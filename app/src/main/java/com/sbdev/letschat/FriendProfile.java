@@ -32,6 +32,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -72,7 +73,7 @@ public class FriendProfile extends AppCompatActivity {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         friendUID=getIntent().getStringExtra("friendUID");
@@ -182,6 +183,7 @@ public class FriendProfile extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         UserModel userModel=snapshot.getValue(UserModel.class);
+                        assert userModel != null;
                         name.setText(userModel.getName());
                         email.setText(userModel.getEmail());
                         friendName.setText(userModel.getName()+"'s profile");

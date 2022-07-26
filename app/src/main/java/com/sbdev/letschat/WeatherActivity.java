@@ -44,6 +44,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class WeatherActivity extends AppCompatActivity {
 
@@ -80,7 +81,7 @@ public class WeatherActivity extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         locationRef= FirebaseDatabase.getInstance().getReference("Location");
@@ -109,6 +110,7 @@ public class WeatherActivity extends AppCompatActivity {
                 if(snapshot.exists())
                 {
                     LocationModel locationModel=snapshot.getValue(LocationModel.class);
+                    assert locationModel != null;
                     city.setText(locationModel.getLocation());
                     progressDialog.dismiss();
                 }
@@ -131,7 +133,7 @@ public class WeatherActivity extends AppCompatActivity {
 
                 progressDialog.show();
                 progressDialog.setContentView(R.layout.progress_dialog_dots);
-                progressDialog.setCancelable(true);
+                progressDialog.setCancelable(false);
                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                 if(!isNetworkConnected())
@@ -223,7 +225,7 @@ public class WeatherActivity extends AppCompatActivity {
                 if(response!=null)
                 {
 
-                    locationRef.child(firebaseAuth.getCurrentUser().getUid())
+                    locationRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                             .child("location").setValue(city).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {

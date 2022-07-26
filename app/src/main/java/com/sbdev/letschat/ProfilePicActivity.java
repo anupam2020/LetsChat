@@ -40,6 +40,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -68,9 +69,6 @@ public class ProfilePicActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_pic);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        getWindow().setStatusBarColor(Color.WHITE);
-
         img=findViewById(R.id.circularProfile);
         upload=findViewById(R.id.btnUpload);
         layout=findViewById(R.id.profileRelative);
@@ -83,7 +81,7 @@ public class ProfilePicActivity extends AppCompatActivity {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         checkRealTimeNetwork();
@@ -213,7 +211,7 @@ public class ProfilePicActivity extends AppCompatActivity {
         else
         {
 
-            storageReference.child(firebaseAuth.getCurrentUser().getUid())
+            storageReference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .child("Profile_Pic")
                 .putFile(imageURI)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {

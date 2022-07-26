@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
@@ -127,7 +128,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 //holder.favImg.setVisibility(View.INVISIBLE);
-                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                if(snapshot.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).hasChild(key))
                 {
                     holder.favImg.setImageResource(R.drawable.heart_1);
                     holder.favImg.setVisibility(View.VISIBLE);
@@ -162,7 +163,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 public void onLongPress(MotionEvent e) {
                     super.onLongPress(e);
 
-                    if(firebaseAuth.getCurrentUser().getUid().equals(messageModel.getSender()))
+                    if(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid().equals(messageModel.getSender()))
                     {
 
                         PopupMenu popupMenu=new PopupMenu(context,holder.itemView);
@@ -246,7 +247,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             if(isFav)
                             {
 
-                                if(!snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key)) {
+                                if(!snapshot.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).hasChild(key)) {
                                     HashMap map = new HashMap();
                                     map.put("sender", messageModel.getSender());
                                     map.put("receiver", messageModel.getReceiver());
@@ -359,7 +360,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             if(isFav)
                             {
 
-                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                if(snapshot.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).hasChild(key))
                                 {
                                     holder.favImg.setVisibility(View.GONE);
                                     favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
@@ -425,7 +426,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        if(arrayList.get(position).sender.equals(firebaseAuth.getCurrentUser().getUid()))
+        if(arrayList.get(position).sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
         {
             return MSG_RIGHT;
         }

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
 
 public class UsersFragment extends Fragment {
 
@@ -72,7 +73,7 @@ public class UsersFragment extends Fragment {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
@@ -192,7 +193,8 @@ public class UsersFragment extends Fragment {
                 {
                     UserModel userModel=dataSnapshot.getValue(UserModel.class);
 
-                    if(!userModel.getUID().equals(firebaseAuth.getCurrentUser().getUid()))
+                    assert userModel != null;
+                    if(!userModel.getUID().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
                     {
                         arrayList.add(userModel);
                     }

@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -144,7 +145,7 @@ public class MessageActivity extends AppCompatActivity {
         chatsRef.keepSynced(true);
         dRef=FirebaseDatabase.getInstance().getReference("Chats");
         dRef.keepSynced(true);
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
         typingRef=FirebaseDatabase.getInstance().getReference("Typing");
         typingRef.keepSynced(true);
@@ -219,6 +220,7 @@ public class MessageActivity extends AppCompatActivity {
                     if(snapshot.exists())
                     {
                         TypingModel typingModel=snapshot.getValue(TypingModel.class);
+                        assert typingModel != null;
                         if(typingModel.isTyping())
                         {
                             userStatus.setText("Typing...");
@@ -232,6 +234,7 @@ public class MessageActivity extends AppCompatActivity {
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                                         UserModel userModel=snapshot.getValue(UserModel.class);
+                                        assert userModel != null;
                                         String status=userModel.getStatus();
                                         if(status.equals("Online") || status.equals("Offline"))
                                         {
@@ -260,6 +263,7 @@ public class MessageActivity extends AppCompatActivity {
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                                     UserModel userModel=snapshot.getValue(UserModel.class);
+                                    assert userModel != null;
                                     String status=userModel.getStatus();
                                     if(status.equals("Online") || status.equals("Offline"))
                                     {
@@ -477,6 +481,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
+                assert userModel != null;
                 if(userModel.getProfilePic()!=null)
                 {
                     senderStr=userModel.getProfilePic();
@@ -496,6 +501,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
+                assert userModel != null;
                 if(userModel.getProfilePic()!=null)
                 {
                     receiverStr=userModel.getProfilePic();
@@ -554,11 +560,8 @@ public class MessageActivity extends AppCompatActivity {
                     {
 
                         MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                        Log.d("Receiver UID",messageModel.getReceiver());
-                        Log.d("Auth UID",firebaseAuth.getCurrentUser().getUid());
-                        Log.d("Sender UID",messageModel.getSender());
-                        Log.d("Friend UID",friendUID);
-                        if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid())
+                        assert messageModel != null;
+                        if(messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                                 && messageModel.getSender().equals(friendUID))
                         {
 
@@ -619,28 +622,28 @@ public class MessageActivity extends AppCompatActivity {
     {
 
         storageReference.child(myUID)
-                .child("Wallpaper")
-                .getDownloadUrl()
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
+            .child("Wallpaper")
+            .getDownloadUrl()
+            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
 
-                        Glide.with(getApplicationContext())
-                                .load(uri)
-                                .into(new CustomTarget<Drawable>() {
-                                    @Override
-                                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                    Glide.with(getApplicationContext())
+                        .load(uri)
+                        .into(new CustomTarget<Drawable>() {
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
 
-                                        getWindow().setBackgroundDrawable(resource);
-                                        progressDialog.dismiss();
+                                getWindow().setBackgroundDrawable(resource);
+                                progressDialog.dismiss();
 
-                                    }
+                            }
 
-                                    @Override
-                                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                                    }
-                                });
+                            }
+                        });
 
 
                     }
@@ -665,6 +668,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
+                assert userModel != null;
                 userName.setText(userModel.getName());
 
                 Glide.with(getApplicationContext())
@@ -701,6 +705,7 @@ public class MessageActivity extends AppCompatActivity {
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
+                    assert messageModel != null;
                     if(messageModel.getSender().equals(uid) && messageModel.getReceiver().equals(friendUID) ||
                         messageModel.getReceiver().equals(uid) && messageModel.getSender().equals(friendUID))
                     {
@@ -765,6 +770,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 DatabaseReference friendRef=FirebaseDatabase.getInstance().getReference("Users").child(receiver);
 
+                assert key != null;
                 chatsRef.child(key).setValue(map)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -860,9 +866,10 @@ public class MessageActivity extends AppCompatActivity {
             imageURI=data.getData();
 
             String pic_key=chatsRef.push().getKey();
+            assert pic_key != null;
             storageReference
                 .child("Chat_Pics")
-                .child(firebaseAuth.getCurrentUser().getUid())
+                .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .child(pic_key)
                 .putFile(imageURI).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override

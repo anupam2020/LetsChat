@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
 
 
 public class ChatFragment extends Fragment {
@@ -79,7 +80,7 @@ public class ChatFragment extends Fragment {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
         reference= FirebaseDatabase.getInstance().getReference("ChatsList").child(firebaseAuth.getCurrentUser().getUid());
         reference.keepSynced(true);
@@ -192,6 +193,7 @@ public class ChatFragment extends Fragment {
 
                     for(ChatsListModel chatsListModel : userList)
                     {
+                        assert userModel != null;
                         if(userModel.getUID().equals(chatsListModel.getUID()))
                         {
                             mUsers.add(userModel);

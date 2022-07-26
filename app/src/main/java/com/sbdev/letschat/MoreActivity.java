@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MoreActivity extends AppCompatActivity {
 
@@ -55,7 +56,7 @@ public class MoreActivity extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         checkRealTimeNetwork();

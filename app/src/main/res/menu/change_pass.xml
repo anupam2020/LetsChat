@@ -5,4 +5,8 @@
         android:id="@+id/changePass"
         android:title="Change Password"/>
 
+    <item
+        android:id="@+id/deleteAccount"
+        android:title="Delete Account"/>
+
 </menu>

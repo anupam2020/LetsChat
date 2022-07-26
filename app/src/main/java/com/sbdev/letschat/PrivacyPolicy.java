@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class PrivacyPolicy extends AppCompatActivity {
 
@@ -51,7 +52,7 @@ public class PrivacyPolicy extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         webView.loadUrl("file:///android_asset/privacy_policy.html");

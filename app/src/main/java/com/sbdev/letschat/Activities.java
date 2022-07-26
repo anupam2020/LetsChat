@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Activities extends AppCompatActivity {
 
@@ -67,7 +68,7 @@ public class Activities extends AppCompatActivity {
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
 
-        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         statusRef=FirebaseDatabase.getInstance().getReference("Status");

@@ -13,6 +13,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.util.Objects;
+
 public class StatusClass extends Application {
 
     @Override
@@ -23,7 +25,7 @@ public class StatusClass extends Application {
 
         FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
 
-        DatabaseReference usersRef= FirebaseDatabase.getInstance().getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+        DatabaseReference usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
         DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");

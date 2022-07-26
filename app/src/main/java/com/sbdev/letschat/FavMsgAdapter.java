@@ -29,6 +29,7 @@ import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -60,7 +61,7 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
                 .placeholder(R.drawable.item_user)
                 .error(R.drawable.item_user)
                 .into(holder.profileImg);
-        if(firebaseAuth.getCurrentUser().getUid().equals(favMsgModel.getSender()))
+        if(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid().equals(favMsgModel.getSender()))
         {
             holder.nameText.setText("You -> "+favMsgModel.getReceiverName());
             holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_user);
