@@ -120,14 +120,14 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
                                     downloadURL(favMsgModel.getImgURI());
                                 }
                             })
-                            .setPositiveButtonIcon(context.getDrawable(R.drawable.download_new))
+                            .setPositiveButtonIcon(context.getDrawable(R.drawable.download_black_new))
                             .setNeutralButton("",new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                 }
                             })
-                            .setNeutralButtonIcon(context.getDrawable(R.drawable.return1_new));
+                            .setNeutralButtonIcon(context.getDrawable(R.drawable.return_black_new));
                     builder.show();
 
                 }

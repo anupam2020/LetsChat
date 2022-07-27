@@ -39,6 +39,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -59,6 +65,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -73,13 +82,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageActivity extends AppCompatActivity {
 
-    ImageView back,more,gallery;
+    ImageView back,more,gallery,send;
 
     //ImageView background;
 
     EditText msgText;
-
-    ImageView send;
 
     CircleImageView profilePic;
 
@@ -178,6 +185,8 @@ public class MessageActivity extends AppCompatActivity {
         loadProfile(friendUID);
 
         //recyclerView.scrollToPosition(arrayList.size() - 1);
+
+
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -772,24 +781,24 @@ public class MessageActivity extends AppCompatActivity {
 
                 assert key != null;
                 chatsRef.child(key).setValue(map)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
 
-                                if(task.isSuccessful())
-                                {
-                                    //recyclerView.scrollToPosition(arrayList.size() - 1);
-                                    usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
-                                    friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
-                                }
+                            if(task.isSuccessful())
+                            {
+                                //recyclerView.scrollToPosition(arrayList.size() - 1);
+                                usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+                                friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+                            }
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
-                            }
-                        });
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                        }
+                    });
 
             }
 
@@ -1066,6 +1075,7 @@ public class MessageActivity extends AppCompatActivity {
                 .child("typing")
                 .setValue(false);
 
+        startActivity(new Intent(MessageActivity.this,ChatActivity.class));
         finish();
 
     }
