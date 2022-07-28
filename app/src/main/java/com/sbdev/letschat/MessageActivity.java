@@ -125,7 +125,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
+        getWindow().setBackgroundDrawableResource(R.color.white);
 
         back=findViewById(R.id.msgBack);
         more=findViewById(R.id.msgMore);
@@ -383,9 +383,9 @@ public class MessageActivity extends AppCompatActivity {
                                 .child("Wallpaper").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
+                                        getWindow().setBackgroundDrawableResource(R.color.white);
                                         progressDialog.dismiss();
                                         DynamicToast.make(MessageActivity.this,"Wallpaper reset successful!",3000).show();
-                                        getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
 
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
@@ -661,7 +661,7 @@ public class MessageActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
 
                         progressDialog.dismiss();
-                        getWindow().setBackgroundDrawableResource(R.drawable.msg_bg);
+                        getWindow().setBackgroundDrawableResource(R.color.white);
                         //background.setImageResource(R.drawable.msg_bg);
 
                     }
@@ -686,9 +686,7 @@ public class MessageActivity extends AppCompatActivity {
                         .error(R.drawable.item_user)
                         .into(profilePic);
 
-                //recyclerView.scrollToPosition(arrayList.size() - 1);
                 readMsg(myUID,friendUID);
-                //recyclerView.scrollToPosition(arrayList.size() - 1);
 
             }
 
@@ -722,12 +720,7 @@ public class MessageActivity extends AppCompatActivity {
                     }
 
                     adapter.notifyDataSetChanged();
-                    MessageActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.scrollToPosition(arrayList.size() - 1);
-                        }
-                    });
+                    recyclerView.scrollToPosition(arrayList.size() - 1);
 
                 }
 

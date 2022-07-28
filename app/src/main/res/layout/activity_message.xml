@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MessageActivity"
-    android:id="@+id/relativeMsg">
+    android:id="@+id/relativeMsg"
+    android:background="@color/white">
 
 <!--    <ImageView-->
 <!--        android:id="@+id/msgBackgroundImg"-->
@@ -91,6 +92,7 @@
         android:layout_above="@id/msgRelativeBottom"
         android:layout_below="@id/msgRelativeTop"
         android:layout_marginBottom="5dp"
+        android:layout_marginTop="10dp"
         android:overScrollMode="never"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
@@ -127,7 +129,7 @@
                 android:layout_height="45dp"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@id/msgGallery"
-                android:background="@drawable/text_bg"
+                android:background="@null"
                 android:hint="Message"
                 android:inputType="text|textCapSentences|textMultiLine"
                 android:maxHeight="100dp"

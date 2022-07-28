@@ -6,7 +6,8 @@
         android:topRightRadius="15dp"
         android:bottomRightRadius="15sp"/>
 
-    <solid
-        android:color="@color/light_grey4"/>
+    <stroke
+        android:color="@color/light_grey3"
+        android:width="1dp"/>
 
 </shape>

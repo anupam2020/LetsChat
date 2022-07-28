@@ -282,7 +282,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                                             AlertDialog.Builder builder=new AlertDialog.Builder(ProfileActivity.this);
                                             builder.setTitle("Update Email");
-                                            builder.setMessage("Please enter your password to continue");
+                                            builder.setMessage("Please enter your password to continue!");
                                             View view=getLayoutInflater().inflate(R.layout.password_layout,null);
                                             builder.setView(view);
 
@@ -516,7 +516,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                                 AlertDialog.Builder builder=new AlertDialog.Builder(ProfileActivity.this);
                                 builder.setTitle("Delete Account");
-                                builder.setMessage("Please enter your password to continue");
+                                builder.setMessage("Please enter your password to continue!");
                                 View view=getLayoutInflater().inflate(R.layout.password_layout,null);
                                 builder.setView(view);
 

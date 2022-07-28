@@ -11,6 +11,17 @@
     <color name="green">#08FF00</color>
     <color name="grey">#BF000000</color>
     <color name="light_grey">#80000000</color>
+    <color name="light_grey2">#40000000</color>
+    <color name="light_grey3">#1A000000</color>
+    <color name="light_grey4">#0D000000</color>
+    <color name="light_grey_left">#8F8F8F</color>
+    <color name="light_white_right">#BFFFFFFF</color>
     <color name="blue">#039BE5</color>
+    <color name="deep_blue">#1E88E5</color>
+    <color name="deep_blue2">#3949AB</color>
+    <color name="violet">#8E24AA</color>
+    <color name="light_violet">#BF8E24AB</color>
     <color name="deep_violet">#4D3380</color>
+    <color name="purple">#D91A60</color>
+    <color name="light_purple">#BFD91A60</color>
 </resources>

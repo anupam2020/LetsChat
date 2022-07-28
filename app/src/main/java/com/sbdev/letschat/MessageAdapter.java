@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +61,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public static final int MSG_LEFT=0;
     public static final int MSG_RIGHT=1;
 
-    boolean isFav;
+    boolean isFav=false;
 
     Animation animation;
 
@@ -120,14 +121,24 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     .error(R.drawable.bw_loading1)
                     .into(holder.msgImg);
             holder.msgImg.setVisibility(View.VISIBLE);
+
+            if(arrayList.get(holder.getAdapterPosition()).sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+            {
+                holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right_img_border));
+
+            }
+            else
+            {
+                holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border));
+            }
+            holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
 
-        holder.favImg.setVisibility(View.GONE);
+        //holder.favImg.setVisibility(View.GONE);
         favorites.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                //holder.favImg.setVisibility(View.INVISIBLE);
                 if(snapshot.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).hasChild(key))
                 {
                     holder.favImg.setImageResource(R.drawable.heart_1);
@@ -146,14 +157,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
-        if(messageModel.isSeen)
-        {
-            holder.tick.setImageResource(R.drawable.double_tick);
-        }
-        else
-        {
-            holder.tick.setImageResource(R.drawable.single_tick);
-        }
+//        if(messageModel.isSeen)
+//        {
+//            holder.tick.setImageResource(R.drawable.double_tick);
+//        }
+//        else
+//        {
+//            holder.tick.setImageResource(R.drawable.single_tick);
+//        }
 
         holder.itemView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -383,18 +394,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         });
 
 
-
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-
-                // Long-click
-
-                return false;
-            }
-        });
-
-
     }
 
 
@@ -408,6 +407,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         TextView msg,time;
         ImageView favImg,msgImg,tick;
+        LinearLayout layout;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -417,6 +417,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             favImg=itemView.findViewById(R.id.favChat);
             msgImg=itemView.findViewById(R.id.imgMsg);
             tick=itemView.findViewById(R.id.imgTick);
+            layout=itemView.findViewById(R.id.chatLinear);
 
         }
     }

@@ -2,30 +2,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="10dp">
 
     <ImageView
+        android:id="@+id/imgTick"
         android:layout_width="15dp"
         android:layout_height="15sp"
-        android:id="@+id/imgTick"
-        android:src="@drawable/single_tick"
+        android:layout_below="@id/chatLinear"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/rightLinear"
         android:layout_marginTop="-15dp"
-        android:layout_marginRight="5dp" />
+        android:layout_marginRight="5dp"
+        android:src="@drawable/single_tick"
+        android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/rightLinear"
+        android:id="@+id/chatLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/chat_bg_right"
-        android:orientation="vertical"
-        android:padding="5dp"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="50dp"
-        android:layout_marginTop="10sp"
-        android:layout_toLeftOf="@id/imgTick"
-        android:layout_marginRight="25dp">
+        android:layout_marginRight="15dp"
+        android:layout_toLeftOf="@id/favChat"
+        android:background="@drawable/chat_bg_right"
+        android:orientation="vertical"
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/showMsg"
@@ -35,21 +36,21 @@
             android:padding="5dp"
             android:text="Hi!"
             android:textColor="@color/white"
-            android:textSize="15sp" />
+            android:textSize="16sp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="10dp"
             android:elevation="5dp"
-            android:padding="5dp">
+            android:padding="5dp"
+            app:cardCornerRadius="10dp">
 
             <ImageView
+                android:id="@+id/imgMsg"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:id="@+id/imgMsg"
-                android:visibility="gone"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
 
         </androidx.cardview.widget.CardView>
 
@@ -60,19 +61,17 @@
             android:layout_gravity="end"
             android:padding="5dp"
             android:text="Jul 07, 2021 - 09:04PM"
-            android:textColor="#9A9A9A"
+            android:textColor="@color/light_white_right"
             android:textSize="10sp" />
 
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/favChat"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_below="@id/rightLinear"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="-10dp"
-        android:layout_marginRight="30dp"
-        android:id="@+id/favChat"
-        android:visibility="gone"/>
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5sp" />
 
 </RelativeLayout>
