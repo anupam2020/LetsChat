@@ -194,9 +194,12 @@ public class UsersFragment extends Fragment {
                     UserModel userModel=dataSnapshot.getValue(UserModel.class);
 
                     assert userModel != null;
-                    if(!userModel.getUID().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+                    if(firebaseAuth.getCurrentUser()!=null)
                     {
-                        arrayList.add(userModel);
+                        if(!userModel.getUID().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+                        {
+                            arrayList.add(userModel);
+                        }
                     }
                 }
 

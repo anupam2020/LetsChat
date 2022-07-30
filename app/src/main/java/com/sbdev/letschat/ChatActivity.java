@@ -110,6 +110,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
+        reference.child(firebaseAuth.getCurrentUser().getUid()).child("isLoggedIn").setValue("true");
+
         weather.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -240,8 +242,22 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                 startActivity(new Intent(ChatActivity.this,MoreActivity.class));
                                 break;
                             case R.id.logout:
-                                logoutUser();
-                                break;
+                                reference.child(firebaseAuth.getCurrentUser().getUid())
+                                    .child("isLoggedIn")
+                                    .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()) {
+                                                logoutUser();
+                                            }
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            DynamicToast.make(ChatActivity.this,e.getMessage(),3000).show();
+                                        }
+                                    });
+                                    break;
                         }
 
                         return false;
@@ -554,7 +570,21 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         }).setNegativeButton("Logout", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                logoutUser();
+                reference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
+                    .child("isLoggedIn")
+                    .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()) {
+                                logoutUser();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            DynamicToast.make(ChatActivity.this,e.getMessage(),3000).show();
+                        }
+                    });
             }
         });
 

@@ -2,7 +2,7 @@ package com.sbdev.letschat;
 
 public class ChatsListModel {
 
-    String UID;
+    private String UID;
 
     public ChatsListModel(String UID) {
         this.UID = UID;

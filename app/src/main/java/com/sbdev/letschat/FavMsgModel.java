@@ -2,7 +2,7 @@ package com.sbdev.letschat;
 
 public class FavMsgModel {
 
-    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
+    private String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
 
     public FavMsgModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI) {
         this.sender = sender;

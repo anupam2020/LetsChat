@@ -4,8 +4,8 @@ import android.net.Uri;
 
 public class MessageModel {
 
-    String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
-    boolean isSeen;
+    private String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
+    private boolean isSeen;
 
     public MessageModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI, boolean isSeen) {
         this.sender = sender;

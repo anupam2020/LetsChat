@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -104,7 +105,7 @@ public class MessageActivity extends AppCompatActivity {
 
     StorageReference storageReference;
 
-    String myUID,receiverStr,senderStr,receiverName,senderName,fUID;
+    String myUID,receiverStr,senderStr,receiverName,senderName,friendToken,friendUID;
 
     private final int reqCodeWall=1,reqCodeMsg=2;
 
@@ -169,8 +170,8 @@ public class MessageActivity extends AppCompatActivity {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        final String friendUID=getIntent().getStringExtra("friendUID");
-        fUID=friendUID;
+        friendUID=getIntent().getStringExtra("friendUID");
+        friendToken=getIntent().getStringExtra("friendToken");
         friendRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
         myUID=firebaseAuth.getCurrentUser().getUid();
 
@@ -435,17 +436,6 @@ public class MessageActivity extends AppCompatActivity {
                     }
                     else
                     {
-                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
-                            @Override
-                            public void onSuccess(String s) {
-                                sendFCMPush(s);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(MessageActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
                         msgText.setText("");
                         addTextToFirebase(myUID,friendUID,text);
                     }
@@ -508,10 +498,10 @@ public class MessageActivity extends AppCompatActivity {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
                 assert userModel != null;
+                senderName=userModel.getName();
                 if(userModel.getProfilePic()!=null)
                 {
                     senderStr=userModel.getProfilePic();
-                    senderName=userModel.getName();
                 }
 
             }
@@ -528,10 +518,10 @@ public class MessageActivity extends AppCompatActivity {
 
                 UserModel userModel=snapshot.getValue(UserModel.class);
                 assert userModel != null;
+                receiverName=userModel.getName();
                 if(userModel.getProfilePic()!=null)
                 {
                     receiverStr=userModel.getProfilePic();
-                    receiverName=userModel.getName();
                 }
 
             }
@@ -800,6 +790,27 @@ public class MessageActivity extends AppCompatActivity {
                                 //recyclerView.scrollToPosition(arrayList.size() - 1);
                                 usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                 friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+
+                                reference.child(friendUID)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                            UserModel userModel=snapshot.getValue(UserModel.class);
+                                            assert userModel != null;
+                                            if(userModel.getIsLoggedIn().equals("true"))
+                                            {
+                                                sendFCMPush(friendToken,text,senderName);
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+
                             }
 
                         }
@@ -841,11 +852,11 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    private void sendFCMPush(String fcm_token) {
+    private void sendFCMPush(String fcm_token, String text, String receiverName) {
 
         String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
-        String msg = "This is test message";
-        String title = "My title";
+        String msg = receiverName+" : "+text;
+        String title = "You've a new message!";
         String token = fcm_token;
         String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
 
@@ -967,7 +978,7 @@ public class MessageActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
 
                                         downloadURL=uri.toString();
-                                        addImageTextToFirebase(myUID,fUID,pic_key);
+                                        addImageTextToFirebase(myUID,friendUID,pic_key);
                                         adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
                                         adapter.notifyDataSetChanged();
 

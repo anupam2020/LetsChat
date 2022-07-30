@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -28,6 +29,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -42,6 +44,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.text.SimpleDateFormat;
@@ -309,6 +312,7 @@ public class RegisterActivity extends AppCompatActivity {
                         map.put("UID",firebaseAuth.getCurrentUser().getUid());
                         map.put("status","Online");
                         map.put("last_text_time","0");
+                        map.put("isLoggedIn","true");
 
 
                         reference.child(firebaseAuth.getCurrentUser().getUid())
@@ -330,10 +334,25 @@ public class RegisterActivity extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<Void> task) {
 
                                                     if (task.isSuccessful()) {
-                                                        progressDialog.dismiss();
-                                                        DynamicToast.make(RegisterActivity.this, "Registration Successful!", 3000).show();
-                                                        startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
-                                                        finish();
+
+                                                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+                                                            @Override
+                                                            public void onSuccess(String s) {
+
+                                                                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+
+                                                                progressDialog.dismiss();
+                                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", 3000).show();
+                                                                startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
+                                                                finish();
+
+                                                            }
+                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), 3000).show();
+                                                            }
+                                                        });
                                                     }
 
                                                 }
@@ -382,6 +401,7 @@ public class RegisterActivity extends AppCompatActivity {
                     map.put("UID",firebaseAuth.getCurrentUser().getUid());
                     map.put("status","Online");
                     map.put("last_text_time","0");
+                    map.put("isLoggedIn","true");
 
                     reference.child(firebaseAuth.getCurrentUser().getUid())
                             .setValue(map)
@@ -391,9 +411,24 @@ public class RegisterActivity extends AppCompatActivity {
 
                                     if(task.isSuccessful())
                                     {
-                                        progressDialog.dismiss();
-                                        DynamicToast.make(RegisterActivity.this,"Registration Successful!",3000).show();
-                                        startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
+                                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+                                            @Override
+                                            public void onSuccess(String s) {
+
+                                                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+
+                                                progressDialog.dismiss();
+                                                DynamicToast.make(RegisterActivity.this,"Registration Successful!",3000).show();
+                                                startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
+                                                finish();
+
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), 3000).show();
+                                            }
+                                        });
                                     }
 
                                 }

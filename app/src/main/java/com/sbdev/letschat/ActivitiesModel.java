@@ -2,7 +2,7 @@ package com.sbdev.letschat;
 
 public class ActivitiesModel {
 
-    String name,profilePic,status,key,UID,dateTime,timestamp;
+    private String name,profilePic,status,key,UID,dateTime,timestamp;
 
     public ActivitiesModel(String name, String profilePic, String status, String key, String UID, String dateTime, String timestamp) {
         this.name = name;

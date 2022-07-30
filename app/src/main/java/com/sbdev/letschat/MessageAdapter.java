@@ -120,7 +120,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     .into(holder.msgImg);
             holder.msgImg.setVisibility(View.VISIBLE);
 
-            if(messageModel.sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
+            if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
                 holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right_img_border));
             }
             else {
@@ -422,7 +422,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         firebaseAuth=FirebaseAuth.getInstance();
 
-        if(arrayList.get(position).sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+        if(arrayList.get(position).getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
         {
             return MSG_RIGHT;
         }

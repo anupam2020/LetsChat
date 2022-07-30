@@ -16,6 +16,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -24,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.util.Arrays;
@@ -107,6 +109,7 @@ public class FacebookActivity extends AppCompatActivity {
                             map.put("UID",mAuth.getCurrentUser().getUid());
                             map.put("status","Online");
                             map.put("last_text_time","0");
+                            map.put("isLoggedIn","true");
 
 
                             reference.child(mAuth.getCurrentUser().getUid())
@@ -116,9 +119,25 @@ public class FacebookActivity extends AppCompatActivity {
 
                                             if(task.isSuccessful())
                                             {
-                                                DynamicToast.make(FacebookActivity.this,"Registration Successful!",3000).show();
-                                                startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
-                                                finish();
+
+                                                FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+                                                    @Override
+                                                    public void onSuccess(String s) {
+
+                                                        reference.child(mAuth.getCurrentUser().getUid()).child("token").setValue(s);
+
+                                                        DynamicToast.make(FacebookActivity.this,"Registration Successful!",3000).show();
+                                                        startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
+                                                        finish();
+
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        DynamicToast.make(FacebookActivity.this, e.getMessage(), 3000).show();
+                                                    }
+                                                });
+
                                             }
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {

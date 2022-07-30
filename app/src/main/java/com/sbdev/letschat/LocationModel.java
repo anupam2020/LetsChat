@@ -2,7 +2,7 @@ package com.sbdev.letschat;
 
 public class LocationModel {
 
-    String location;
+    private String location;
 
     public LocationModel(String location) {
         this.location = location;

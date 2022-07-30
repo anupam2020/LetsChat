@@ -112,8 +112,8 @@ public class WeatherActivity extends AppCompatActivity {
                     LocationModel locationModel=snapshot.getValue(LocationModel.class);
                     assert locationModel != null;
                     city.setText(locationModel.getLocation());
-                    progressDialog.dismiss();
                 }
+                progressDialog.dismiss();
 
             }
 
