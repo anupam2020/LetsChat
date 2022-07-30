@@ -472,6 +472,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                     weather.setImageResource(R.drawable.moon_clear);
                 }
             }
+            else
+            {
+                weather.setImageResource(R.drawable.moon_clear);
+            }
 
         }
         else
@@ -525,6 +529,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             else if(textCondition.contains("drizzle"))
             {
                 weather.setImageResource(R.drawable.morning_drizzle);
+            }
+            else
+            {
+                weather.setImageResource(R.drawable.cloudy);
             }
 
         }

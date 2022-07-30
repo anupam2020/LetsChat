@@ -43,6 +43,9 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -54,12 +57,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -429,6 +435,17 @@ public class MessageActivity extends AppCompatActivity {
                     }
                     else
                     {
+                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+                            @Override
+                            public void onSuccess(String s) {
+                                sendFCMPush(s);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(MessageActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         msgText.setText("");
                         addTextToFirebase(myUID,friendUID,text);
                     }
@@ -822,6 +839,69 @@ public class MessageActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void sendFCMPush(String fcm_token) {
+
+        String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
+        String msg = "This is test message";
+        String title = "My title";
+        String token = fcm_token;
+        String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
+
+        JSONObject obj = null;
+        JSONObject objData = null;
+        JSONObject dataobjData = null;
+
+        try {
+            obj = new JSONObject();
+            objData = new JSONObject();
+
+            objData.put("body", msg);
+            objData.put("title", title);
+            objData.put("tag", token);
+            objData.put("priority", "high");
+
+            dataobjData = new JSONObject();
+            dataobjData.put("text", msg);
+            dataobjData.put("title", title);
+
+            obj.put("to", token);
+            //obj.put("priority", "high");
+
+            obj.put("notification", objData);
+            obj.put("data", dataobjData);
+            Log.e("return here>>", obj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, FCM_MESSAGE_URL, obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.e("True", response + "");
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("False", error + "");
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "key=" + SERVER_KEY);
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        int socketTimeout = 1000 * 60;// 60 seconds
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        jsObjRequest.setRetryPolicy(policy);
+        requestQueue.add(jsObjRequest);
     }
 
     private void selectImgAndSetBg()

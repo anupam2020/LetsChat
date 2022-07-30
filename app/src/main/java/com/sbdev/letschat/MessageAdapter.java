@@ -110,8 +110,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.time.setText(messageModel.getTime());
 
-        holder.msgImg.setVisibility(View.GONE);
-        holder.msg.setVisibility(View.VISIBLE);
         if(messageModel.getText().equals("--Image--"))
         {
             holder.msg.setVisibility(View.GONE);
@@ -122,19 +120,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     .into(holder.msgImg);
             holder.msgImg.setVisibility(View.VISIBLE);
 
-            if(arrayList.get(holder.getAdapterPosition()).sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
-            {
+            if(messageModel.sender.equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
                 holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right_img_border));
-
             }
-            else
-            {
+            else {
                 holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border));
             }
             holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
 
-        //holder.favImg.setVisibility(View.GONE);
+        holder.favImg.setVisibility(View.GONE);
         favorites.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
