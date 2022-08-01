@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:paddingBottom="10dp">
+    android:layout_marginTop="10dp">
 
     <ImageView
         android:layout_width="15dp"
@@ -19,11 +19,11 @@
         android:id="@+id/chatLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
         android:layout_marginRight="50dp"
         android:background="@drawable/chat_bg_left"
         android:orientation="vertical"
-        android:padding="10dp"
-        android:layout_marginLeft="15dp">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/showMsg"

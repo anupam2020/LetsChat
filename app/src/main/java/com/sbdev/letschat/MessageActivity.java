@@ -437,6 +437,7 @@ public class MessageActivity extends AppCompatActivity {
                     else
                     {
                         msgText.setText("");
+                        downloadURL="";
                         addTextToFirebase(myUID,friendUID,text);
                     }
                 }
@@ -800,7 +801,7 @@ public class MessageActivity extends AppCompatActivity {
                                             assert userModel != null;
                                             if(userModel.getIsLoggedIn().equals("true"))
                                             {
-                                                sendFCMPush(friendToken,text,senderName);
+                                                sendFCMPush(friendToken,text,senderName,"");
                                             }
 
                                         }
@@ -809,7 +810,7 @@ public class MessageActivity extends AppCompatActivity {
                                         public void onCancelled(@NonNull DatabaseError error) {
 
                                         }
-                                    });
+                                });
 
                             }
 
@@ -852,11 +853,12 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    private void sendFCMPush(String fcm_token, String text, String receiverName) {
+    private void sendFCMPush(String fcm_token, String text, String receiverName, String uri) {
 
         String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
         String msg = receiverName+" : "+text;
         String title = "You've a new message!";
+        String imageUrl=uri;
         String token = fcm_token;
         String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
 
@@ -870,6 +872,10 @@ public class MessageActivity extends AppCompatActivity {
 
             objData.put("body", msg);
             objData.put("title", title);
+            if(!uri.isEmpty()) {
+                Log.d("URI",imageUrl);
+                objData.put("imageUrl",imageUrl);
+            }
             objData.put("tag", token);
             objData.put("priority", "high");
 
@@ -1052,6 +1058,27 @@ public class MessageActivity extends AppCompatActivity {
                                     //recyclerView.scrollToPosition(arrayList.size() - 1);
                                     usersRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
                                     friendRef.child("last_text_time").setValue(Long.toString(estimatedServerTimeMs));
+
+                                    reference.child(friendUID)
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                UserModel userModel=snapshot.getValue(UserModel.class);
+                                                assert userModel != null;
+                                                if(userModel.getIsLoggedIn().equals("true"))
+                                                {
+                                                    sendFCMPush(friendToken,"Image received...",senderName,downloadURL);
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+
                                 }
 
                             }

@@ -82,7 +82,7 @@ public class FavMsgActivity extends AppCompatActivity {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        bg.setImageResource(R.drawable.msg_bg);
+        bg.setBackgroundResource(R.color.white);
 
         checkRealTimeNetwork();
 
@@ -131,7 +131,7 @@ public class FavMsgActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
 
-                        bg.setImageResource(R.drawable.msg_bg);
+                        bg.setBackgroundResource(R.color.white);
                         progressDialog.dismiss();
 
                     }

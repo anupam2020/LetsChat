@@ -3,18 +3,27 @@ package com.sbdev.letschat;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.res.ResourcesCompat;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -48,11 +57,13 @@ import java.util.Objects;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    ImageView back;
+    ImageView day_night_mode,weather;
 
     TextInputLayout textInputLayout;
 
     TextInputEditText city;
+
+    TextView cityText,country,pressure,wind,humidity,temp,temp_type,presText,humText,windText;
 
     RelativeLayout layout;
 
@@ -64,18 +75,44 @@ public class WeatherActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    String url="";
+    String url="",dbCity="";
+
+    RelativeLayout relativeLayout;
+
+    private SharedPreferences sp;
+
+    private String mode;
+
+    private String SHARED_PREFS="SHARED_PREFS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-        back=findViewById(R.id.weatherBack);
-        textInputLayout=findViewById(R.id.weatherLayout1);
-        city=findViewById(R.id.weatherET1);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+        textInputLayout=findViewById(R.id.allWeatherLayout);
+        city=findViewById(R.id.allWeatherEditText);
         layout=findViewById(R.id.weatherRelative);
-        done=findViewById(R.id.weatherDone);
+        done=findViewById(R.id.allWeatherButton);
+        day_night_mode=findViewById(R.id.allWeatherMode);
+        cityText=findViewById(R.id.allWeatherCityText);
+        country=findViewById(R.id.allWeatherCountryText);
+        pressure=findViewById(R.id.allWeatherPressureValue);
+        wind=findViewById(R.id.allWeatherWindValue);
+        humidity=findViewById(R.id.allWeatherHumidityValue);
+        temp=findViewById(R.id.allWeatherTempText);
+        temp_type=findViewById(R.id.allWeatherSkyTypeText);
+        presText=findViewById(R.id.allWeatherPressureText);
+        humText=findViewById(R.id.allWeatherHumidityText);
+        windText=findViewById(R.id.allWeatherWindText);
+        weather=findViewById(R.id.allWeatherWeatherImg);
+        relativeLayout=findViewById(R.id.allWeatherSwipeRelative);
+
+        relativeLayout.setVisibility(View.GONE);
+
+        textInputLayout.setBoxBackgroundColorResource(R.color.white);
 
         progressDialog=new ProgressDialog(this);
 
@@ -94,13 +131,20 @@ public class WeatherActivity extends AppCompatActivity {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
+        sp=getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
 
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        mode=sp.getString("bgMode","1");
+        if(mode.equals("0"))
+        {
+            day_night_mode.setImageResource(R.drawable.night_mode);
+            nightMode();
+        }
+        else
+        {
+            day_night_mode.setImageResource(R.drawable.day_mode);
+            dayMode();
+        }
+
 
         locationRef.child(firebaseAuth.getCurrentUser().getUid())
                 .addValueEventListener(new ValueEventListener() {
@@ -112,6 +156,8 @@ public class WeatherActivity extends AppCompatActivity {
                     LocationModel locationModel=snapshot.getValue(LocationModel.class);
                     assert locationModel != null;
                     city.setText(locationModel.getLocation());
+                    updateLocation(city.getText().toString().trim());
+                    dbCity=city.getText().toString().trim();
                 }
                 progressDialog.dismiss();
 
@@ -201,6 +247,11 @@ public class WeatherActivity extends AppCompatActivity {
 
                         }
                     });
+
+                    if(!dbCity.isEmpty()){
+                        updateLocation(dbCity);
+                    }
+
                 }
             }
 
@@ -213,6 +264,40 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
+    public void dayMode()
+    {
+
+        cityText.setTextColor(Color.BLACK);
+        country.setTextColor(Color.DKGRAY);
+        temp.setTextColor(Color.BLACK);
+        temp_type.setTextColor(Color.BLACK);
+        pressure.setTextColor(Color.BLACK);
+        humidity.setTextColor(Color.BLACK);
+        wind.setTextColor(Color.BLACK);
+
+        presText.setTextColor(Color.DKGRAY);
+        humText.setTextColor(Color.DKGRAY);
+        windText.setTextColor(Color.DKGRAY);
+
+    }
+
+    public void nightMode()
+    {
+
+        cityText.setTextColor(Color.WHITE);
+        country.setTextColor(Color.LTGRAY);
+        temp.setTextColor(Color.WHITE);
+        temp_type.setTextColor(Color.WHITE);
+        pressure.setTextColor(Color.WHITE);
+        humidity.setTextColor(Color.WHITE);
+        wind.setTextColor(Color.WHITE);
+
+        presText.setTextColor(Color.LTGRAY);
+        humText.setTextColor(Color.LTGRAY);
+        windText.setTextColor(Color.LTGRAY);
+
+    }
+
     public void updateLocation(String city)
     {
 
@@ -222,35 +307,13 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
 
-                if(response!=null)
-                {
+                if(response!=null) {
+
+                    updateWeather(response);
 
                     locationRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                            .child("location").setValue(city).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
+                        .child("location").setValue(city);
 
-                                    if(task.isSuccessful())
-                                    {
-                                        progressDialog.dismiss();
-                                        startActivity(new Intent(WeatherActivity.this,ChatActivity.class));
-                                        finish();
-                                    }
-
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    progressDialog.dismiss();
-                                    DynamicToast.make(WeatherActivity.this,e.getMessage(),3000).show();
-                                }
-                            });
-
-                }
-                else
-                {
-                    progressDialog.dismiss();
-                    DynamicToast.make(WeatherActivity.this,"City not found!",3000).show();
                 }
 
 
@@ -265,6 +328,190 @@ public class WeatherActivity extends AppCompatActivity {
 
         RequestQueue queue= Volley.newRequestQueue(this);
         queue.add(request);
+
+    }
+
+    private void updateWeather(String response)
+    {
+
+        try {
+
+            JSONObject jsonObject=new JSONObject(response);
+            JSONObject location=jsonObject.getJSONObject("location");
+
+            String strName=location.getString("name");
+            cityText.setText(strName);
+            String strCountry=location.getString("country");
+            String strContinent=location.getString("tz_id");
+            strContinent=strContinent.substring(0,strContinent.indexOf('/'));
+            country.setText(strCountry+", "+strContinent);
+
+            JSONObject current=jsonObject.getJSONObject("current");
+            int temp_c= (int) current.getDouble("temp_c");
+            Typeface face = ResourcesCompat.getFont(WeatherActivity.this, R.font.aladin);
+            temp.setTypeface(face);
+            temp.setText(temp_c+"\u2103");
+
+            int is_day=current.getInt("is_day");
+
+            SharedPreferences.Editor editor=sp.edit();
+            if(is_day==0)
+            {
+                day_night_mode.setImageResource(R.drawable.night_mode);
+                nightMode();
+
+                editor.putString("bgMode","0");
+            }
+            else
+            {
+                day_night_mode.setImageResource(R.drawable.day_mode);
+                dayMode();
+
+                editor.putString("bgMode","1");
+            }
+            editor.apply();
+
+            JSONObject condition=current.getJSONObject("condition");
+            String text=condition.getString("text");
+            temp_type.setText(text);
+            text=text.toLowerCase();
+
+            if(is_day==0)
+            {
+
+                text=text.toLowerCase();
+                if(text.contains("fog") || text.contains("mist"))
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else if(text.contains("clear"))
+                {
+                    if(temp_c<=20)
+                    {
+                        weather.setImageResource(R.drawable.mist);
+                    }
+                    else
+                    {
+                        weather.setImageResource(R.drawable.moon_clear);
+                    }
+                }
+                else if(text.contains("rain"))
+                {
+                    if(text.contains("light") || text.contains("patchy"))
+                    {
+                        weather.setImageResource(R.drawable.light_rain_night);
+                    }
+                    else if(text.contains("moderate"))
+                    {
+                        weather.setImageResource(R.drawable.moderate_rain_night);
+                    }
+                    else
+                    {
+                        if(text.contains("heavy"))
+                        {
+                            weather.setImageResource(R.drawable.heavy_rain_night);
+                        }
+                    }
+                }
+                else if(text.contains("drizzle"))
+                {
+                    weather.setImageResource(R.drawable.drizzle_night);
+                }
+                else if(text.contains("cloudy"))
+                {
+                    if(temp_c<=20)
+                    {
+                        weather.setImageResource(R.drawable.mist);
+                    }
+                    else
+                    {
+                        weather.setImageResource(R.drawable.moon_clear);
+                    }
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.moon_clear);
+                }
+
+            }
+            else
+            {
+
+                text=text.toLowerCase();
+                if(text.contains("cloudy"))
+                {
+                    if(temp_c<=25)
+                    {
+                        weather.setImageResource(R.drawable.mist);
+                    }
+                    else
+                    {
+                        weather.setImageResource(R.drawable.cloudy);
+                    }
+                }
+                if(text.contains("sunny"))
+                {
+                    if(temp_c<=20)
+                    {
+                        weather.setImageResource(R.drawable.mist);
+                    }
+                    else
+                    {
+                        weather.setImageResource(R.drawable.clear_sky);
+                    }
+                }
+                else if(text.contains("mist") || text.contains("fog"))
+                {
+                    weather.setImageResource(R.drawable.mist);
+                }
+                else if(text.contains("rain"))
+                {
+                    if(text.contains("light") || text.contains("patchy"))
+                    {
+                        weather.setImageResource(R.drawable.light_rain);
+                    }
+                    else if(text.contains("moderate"))
+                    {
+                        weather.setImageResource(R.drawable.moderate_rain);
+                    }
+                    else
+                    {
+                        if(text.contains("heavy"))
+                        {
+                            weather.setImageResource(R.drawable.heavy_rain);
+                        }
+                    }
+                }
+                else if(text.contains("drizzle"))
+                {
+                    weather.setImageResource(R.drawable.morning_drizzle);
+                }
+                else
+                {
+                    weather.setImageResource(R.drawable.cloudy);
+                }
+
+            }
+
+            String strWind=current.getString("wind_mph");
+            wind.setText(strWind+" mph");
+
+            int strHumidity=current.getInt("humidity");
+            humidity.setText(strHumidity+"%");
+
+            int strPressure=current.getInt("pressure_mb");
+            String pressure_two_decimal=String.format("%.2f",strPressure*0.750062);
+            pressure.setText(pressure_two_decimal+" mmhg");
+
+            relativeLayout.setVisibility(View.VISIBLE);
+
+            progressDialog.dismiss();
+
+        } catch (JSONException e) {
+            progressDialog.dismiss();
+            Log.e("CATCH",e.getMessage());
+            DynamicToast.makeWarning(WeatherActivity.this,e.getMessage(),2000).show();
+        }
 
     }
 

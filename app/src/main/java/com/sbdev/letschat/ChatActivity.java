@@ -71,7 +71,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity implements LifecycleObserver {
 
-    private static final String TAG = "Connection";
     ImageView more,weather;
 
     FirebaseAuth firebaseAuth;

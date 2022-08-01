@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="5dp"
+                android:padding="10dp"
                 android:layout_marginTop="5dp"
                 android:id="@+id/favLinearLayout"
                 android:background="@drawable/chat_bg_left_fav_msg_user">
@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/favTime"
                     android:text="Jul 07, 2021 - 09:04PM"
-                    android:textColor="#9A9A9A"
+                    android:textColor="@color/light_white_right"
                     android:textSize="10sp"
                     android:padding="5dp"
                     android:layout_gravity="start"/>

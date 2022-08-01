@@ -7,70 +7,236 @@
     tools:context=".WeatherActivity"
     android:id="@+id/weatherRelative">
 
-    <RelativeLayout
-        android:id="@+id/weatherRelativeTop"
+    <ImageView
+        android:id="@+id/allWeatherMode"
         android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:background="@drawable/black_box_round">
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/day_mode" />
 
-        <ImageView
-            android:id="@+id/weatherBack"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:src="@drawable/ic_baseline_arrow_back_24"
-            app:tint="@color/white" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@id/weatherBack"
-            android:text="Location"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-    </RelativeLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/weatherLayout1"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/weatherRelativeTop"
-        app:hintEnabled="false"
-        app:endIconMode="clear_text"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp">
+        android:layout_centerInParent="true"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="25dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/weatherET1"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_outline_location_on_24"
-            android:drawablePadding="10dp"
-            android:hint="Your city"
-            android:drawableTint="@color/black"
-            android:singleLine="true"
-            android:inputType="textCapSentences"/>
+            android:layout_height="match_parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:id="@+id/allWeatherLayout"
+                app:hintEnabled="false"
+                app:startIconDrawable="@drawable/ic_baseline_search_24"
+                app:endIconMode="clear_text"
+                app:startIconTint="@color/black">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/weatherDone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/weatherLayout1"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="20dp"
-        android:background="@drawable/black_box"
-        android:text="Done"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="16sp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search"
+                    android:id="@+id/allWeatherEditText"
+                    android:singleLine="true"
+                    android:inputType="textCapSentences" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/allWeatherButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/allWeatherSwipeRelative"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/black_box"
+                android:text="Done"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16dp" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/allWeatherSwipeRelative"
+                android:layout_below="@+id/allWeatherLayout"
+                android:layout_marginTop="30dp"
+                >
+
+
+                <TextView
+                    android:id="@+id/allWeatherCityText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:fontFamily="@font/aladin"
+                    android:text="- -"
+                    android:textColor="@color/black"
+                    android:textSize="40dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="- -"
+                    android:textSize="16dp"
+                    android:textColor="@color/grey"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/allWeatherCityText"
+                    android:id="@+id/allWeatherCountryText"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_below="@id/allWeatherCountryText"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="15dp"
+                    android:id="@+id/allWeatherWeatherLinear">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="- -"
+                            android:textColor="@color/black"
+                            android:id="@+id/allWeatherPressureValue"
+                            android:textSize="20dp"
+                            android:layout_gravity="center"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/aladin"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pressure"
+                            android:textColor="@color/grey"
+                            android:textSize="12dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/allWeatherPressureText"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="35dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="- -"
+                            android:textColor="@color/black"
+                            android:id="@+id/allWeatherHumidityValue"
+                            android:textSize="20dp"
+                            android:layout_gravity="center"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/aladin"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Humidity"
+                            android:textColor="@color/grey"
+                            android:textSize="12dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/allWeatherHumidityText"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="35dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="- -"
+                            android:textColor="@color/black"
+                            android:id="@+id/allWeatherWindValue"
+                            android:textSize="20dp"
+                            android:layout_gravity="center"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/aladin"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Wind"
+                            android:textColor="@color/grey"
+                            android:textSize="12dp"
+                            android:layout_gravity="center"
+                            android:id="@+id/allWeatherWindText"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/allWeatherWeatherLinear2"
+                    android:layout_below="@id/allWeatherWeatherLinear"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- -"
+                        android:textColor="@color/black"
+                        android:layout_centerHorizontal="true"
+                        android:textSize="50dp"
+                        android:id="@+id/allWeatherTempText"
+                        android:layout_gravity="center"
+                        android:textAlignment="center"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- -"
+                        android:textSize="20dp"
+                        android:textColor="@color/black"
+                        android:layout_centerHorizontal="true"
+                        android:id="@+id/allWeatherSkyTypeText"
+                        android:layout_gravity="center"
+                        android:textAlignment="center"/>
+
+                    <ImageView
+                        android:id="@+id/allWeatherWeatherImg"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="15dp"
+                        android:src="@drawable/ic_baseline_cloud_24"/>
+
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </RelativeLayout>

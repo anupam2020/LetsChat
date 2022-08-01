@@ -61,17 +61,22 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
                 .placeholder(R.drawable.item_user)
                 .error(R.drawable.item_user)
                 .into(holder.profileImg);
-        if(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid().equals(favMsgModel.getSender()))
+        if(firebaseAuth.getCurrentUser()!=null)
         {
-            holder.nameText.setText("You -> "+favMsgModel.getReceiverName());
-            holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_user);
-            holder.msgText.setTextColor(Color.WHITE);
-        }
-        else
-        {
-            holder.nameText.setText(favMsgModel.getSenderName()+" -> You");
-            holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_friend);
-            holder.msgText.setTextColor(Color.BLACK);
+            if(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid().equals(favMsgModel.getSender()))
+            {
+                holder.nameText.setText("You -> "+favMsgModel.getReceiverName());
+                holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_user);
+                holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_white_right));
+                holder.msgText.setTextColor(Color.WHITE);
+            }
+            else
+            {
+                holder.nameText.setText(favMsgModel.getSenderName()+" -> You");
+                holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_friend);
+                holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+                holder.msgText.setTextColor(Color.BLACK);
+            }
         }
         Glide.with(context)
                 .load(favMsgModel.getSenderPic())

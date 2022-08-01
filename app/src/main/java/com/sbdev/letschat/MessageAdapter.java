@@ -460,7 +460,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 downloadManager.enqueue(request);
 
-                DynamicToast.make(context,"Downloading file!",3000).show();
+                DynamicToast.make(context,"Downloading image!",3000).show();
 
             }
 
