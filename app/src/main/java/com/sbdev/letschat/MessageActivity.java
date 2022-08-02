@@ -1,20 +1,8 @@
 package com.sbdev.letschat;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -24,21 +12,21 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -58,15 +46,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -858,8 +842,6 @@ public class MessageActivity extends AppCompatActivity {
         String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
         String msg = receiverName+" : "+text;
         String title = "You've a new message!";
-        String imageUrl=uri;
-        String token = fcm_token;
         String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
 
         JSONObject obj = null;
@@ -873,17 +855,17 @@ public class MessageActivity extends AppCompatActivity {
             objData.put("body", msg);
             objData.put("title", title);
             if(!uri.isEmpty()) {
-                Log.d("URI",imageUrl);
-                objData.put("imageUrl",imageUrl);
+                Log.d("URI",uri);
+                objData.put("icon","icon");
             }
-            objData.put("tag", token);
+            objData.put("tag", fcm_token);
             objData.put("priority", "high");
 
             dataobjData = new JSONObject();
             dataobjData.put("text", msg);
             dataobjData.put("title", title);
 
-            obj.put("to", token);
+            obj.put("to", fcm_token);
             //obj.put("priority", "high");
 
             obj.put("notification", objData);

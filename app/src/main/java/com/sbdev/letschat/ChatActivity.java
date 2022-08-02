@@ -53,6 +53,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
@@ -160,6 +161,15 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             }
         });
 
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+
+                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+
+            }
+        });
+
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -233,9 +243,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                 break;
                             case R.id.activities:
                                 startActivity(new Intent(ChatActivity.this,Activities.class));
-                                break;
-                            case R.id.notifications:
-                                startActivity(new Intent(ChatActivity.this,Notifications.class));
                                 break;
                             case R.id.more:
                                 startActivity(new Intent(ChatActivity.this,MoreActivity.class));
