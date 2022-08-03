@@ -55,6 +55,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
@@ -997,7 +998,22 @@ public class MessageActivity extends AppCompatActivity {
                 .child("Chat_Pics")
                 .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .child(pic_key)
-                .putFile(imageURI).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                .putFile(imageURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                            //progressDialog.setMessage((int) progress + "");
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.progress_image_upload_status);
+                            progressDialog.setCancelable(false);
+                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                            TextView tv=progressDialog.findViewById(R.id.progressText);
+                            tv.setText(String.format("%.2f",progress)+"%");
+
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
@@ -1010,6 +1026,7 @@ public class MessageActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Uri uri) {
 
+                                        progressDialog.dismiss();
                                         downloadURL=uri.toString();
                                         addImageTextToFirebase(myUID,friendUID,pic_key);
                                         adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
@@ -1097,7 +1114,7 @@ public class MessageActivity extends AppCompatActivity {
                                                 if(userModel.getIsLoggedIn().equals("true"))
                                                 {
 
-                                                    friendRef.addValueEventListener(new ValueEventListener() {
+                                                    friendDBRef.child(friendUID).addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -1105,7 +1122,7 @@ public class MessageActivity extends AppCompatActivity {
                                                             {
                                                                 FriendClass friendClass=snapshot.getValue(FriendClass.class);
                                                                 assert friendClass != null;
-                                                                if(!friendClass.getFriendUID().equals(friendUID))
+                                                                if(!friendClass.getFriendUID().equals(firebaseAuth.getCurrentUser().getUid()))
                                                                 {
                                                                     sendFCMPush(friendToken,"Image received...",senderName,downloadURL);
                                                                 }

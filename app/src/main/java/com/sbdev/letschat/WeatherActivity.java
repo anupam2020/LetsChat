@@ -322,7 +322,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                DynamicToast.make(WeatherActivity.this,"City not found!",3000).show();
+                DynamicToast.make(WeatherActivity.this,error.getMessage(),3000).show();
             }
         });
 
