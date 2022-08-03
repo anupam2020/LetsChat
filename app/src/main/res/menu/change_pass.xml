@@ -9,4 +9,8 @@
         android:id="@+id/deleteAccount"
         android:title="Delete Account"/>
 
+    <item
+        android:id="@+id/verifyEmail"
+        android:title="Send Verification Link"/>
+
 </menu>

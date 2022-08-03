@@ -4,17 +4,27 @@ package com.sbdev.letschat;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.text.Html;
+import android.util.Log;
+import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class PushNotificationService extends FirebaseMessagingService {
 
@@ -31,7 +41,30 @@ public class PushNotificationService extends FirebaseMessagingService {
 
         String title= Objects.requireNonNull(remoteMessage.getNotification()).getTitle();
         String body=remoteMessage.getNotification().getBody();
-        String icon=remoteMessage.getNotification().getIcon();
+        String uid=remoteMessage.getData().get("myUID");
+        String token=remoteMessage.getData().get("myToken");
+        String image=remoteMessage.getData().get("image");
+
+        Bitmap bitmap=null;
+        try {
+            bitmap= Glide.with(getApplicationContext())
+                    .asBitmap()
+                    .load(image)
+                    .submit()
+                    .get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Intent myIntent = new Intent(this, MessageActivity.class);
+        myIntent.putExtra("myUID",uid);
+        myIntent.putExtra("myToken",token);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                myIntent,0);
 
         final String CHANNEL_ID="HEADS_UP_NOTIFICATION";
 
@@ -40,12 +73,13 @@ public class PushNotificationService extends FirebaseMessagingService {
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
 
         Notification.Builder notification;
-        if(icon==null || icon.length()==0)
+        if(image==null || image.length()==0)
         {
             notification=new Notification.Builder(this,CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(R.drawable.chat_box1)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
         }
         else
@@ -53,9 +87,10 @@ public class PushNotificationService extends FirebaseMessagingService {
             notification=new Notification.Builder(this,CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
-                    .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(),
-                            R.drawable.image_sent))
+                .setLargeIcon(bitmap)
+                .setStyle(new Notification.BigPictureStyle().bigPicture(bitmap))
                 .setSmallIcon(R.drawable.chat_box1)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
         }
 

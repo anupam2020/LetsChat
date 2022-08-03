@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -40,8 +41,11 @@ public class SplashScreen extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(SplashScreen.this,MainActivity.class));
-                finish();
+                Intent intent = new Intent(SplashScreen.this,MainActivity.class);
+                intent.putExtra("myUID",getIntent().getStringExtra("myUID"));
+                intent.putExtra("myToken",getIntent().getStringExtra("myToken"));
+                startActivity(intent);
+                //finish();
             }
         },2500);
 

@@ -3,6 +3,7 @@ package com.sbdev.letschat;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
@@ -51,6 +53,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -85,11 +88,11 @@ public class MessageActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef,seenRef,friendRef;
+    DatabaseReference reference,chatsRef,dRef,usersRef,statusRef,typingRef,seenRef,friendDBRef;
 
     StorageReference storageReference;
 
-    String myUID,receiverStr,senderStr,receiverName,senderName,friendToken,friendUID;
+    String myUID,receiverStr,senderStr,receiverName,senderName,friendToken,friendUID,myToken;
 
     private final int reqCodeWall=1,reqCodeMsg=2;
 
@@ -149,15 +152,37 @@ public class MessageActivity extends AppCompatActivity {
         typingRef.keepSynced(true);
         seenRef=FirebaseDatabase.getInstance().getReference("Seen");
         seenRef.keepSynced(true);
+        friendDBRef=FirebaseDatabase.getInstance().getReference("Friend");
+        friendDBRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
-        friendUID=getIntent().getStringExtra("friendUID");
-        friendToken=getIntent().getStringExtra("friendToken");
-        friendRef=FirebaseDatabase.getInstance().getReference("Users").child(friendUID);
+        if(getIntent().getStringExtra("friendUID")!=null) {
+            friendUID=getIntent().getStringExtra("friendUID");
+        }
+        else {
+            friendUID=getIntent().getStringExtra("myUID");
+        }
+
+        if(getIntent().getStringExtra("friendToken")!=null) {
+            friendToken=getIntent().getStringExtra("friendToken");
+        }
+        else {
+            friendToken=getIntent().getStringExtra("myToken");
+        }
+        Log.d("friendUID",friendUID+"");
+        Log.d("friendToken",friendToken+"");
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
         myUID=firebaseAuth.getCurrentUser().getUid();
+
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                myToken=s;
+            }
+        });
 
         statusRef= FirebaseDatabase.getInstance().getReference("Users");
         statusRef.keepSynced(true);
@@ -176,7 +201,6 @@ public class MessageActivity extends AppCompatActivity {
         loadProfile(friendUID);
 
         //recyclerView.scrollToPosition(arrayList.size() - 1);
-
 
 
         back.setOnClickListener(new View.OnClickListener() {
@@ -535,7 +559,7 @@ public class MessageActivity extends AppCompatActivity {
 //            });
 
 
-        seenMsg(friendUID);
+        //seenMsg(friendUID);
 
     }
 
@@ -785,7 +809,31 @@ public class MessageActivity extends AppCompatActivity {
                                             assert userModel != null;
                                             if(userModel.getIsLoggedIn().equals("true"))
                                             {
-                                                sendFCMPush(friendToken,text,senderName,"");
+                                                friendDBRef.child(friendUID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                        if(snapshot.exists())
+                                                        {
+                                                            FriendClass friendClass=snapshot.getValue(FriendClass.class);
+                                                            assert friendClass != null;
+                                                            if(!friendClass.getFriendUID().equals(firebaseAuth.getCurrentUser().getUid()))
+                                                            {
+                                                                sendFCMPush(friendToken,text,senderName,"");
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            sendFCMPush(friendToken,text,senderName,"");
+                                                        }
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                    }
+                                                });
                                             }
 
                                         }
@@ -837,7 +885,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    private void sendFCMPush(String fcm_token, String text, String receiverName, String uri) {
+    private void sendFCMPush(String fcm_token, String text, String receiverName, String url) {
 
         String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
         String msg = receiverName+" : "+text;
@@ -854,16 +902,13 @@ public class MessageActivity extends AppCompatActivity {
 
             objData.put("body", msg);
             objData.put("title", title);
-            if(!uri.isEmpty()) {
-                Log.d("URI",uri);
-                objData.put("icon","icon");
-            }
-            objData.put("tag", fcm_token);
+
             objData.put("priority", "high");
 
             dataobjData = new JSONObject();
-            dataobjData.put("text", msg);
-            dataobjData.put("title", title);
+            dataobjData.put("myUID", myUID);
+            dataobjData.put("myToken", myToken);
+            dataobjData.put("image", url);
 
             obj.put("to", fcm_token);
             //obj.put("priority", "high");
@@ -968,6 +1013,7 @@ public class MessageActivity extends AppCompatActivity {
                                         downloadURL=uri.toString();
                                         addImageTextToFirebase(myUID,friendUID,pic_key);
                                         adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
+                                        recyclerView.setAdapter(adapter);
                                         adapter.notifyDataSetChanged();
 
                                     }
@@ -1050,7 +1096,33 @@ public class MessageActivity extends AppCompatActivity {
                                                 assert userModel != null;
                                                 if(userModel.getIsLoggedIn().equals("true"))
                                                 {
-                                                    sendFCMPush(friendToken,"Image received...",senderName,downloadURL);
+
+                                                    friendRef.addValueEventListener(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                            if(snapshot.exists())
+                                                            {
+                                                                FriendClass friendClass=snapshot.getValue(FriendClass.class);
+                                                                assert friendClass != null;
+                                                                if(!friendClass.getFriendUID().equals(friendUID))
+                                                                {
+                                                                    sendFCMPush(friendToken,"Image received...",senderName,downloadURL);
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                sendFCMPush(friendToken,"Image received...",senderName,downloadURL);
+                                                            }
+
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+
                                                 }
 
                                             }
@@ -1164,6 +1236,8 @@ public class MessageActivity extends AppCompatActivity {
 
         //friendUID="";
 
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
+
         typingRef.child(firebaseAuth.getCurrentUser().getUid())
                 .child("typing")
                 .setValue(false);
@@ -1177,7 +1251,8 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         //friendUID="";
-        friendRef.removeEventListener(seenListener);
+
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
         checkStatus("Offline");
     }
 
@@ -1185,18 +1260,21 @@ public class MessageActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         checkStatus("Online");
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         checkStatus("Online");
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         checkStatus("Online");
+        friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
     }
 
 }

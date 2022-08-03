@@ -93,6 +93,15 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        if(getIntent().getExtras() !=null){
+            if(getIntent().getStringExtra("myUID")!=null || getIntent().getStringExtra("myToken")!=null){
+                Intent intent=new Intent(ChatActivity.this,MessageActivity.class);
+                intent.putExtra("myUID",getIntent().getStringExtra("myUID"));
+                intent.putExtra("myToken",getIntent().getStringExtra("myToken"));
+                startActivity(intent);
+            }
+        }
+
         more=findViewById(R.id.chatMore);
         weather=findViewById(R.id.chatWeather);
         tabLayout=findViewById(R.id.chatTabLayout);

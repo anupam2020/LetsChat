@@ -94,6 +94,8 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
                     .into(holder.favImg);
             holder.favImg.setVisibility(View.VISIBLE);
             holder.msgText.setVisibility(View.GONE);
+            holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border_fav_msg));
+            holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
         else
         {

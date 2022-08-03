@@ -68,7 +68,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     ArrayList<MessageModel> arrayList;
     Context context;
     Uri imgUri;
-    View view;
 
     public MessageAdapter(ArrayList<MessageModel> arrayList, Context context) {
         this.arrayList = arrayList;
@@ -110,23 +109,37 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.time.setText(messageModel.getTime());
 
+        holder.msgImg.setVisibility(View.GONE);
+        holder.msg.setVisibility(View.VISIBLE);
+        if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
+            holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right));
+            holder.time.setTextColor(context.getResources().getColor(R.color.light_white_right));
+        }
+        else {
+            holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left));
+            holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+        }
+
         if(messageModel.getText().equals("--Image--"))
         {
-            holder.msg.setVisibility(View.GONE);
-            Glide.with(context)
-                    .load(messageModel.getImgURI())
-                    .placeholder(R.drawable.bw_loading1)
-                    .error(R.drawable.bw_loading1)
-                    .into(holder.msgImg);
-            holder.msgImg.setVisibility(View.VISIBLE);
+            if(messageModel.getImgURI()!=null)
+            {
+                holder.msg.setVisibility(View.GONE);
+                Glide.with(context)
+                        .load(messageModel.getImgURI())
+                        .placeholder(R.drawable.bw_loading1)
+                        .error(R.drawable.bw_loading1)
+                        .into(holder.msgImg);
+                holder.msgImg.setVisibility(View.VISIBLE);
 
-            if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
-                holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right_img_border));
+                if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
+                    holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right_img_border));
+                }
+                else {
+                    holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border));
+                }
+                holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
             }
-            else {
-                holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border));
-            }
-            holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
 
         holder.favImg.setVisibility(View.GONE);

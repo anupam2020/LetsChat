@@ -43,7 +43,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(firebaseAuth.getCurrentUser()!=null)
         {
-            startActivity(new Intent(MainActivity.this,ChatActivity.class));
+            Intent intent=new Intent(MainActivity.this,ChatActivity.class);
+            intent.putExtra("myUID",getIntent().getStringExtra("myUID"));
+            intent.putExtra("myToken",getIntent().getStringExtra("myToken"));
+            startActivity(intent);
             finishAffinity();
         }
 

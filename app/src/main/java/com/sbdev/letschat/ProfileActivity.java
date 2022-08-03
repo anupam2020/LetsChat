@@ -57,7 +57,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    ImageView back,editImg,more;
+    ImageView back,editImg,more,verificationImg;
 
     CircleImageView profilePic;
 
@@ -100,6 +100,7 @@ public class ProfileActivity extends AppCompatActivity {
         layout=findViewById(R.id.profileRelativeNew);
         editImg=findViewById(R.id.profileEditImg);
         more=findViewById(R.id.profileMore);
+        verificationImg=findViewById(R.id.profileVerificationImg);
 
         progressDialog=new ProgressDialog(this);
 
@@ -135,15 +136,14 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        /*profilePic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                View view=getLayoutInflater().inflate(R.layout.profile_pic_zoom,null);
-                layout.addView(view);
-
+        if(firebaseAuth.getCurrentUser()!=null) {
+            if(firebaseAuth.getCurrentUser().isEmailVerified()) {
+                verificationImg.setImageResource(R.drawable.verified);
             }
-        });*/
+            else {
+                verificationImg.setImageResource(R.drawable.info_not_verified);
+            }
+        }
 
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -604,6 +604,45 @@ public class ProfileActivity extends AppCompatActivity {
 
                                     }
                                 });
+                                break;
+                            case R.id.verifyEmail:
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.progress_dialog_dots);
+                                progressDialog.setCancelable(true);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                                if(firebaseAuth.getCurrentUser()!=null)
+                                {
+
+                                    if(!firebaseAuth.getCurrentUser().isEmailVerified())
+                                    {
+
+                                        firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+
+                                                if(task.isSuccessful())
+                                                {
+                                                    DynamicToast.make(ProfileActivity.this,"Email verification link is sent to your mail!",3000).show();
+                                                    progressDialog.dismiss();
+                                                }
+
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                progressDialog.dismiss();
+                                            }
+                                        });
+
+                                    }
+                                    else
+                                    {
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(ProfileActivity.this,"Email is already verified!",3000).show();
+                                    }
+
+                                }
                                 break;
 
                         }
