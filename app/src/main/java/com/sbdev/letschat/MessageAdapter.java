@@ -50,6 +50,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
@@ -113,11 +115,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.msg.setVisibility(View.VISIBLE);
         if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
             holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_right));
-            holder.time.setTextColor(context.getResources().getColor(R.color.light_white_right));
+            //holder.time.setTextColor(context.getResources().getColor(R.color.light_white_right));
         }
         else {
             holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left));
-            holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+            //holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
 
         if(messageModel.getText().equals("--Image--"))
@@ -138,7 +140,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 else {
                     holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border));
                 }
-                holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+               //holder.time.setTextColor(context.getResources().getColor(R.color.light_grey_left));
             }
         }
 
@@ -165,14 +167,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
         });
 
-//        if(messageModel.isSeen)
-//        {
-//            holder.tick.setImageResource(R.drawable.double_tick);
-//        }
-//        else
-//        {
-//            holder.tick.setImageResource(R.drawable.single_tick);
-//        }
+        for(int i=0;i<arrayList.size();i++)
+        {
+
+            if(holder.getAdapterPosition()==arrayList.size()-1){
+
+                if(messageModel.getIsSeen()==1) {
+                    if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
+                        holder.tick.setImageResource(R.drawable.me);
+
+                        Glide.with(context)
+                             .load(messageModel.getReceiverPic())
+                             .into(holder.tick);
+
+                        holder.tick.setVisibility(View.VISIBLE);
+                    }
+                }
+                else {
+                    if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
+                        holder.tick.setImageResource(R.drawable.single_tick);
+                        holder.tick.setVisibility(View.VISIBLE);
+                    }
+                }
+
+            }
+            else {
+                if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
+                    holder.tick.setImageResource(R.drawable.double_tick);
+                    holder.tick.setVisibility(View.VISIBLE);
+                }
+            }
+
+        }
 
         holder.itemView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -414,7 +440,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         TextView msg,time;
-        ImageView favImg,msgImg,tick;
+        ImageView favImg,msgImg;
+        CircleImageView tick;
         LinearLayout layout;
 
         public MessageViewHolder(@NonNull View itemView) {

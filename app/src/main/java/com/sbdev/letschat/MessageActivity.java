@@ -560,7 +560,7 @@ public class MessageActivity extends AppCompatActivity {
 //            });
 
 
-        //seenMsg(friendUID);
+        seenMsg();
 
     }
 
@@ -574,43 +574,62 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void seenMsg(final String friendUID)
+    public void seenMsg()
     {
 
+        DatabaseReference FriendDB=FirebaseDatabase.getInstance().getReference("Friend");
 
-            seenListener=dRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                    {
+        dRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                        assert messageModel != null;
-                        if(messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                                && messageModel.getSender().equals(friendUID))
-                        {
+                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+                {
+                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-                            HashMap map=new HashMap();
-                            map.put("isSeen",true);
-                            dataSnapshot.getRef().updateChildren(map);
+                    FriendDB.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot1) {
+
+                            for(DataSnapshot dataSnapshot1 : snapshot1.getChildren())
+                            {
+
+                                String value=dataSnapshot1.getValue().toString();
+                                value=value.substring(value.indexOf('=')+1,value.length()-1);
+
+                                if(dataSnapshot1.getKey().equals(messageModel.getReceiver()))
+                                {
+
+                                    if(messageModel.getSender().equals(value))
+                                    {
+
+                                        dataSnapshot.getRef().child("isSeen").setValue(1);
+
+                                    }
+
+                                }
+
+                            }
+
+
                         }
 
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    //adapter.notifyDataSetChanged();
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                    });
 
                 }
-            });
 
+            }
 
-        //dRef=FirebaseDatabase.getInstance().getReference("Chats");
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
 
     }
 
@@ -782,7 +801,7 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("time",strDateTime);
                 map.put("senderPic",senderStr);
                 map.put("receiverPic",receiverStr);
-                map.put("isSeen",false);
+                map.put("isSeen",0);
 
                 String key=chatsRef.push().getKey();
                 map.put("key",key);
@@ -963,94 +982,125 @@ public class MessageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==reqCodeWall && resultCode==RESULT_OK && data.getData()!=null)
-        {
+        if(requestCode == reqCodeWall && resultCode == RESULT_OK) {
+            assert data != null;
+            if (data.getData()!=null) {
 
-            imgURI=data.getData();
+                imgURI = data.getData();
 
-            //background.setImageURI(imgURI);
+                //background.setImageURI(imgURI);
 
-            Drawable drawable;
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(imgURI);
-                drawable = Drawable.createFromStream(inputStream, imgURI.toString());
-            } catch (FileNotFoundException e) {
-                drawable = getResources().getDrawable(R.drawable.msg_bg);
+                Drawable drawable;
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(imgURI);
+                    drawable = Drawable.createFromStream(inputStream, imgURI.toString());
+                } catch (FileNotFoundException e) {
+                    drawable = getResources().getDrawable(R.drawable.msg_bg);
+                }
+
+                getWindow().setBackgroundDrawable(drawable);
+
+                storageReference.child(myUID)
+                        .child("Wallpaper")
+                        .putFile(imgURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                                double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                                //progressDialog.setMessage((int) progress + "");
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.progress_image_upload_status);
+                                progressDialog.setCancelable(false);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                                TextView tv = progressDialog.findViewById(R.id.progressText);
+                                tv.setText(String.format("%.2f", progress) + "%");
+
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", 3000).show();
+                                progressDialog.dismiss();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                progressDialog.dismiss();
+                            }
+                        });
+
             }
-
-            getWindow().setBackgroundDrawable(drawable);
-
-            storageReference.child(myUID)
-                    .child("Wallpaper")
-                    .putFile(imgURI);
-
         }
-        if(requestCode==reqCodeMsg && resultCode==RESULT_OK && data.getData()!=null)
-        {
+        if(requestCode == reqCodeMsg && resultCode == RESULT_OK) {
+            assert data != null;
+            if (data.getData()!=null) {
 
-            Snackbar.make(layout,"Please wait! We are uploading your image...",Snackbar.LENGTH_LONG).show();
+                Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
 
-            imageURI=data.getData();
+                imageURI = data.getData();
 
-            String pic_key=chatsRef.push().getKey();
-            assert pic_key != null;
-            storageReference
-                .child("Chat_Pics")
-                .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                .child(pic_key)
-                .putFile(imageURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                String pic_key = chatsRef.push().getKey();
+                assert pic_key != null;
+                storageReference
+                        .child("Chat_Pics")
+                        .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
+                        .child(pic_key)
+                        .putFile(imageURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
 
-                            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                            //progressDialog.setMessage((int) progress + "");
-                            progressDialog.show();
-                            progressDialog.setContentView(R.layout.progress_image_upload_status);
-                            progressDialog.setCancelable(false);
-                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                                double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                                //progressDialog.setMessage((int) progress + "");
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.progress_image_upload_status);
+                                progressDialog.setCancelable(false);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-                            TextView tv=progressDialog.findViewById(R.id.progressText);
-                            tv.setText(String.format("%.2f",progress)+"%");
+                                TextView tv = progressDialog.findViewById(R.id.progressText);
+                                tv.setText(String.format("%.2f", progress) + "%");
 
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            storageReference
-                                .child("Chat_Pics")
-                                .child(firebaseAuth.getCurrentUser().getUid())
-                                .child(pic_key)
-                                .getDownloadUrl()
-                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
+                                storageReference
+                                        .child("Chat_Pics")
+                                        .child(firebaseAuth.getCurrentUser().getUid())
+                                        .child(pic_key)
+                                        .getDownloadUrl()
+                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
 
-                                        progressDialog.dismiss();
-                                        downloadURL=uri.toString();
-                                        addImageTextToFirebase(myUID,friendUID,pic_key);
-                                        adapter=new MessageAdapter(arrayList,MessageActivity.this,imageURI);
-                                        recyclerView.setAdapter(adapter);
-                                        adapter.notifyDataSetChanged();
+                                                progressDialog.dismiss();
+                                                downloadURL = uri.toString();
+                                                addImageTextToFirebase(myUID, friendUID, pic_key);
+                                                adapter = new MessageAdapter(arrayList, MessageActivity.this, imageURI);
+                                                recyclerView.setAdapter(adapter);
+                                                adapter.notifyDataSetChanged();
 
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
-                                            progressDialog.dismiss();
-                                        }
-                                    });
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                                progressDialog.dismiss();
+                                            }
+                                        });
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
-                            progressDialog.dismiss();
-                        }
-                    });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                progressDialog.dismiss();
+                            }
+                        });
 
+            }
         }
 
     }
@@ -1086,7 +1136,7 @@ public class MessageActivity extends AppCompatActivity {
                 map.put("time",strDateTime);
                 map.put("senderPic",senderStr);
                 map.put("receiverPic",receiverStr);
-                map.put("isSeen",false);
+                map.put("isSeen",0);
 
                 //String key=chatsRef.push().getKey();
                 map.put("key",pic_key);
@@ -1253,6 +1303,9 @@ public class MessageActivity extends AppCompatActivity {
 
         //friendUID="";
 
+        if (seenListener != null && reference!=null) {
+            reference.child(friendUID).removeEventListener(seenListener);
+        }
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
 
         typingRef.child(firebaseAuth.getCurrentUser().getUid())
@@ -1269,6 +1322,9 @@ public class MessageActivity extends AppCompatActivity {
         super.onPause();
         //friendUID="";
 
+        if (seenListener != null && reference!=null) {
+            reference.child(friendUID).removeEventListener(seenListener);
+        }
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
         checkStatus("Offline");
     }

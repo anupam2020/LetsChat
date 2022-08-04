@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="10dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="15dp"
         android:layout_height="15sp"
         android:id="@+id/imgTick"
@@ -51,17 +51,19 @@
 
         </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/textTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:padding="5dp"
-            android:text="Jul 07, 2021 - 09:04PM"
-            android:textColor="@color/light_grey_left"
-            android:textSize="10sp" />
-
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_below="@id/chatLinear"
+        android:layout_marginLeft="15sp"
+        android:layout_marginTop="5dp"
+        android:text="Jul 07, 2021 - 09:04PM"
+        android:textColor="@color/light_grey_left"
+        android:textSize="10sp" />
 
     <ImageView
         android:id="@+id/favChat"

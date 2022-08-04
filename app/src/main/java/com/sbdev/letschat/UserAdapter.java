@@ -248,27 +248,31 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
                     assert messageModel != null;
-                    strTime=messageModel.getTime();
-                    strTime=strTime.substring(0,strTime.indexOf(',')+1) + strTime.substring(strTime.indexOf('-')+1);
+                    if(messageModel.getTime()!=null){
 
-                    if(firebaseAuth.getCurrentUser()!=null)
-                    {
-                        if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
-                        {
-                            lastMessage=messageModel.getText();
-                            time.setText(strTime);
-                            msg_icon.setImageResource(R.drawable.curve_down_arrow);
-                        }
-                    }
+                        strTime=messageModel.getTime();
+                        strTime=strTime.substring(0,strTime.indexOf(',')+1) + strTime.substring(strTime.indexOf('-')+1);
 
-                    if(firebaseAuth.getCurrentUser()!=null)
-                    {
-                        if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()) && messageModel.getReceiver().equals(friendUID))
+                        if(firebaseAuth.getCurrentUser()!=null)
                         {
-                            lastMessage=messageModel.getText();
-                            time.setText(strTime);
-                            msg_icon.setImageResource(R.drawable.curve_up_arrow);
+                            if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+                            {
+                                lastMessage=messageModel.getText();
+                                time.setText(strTime);
+                                msg_icon.setImageResource(R.drawable.curve_down_arrow);
+                            }
                         }
+
+                        if(firebaseAuth.getCurrentUser()!=null)
+                        {
+                            if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()) && messageModel.getReceiver().equals(friendUID))
+                            {
+                                lastMessage=messageModel.getText();
+                                time.setText(strTime);
+                                msg_icon.setImageResource(R.drawable.curve_up_arrow);
+                            }
+                        }
+
                     }
 
                 }

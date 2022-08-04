@@ -315,6 +315,9 @@ public class WeatherActivity extends AppCompatActivity {
                         .child("location").setValue(city);
 
                 }
+                else{
+                    DynamicToast.make(WeatherActivity.this,"City not found!",3000).show();
+                }
 
 
             }
@@ -322,7 +325,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                DynamicToast.make(WeatherActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(WeatherActivity.this,"Something went wrong!",3000).show();
             }
         });
 

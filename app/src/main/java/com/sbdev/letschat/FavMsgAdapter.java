@@ -67,14 +67,14 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
             {
                 holder.nameText.setText("You -> "+favMsgModel.getReceiverName());
                 holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_user);
-                holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_white_right));
+                //holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_white_right));
                 holder.msgText.setTextColor(Color.WHITE);
             }
             else
             {
                 holder.nameText.setText(favMsgModel.getSenderName()+" -> You");
                 holder.layout.setBackgroundResource(R.drawable.chat_bg_left_fav_msg_friend);
-                holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+                //holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
                 holder.msgText.setTextColor(Color.BLACK);
             }
         }
@@ -95,7 +95,7 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
             holder.favImg.setVisibility(View.VISIBLE);
             holder.msgText.setVisibility(View.GONE);
             holder.layout.setBackground(context.getDrawable(R.drawable.chat_bg_left_img_border_fav_msg));
-            holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
+            //holder.msgTime.setTextColor(context.getResources().getColor(R.color.light_grey_left));
         }
         else
         {

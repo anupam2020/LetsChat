@@ -5,9 +5,9 @@ import android.net.Uri;
 public class MessageModel {
 
     private String sender,receiver,text,time,key,senderPic,receiverPic,senderName,receiverName,imgURI;
-    private boolean isSeen;
+    private int isSeen;
 
-    public MessageModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI, boolean isSeen) {
+    public MessageModel(String sender, String receiver, String text, String time, String key, String senderPic, String receiverPic, String senderName, String receiverName, String imgURI, int isSeen) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
@@ -106,11 +106,11 @@ public class MessageModel {
         this.imgURI = imgURI;
     }
 
-    public boolean getIsSeen() {
+    public int getIsSeen() {
         return isSeen;
     }
 
-    public void setIsSeen(boolean isSeen) {
+    public void setIsSeen(int isSeen) {
         this.isSeen = isSeen;
     }
 }
