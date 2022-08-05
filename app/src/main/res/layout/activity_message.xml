@@ -94,6 +94,50 @@
         android:overScrollMode="never"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:id="@+id/messageRelativeVIS">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="10sp"
+            android:elevation="5dp"
+            android:id="@+id/messageCard">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/msgLottie"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:layout_centerInParent="true"
+                    app:lottie_autoPlay="true"
+                    app:lottie_fileName="santa_hi.json"
+                    app:lottie_loop="true" />
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:text="Say HELLO!"
+            android:fontFamily="@font/aladin"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/messageCard"
+            android:id="@+id/messageHelloText"
+            android:layout_marginTop="15sp"/>
+
+    </RelativeLayout>
+
 <!--    <ImageView-->
 <!--        android:id="@+id/msgDown"-->
 <!--        android:layout_width="40dp"-->
@@ -112,7 +156,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="5dp">
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/white_box">
 
         <RelativeLayout
             android:layout_width="wrap_content"

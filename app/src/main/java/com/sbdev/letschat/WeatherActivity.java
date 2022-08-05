@@ -258,7 +258,8 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 progressDialog.dismiss();
-                DynamicToast.make(WeatherActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(WeatherActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -316,7 +317,8 @@ public class WeatherActivity extends AppCompatActivity {
 
                 }
                 else{
-                    DynamicToast.make(WeatherActivity.this,"City not found!",3000).show();
+                    DynamicToast.make(WeatherActivity.this, "City not found!", getResources().getDrawable(R.drawable.warning),
+                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                 }
 
 
@@ -325,7 +327,8 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 progressDialog.dismiss();
-                DynamicToast.make(WeatherActivity.this,"Something went wrong!",3000).show();
+                DynamicToast.make(WeatherActivity.this, "Something went wrong!", getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -512,8 +515,8 @@ public class WeatherActivity extends AppCompatActivity {
 
         } catch (JSONException e) {
             progressDialog.dismiss();
-            Log.e("CATCH",e.getMessage());
-            DynamicToast.makeWarning(WeatherActivity.this,e.getMessage(),2000).show();
+            DynamicToast.make(WeatherActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
         }
 
     }
@@ -540,7 +543,8 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         progressDialog.dismiss();
-                        DynamicToast.make(WeatherActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(WeatherActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 

@@ -109,7 +109,8 @@ public class FavMsgActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 progressDialog.dismiss();
-                DynamicToast.make(FavMsgActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -190,7 +191,8 @@ public class FavMsgActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(FavMsgActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -217,7 +219,8 @@ public class FavMsgActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(FavMsgActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 

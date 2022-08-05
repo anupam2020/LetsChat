@@ -42,18 +42,37 @@
                 android:id="@+id/relativeUserItem"
                 android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/userName"
-                    android:layout_width="match_parent"
+                <RelativeLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Anupam Basak"
-                    android:textColor="@color/black"
-                    android:textSize="16dp" />
+                    android:id="@+id/userRelative">
+
+                    <TextView
+                        android:id="@+id/userName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Anupam Basak"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@id/userInfo"
+                        android:singleLine="true"/>
+
+                    <ImageView
+                        android:id="@+id/userInfo"
+                        android:layout_width="15dp"
+                        android:layout_height="15sp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:visibility="gone"
+                        android:src="@drawable/info2_black_new" />
+
+                </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/userName"
+                    android:layout_below="@id/userRelative"
                     android:layout_marginTop="2dp">
 
                     <ImageView

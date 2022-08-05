@@ -42,11 +42,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/BlackBorder" />
         <activity
-            android:name=".Notifications"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/BlackBorder" />
-        <activity
             android:name=".FriendProfile"
             android:exported="false"
             android:screenOrientation="portrait"

@@ -263,7 +263,8 @@ public class LoginActivity extends AppCompatActivity {
                                 if(task.isSuccessful())
                                 {
                                     progressDialog.dismiss();
-                                    DynamicToast.make(LoginActivity.this,"Password reset link was successfully sent to your mail!",3000).show();
+                                    DynamicToast.make(LoginActivity.this, "Password reset link was successfully sent to your mail!", getResources().getDrawable(R.drawable.mail),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
 
                             }
@@ -271,7 +272,8 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 progressDialog.dismiss();
-                                DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                                DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             }
                         });
                     }
@@ -319,7 +321,8 @@ public class LoginActivity extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
 
                 progressDialog.dismiss();
-                DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         }
     }
@@ -350,7 +353,8 @@ public class LoginActivity extends AppCompatActivity {
 
                                     if (snapshot.exists()) {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(LoginActivity.this, "Login Successful!", 3000).show();
+                                        DynamicToast.make(LoginActivity.this, "Login Successful!", getResources().getDrawable(R.drawable.checked),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                         startActivity(new Intent(LoginActivity.this, ChatActivity.class));
                                         finish();
                                     }
@@ -370,7 +374,8 @@ public class LoginActivity extends AppCompatActivity {
                                                                 reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
 
                                                                 progressDialog.dismiss();
-                                                                DynamicToast.make(LoginActivity.this, "Registration Successful!", 3000).show();
+                                                                DynamicToast.make(LoginActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                                 startActivity(new Intent(LoginActivity.this, ProfilePicActivity.class));
                                                                 finish();
 
@@ -378,7 +383,8 @@ public class LoginActivity extends AppCompatActivity {
                                                         }).addOnFailureListener(new OnFailureListener() {
                                                             @Override
                                                             public void onFailure(@NonNull Exception e) {
-                                                                DynamicToast.make(LoginActivity.this, e.getMessage(), 3000).show();
+                                                                DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
                                                         });
 
@@ -388,7 +394,8 @@ public class LoginActivity extends AppCompatActivity {
                                             }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
-                                                    DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                                                    DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 }
                                             });
 
@@ -398,7 +405,8 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    DynamicToast.make(LoginActivity.this,error.getMessage(),3000).show();
+                                    DynamicToast.make(LoginActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
                             });
                     }
@@ -418,7 +426,9 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful())
                         {
                             progressDialog.dismiss();
-                            DynamicToast.make(LoginActivity.this,"Login Successful!",3000).show();
+
+                            DynamicToast.make(LoginActivity.this, "Login Successful!", getResources().getDrawable(R.drawable.checked),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             startActivity(new Intent(LoginActivity.this,ChatActivity.class));
                             finishAffinity();
                         }
@@ -429,7 +439,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
 
                         progressDialog.dismiss();
-                        DynamicToast.make(LoginActivity.this,e.getMessage(),3000).show();
+                        DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
                     }
                 });

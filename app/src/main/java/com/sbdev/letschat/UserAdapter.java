@@ -4,6 +4,7 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -187,7 +188,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             holder.statusIcon.setImageResource(R.drawable.circle_offline);
         }
 
-        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus(), holder.time, holder.imgSentIcon);
+        lastMsg(model.getUID(), holder.lastMsg, holder.msgIcon, model.getStatus(), holder.time, holder.imgSentIcon, holder.imgInfo);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,7 +214,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public class UserViewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView profile;
-        ImageView statusIcon,msgIcon,imgSentIcon;
+        ImageView statusIcon,msgIcon,imgSentIcon,imgInfo;
         TextView name,lastMsg,time;
 
         public UserViewHolder(@NonNull View itemView) {
@@ -226,11 +227,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             msgIcon=itemView.findViewById(R.id.userMsgIcon);
             time=itemView.findViewById(R.id.userTime);
             imgSentIcon=itemView.findViewById(R.id.userImgSent);
+            imgInfo=itemView.findViewById(R.id.userInfo);
 
         }
     }
 
-    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status, TextView time, ImageView imageIconSent)
+    public void lastMsg(String friendUID, TextView last_msg, ImageView msg_icon, String status, TextView time, ImageView imageIconSent, ImageView info)
     {
 
         lastMessage="";
@@ -243,6 +245,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                last_msg.setTypeface(null);
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
 
@@ -260,6 +263,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                 lastMessage=messageModel.getText();
                                 time.setText(strTime);
                                 msg_icon.setImageResource(R.drawable.curve_down_arrow);
+                                if(messageModel.getIsSeen()==0)
+                                {
+                                    last_msg.setTypeface(last_msg.getTypeface(),Typeface.BOLD);
+                                    info.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    info.setVisibility(View.GONE);
+                                }
                             }
                         }
 
@@ -306,6 +318,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     imageIconSent.setVisibility(View.GONE);
                 }
 
+
+
                 lastMessage="";
                 strTime="";
 
@@ -336,7 +350,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         downloadManager.enqueue(request);
 
-        DynamicToast.make(context,"Downloading profile picture!",3000).show();
+        DynamicToast.make(context, "Downloading profile picture!", context.getResources().getDrawable(R.drawable.download_1),
+                context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
     }
 

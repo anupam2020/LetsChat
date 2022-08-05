@@ -174,19 +174,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 if(messageModel.getIsSeen()==1) {
                     if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
-                        holder.tick.setImageResource(R.drawable.me);
 
                         Glide.with(context)
                              .load(messageModel.getReceiverPic())
                              .into(holder.tick);
-
-                        holder.tick.setVisibility(View.VISIBLE);
                     }
                 }
                 else {
                     if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
-                        holder.tick.setImageResource(R.drawable.single_tick);
-                        holder.tick.setVisibility(View.VISIBLE);
+                        holder.tick.setImageResource(R.drawable.double_tick);
                     }
                 }
 
@@ -194,7 +190,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             else {
                 if(messageModel.getSender().equals(firebaseAuth.getCurrentUser().getUid())) {
                     holder.tick.setImageResource(R.drawable.double_tick);
-                    holder.tick.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -500,13 +495,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 downloadManager.enqueue(request);
 
-                DynamicToast.make(context,"Downloading image!",3000).show();
+                DynamicToast.make(context, "Downloading file!", context.getResources().getDrawable(R.drawable.download_1),
+                        context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                DynamicToast.make(context, error.getMessage(), context.getResources().getDrawable(R.drawable.warning),
+                        context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
             }
         });
 

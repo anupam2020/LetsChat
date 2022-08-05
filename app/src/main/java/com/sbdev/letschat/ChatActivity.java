@@ -76,11 +76,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,usersRef,locationRef;
-
-    TabLayout tabLayout;
-
-    ViewPager2 viewPager2;
+    DatabaseReference reference,usersRef,locationRef,chatsRef;
 
     ChatStateAdapter adapter;
 
@@ -104,8 +100,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         more=findViewById(R.id.chatMore);
         weather=findViewById(R.id.chatWeather);
-        tabLayout=findViewById(R.id.chatTabLayout);
-        viewPager2=findViewById(R.id.viewPager2);
+        final TabLayout tabLayout=findViewById(R.id.chatTabLayout);
+        final ViewPager2 viewPager2=findViewById(R.id.viewPager2);
         layout=findViewById(R.id.relativeChats);
 
         firebaseAuth=FirebaseAuth.getInstance();
@@ -116,6 +112,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         usersRef.keepSynced(true);
         locationRef=FirebaseDatabase.getInstance().getReference("Location");
         locationRef.keepSynced(true);
+        chatsRef=FirebaseDatabase.getInstance().getReference("Chats");
+        chatsRef.keepSynced(true);
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
@@ -134,6 +132,37 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         viewPager2.setAdapter(adapter);
 
         tabLayout.addTab(tabLayout.newTab().setText("Chats"));
+
+        chatsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                int unreadMsg=0;
+
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+
+                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                    if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getIsSeen()==0) {
+                        unreadMsg++;
+                    }
+
+                }
+
+                if(unreadMsg==0) {
+                    tabLayout.getTabAt(0).setText("Chats");
+                }
+                else {
+                    tabLayout.getTabAt(0).setText("Chats ("+unreadMsg+")");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         tabLayout.addTab(tabLayout.newTab().setText("Users"));
 
         checkRealTimeNetwork();
@@ -225,7 +254,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -269,7 +299,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            DynamicToast.make(ChatActivity.this,e.getMessage(),3000).show();
+                                            DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                         }
                                     });
                                     break;
@@ -307,37 +338,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChatActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
-
-    }
-
-    public void setTimeRealTime(TextView time)
-    {
-
-        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
-        serverTimeRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                long offset = snapshot.getValue(Long.class);
-                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
-
-                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
-                Date date=timestamp;
-                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("hh:mm a");
-                String strDateTime=simpleDateFormat.format(date);
-
-                time.setText(strDateTime);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
-            }
-        });
 
     }
 
@@ -393,7 +397,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
+                        DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
@@ -597,7 +602,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            DynamicToast.make(ChatActivity.this,e.getMessage(),3000).show();
+                            DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                         }
                     });
             }
@@ -633,7 +639,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        DynamicToast.make(ChatActivity.this, e.getMessage(), 3000).show();
+                        DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
         }
@@ -673,7 +680,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    DynamicToast.make(ChatActivity.this, error.getMessage(), 3000).show();
+                    DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                 }
             });
 

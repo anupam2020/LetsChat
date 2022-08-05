@@ -193,7 +193,8 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(ProfileActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -352,7 +353,8 @@ public class ProfileActivity extends AppCompatActivity {
                                                                         @Override
                                                                         public void onFailure(@NonNull Exception e) {
                                                                             progressDialog.dismiss();
-                                                                            DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                                            DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                                         }
                                                                     });
 
@@ -416,7 +418,8 @@ public class ProfileActivity extends AppCompatActivity {
                                                 }).addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
-                                                        DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                        DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     }
                                                 });
                                             isUpdated=true;
@@ -441,7 +444,8 @@ public class ProfileActivity extends AppCompatActivity {
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+                                        DynamicToast.make(ProfileActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
                                 });
 
@@ -576,7 +580,8 @@ public class ProfileActivity extends AppCompatActivity {
                                                             @Override
                                                             public void onFailure(@NonNull Exception e) {
                                                                 progressDialog.dismiss();
-                                                                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                                DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
                                                         });
 
@@ -622,7 +627,8 @@ public class ProfileActivity extends AppCompatActivity {
 
                                                 if(task.isSuccessful())
                                                 {
-                                                    DynamicToast.make(ProfileActivity.this,"Email verification link is sent to your mail!",3000).show();
+                                                    DynamicToast.make(ProfileActivity.this, "Email verification link is sent to your mail!", getResources().getDrawable(R.drawable.mail),
+                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     progressDialog.dismiss();
                                                 }
 
@@ -630,7 +636,8 @@ public class ProfileActivity extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                                                DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 progressDialog.dismiss();
                                             }
                                         });
@@ -639,7 +646,8 @@ public class ProfileActivity extends AppCompatActivity {
                                     else
                                     {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(ProfileActivity.this,"Email is already verified!",3000).show();
+                                        DynamicToast.make(ProfileActivity.this, "Email is already verified!", getResources().getDrawable(R.drawable.mail),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
 
                                 }
@@ -688,7 +696,8 @@ public class ProfileActivity extends AppCompatActivity {
                             public void onSuccess(Void unused) {
 
                                 progressDialog.dismiss();
-                                DynamicToast.make(ProfileActivity.this,"Account successfully deleted!",3000).show();
+                                DynamicToast.make(ProfileActivity.this, "Account successfully deleted!", getResources().getDrawable(R.drawable.checked),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 startActivity(new Intent(ProfileActivity.this,MainActivity.class));
 
                             }
@@ -701,7 +710,8 @@ public class ProfileActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                DynamicToast.make(ProfileActivity.this,e.getMessage(),3000).show();
+                DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -741,7 +751,8 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         progressDialog.dismiss();
-                        DynamicToast.make(ProfileActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(ProfileActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
@@ -771,7 +782,8 @@ public class ProfileActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ProfileActivity.this, error.getMessage(), 3000).show();
+                        DynamicToast.make(ProfileActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
@@ -867,15 +879,15 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        checkStatus("Online");
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         checkStatus("Offline");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkStatus("Online");
     }
 
     @Override

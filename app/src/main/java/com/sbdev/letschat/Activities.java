@@ -181,7 +181,8 @@ public class Activities extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(Activities.this,error.getMessage(),3000).show();
+                DynamicToast.make(Activities.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -208,7 +209,8 @@ public class Activities extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(Activities.this,error.getMessage(),3000).show();
+                        DynamicToast.make(Activities.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 

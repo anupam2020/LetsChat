@@ -74,7 +74,8 @@ public class FacebookActivity extends AppCompatActivity {
                     @Override
                     public void onError(FacebookException exception) {
                         // App code
-                        DynamicToast.make(FacebookActivity.this,exception.getMessage(),3000).show();
+                        DynamicToast.make(FacebookActivity.this, exception.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                         finish();
                     }
                 });
@@ -126,7 +127,8 @@ public class FacebookActivity extends AppCompatActivity {
 
                                                         reference.child(mAuth.getCurrentUser().getUid()).child("token").setValue(s);
 
-                                                        DynamicToast.make(FacebookActivity.this,"Registration Successful!",3000).show();
+                                                        DynamicToast.make(FacebookActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                         startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
                                                         finish();
 
@@ -134,7 +136,8 @@ public class FacebookActivity extends AppCompatActivity {
                                                 }).addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
-                                                        DynamicToast.make(FacebookActivity.this, e.getMessage(), 3000).show();
+                                                        DynamicToast.make(FacebookActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     }
                                                 });
 
@@ -144,7 +147,8 @@ public class FacebookActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
 
-                                            DynamicToast.make(FacebookActivity.this,e.getMessage(),3000).show();
+                                            DynamicToast.make(FacebookActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                             finish();
                                         }
                                     });
@@ -152,7 +156,8 @@ public class FacebookActivity extends AppCompatActivity {
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            DynamicToast.make(FacebookActivity.this,task.getException().toString(),3000).show();
+                            DynamicToast.make(FacebookActivity.this, task.getException().toString(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             finish();
                         }
                     }

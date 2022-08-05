@@ -137,7 +137,8 @@ public class ChangePassword extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ChangePassword.this,error.getMessage(),3000).show();
+                DynamicToast.make(ChangePassword.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -286,7 +287,8 @@ public class ChangePassword extends AppCompatActivity {
                                 if(task.isSuccessful())
                                 {
                                     progressDialog.dismiss();
-                                    DynamicToast.make(ChangePassword.this,"Password reset link was successfully sent to your mail!",3000).show();
+                                    DynamicToast.make(ChangePassword.this, "Password reset link was successfully sent to your mail!", getResources().getDrawable(R.drawable.mail),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
 
                             }
@@ -294,7 +296,8 @@ public class ChangePassword extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 progressDialog.dismiss();
-                                DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+                                DynamicToast.make(ChangePassword.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             }
                         });
 
@@ -302,7 +305,8 @@ public class ChangePassword extends AppCompatActivity {
                     else
                     {
                         progressDialog.dismiss();
-                        DynamicToast.make(ChangePassword.this,"Email not found!",3000).show();
+                        DynamicToast.make(ChangePassword.this, "Email not found!", getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 }
 
@@ -330,7 +334,8 @@ public class ChangePassword extends AppCompatActivity {
                             if(task.isSuccessful())
                             {
                                 progressDialog.dismiss();
-                                DynamicToast.make(ChangePassword.this,"Password was successfully changed!",3000).show();
+                                DynamicToast.make(ChangePassword.this, "Password was successfully changed!", getResources().getDrawable(R.drawable.checked),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             }
 
                         }
@@ -338,7 +343,8 @@ public class ChangePassword extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             progressDialog.dismiss();
-                            DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+                            DynamicToast.make(ChangePassword.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                         }
                     });
 
@@ -349,7 +355,8 @@ public class ChangePassword extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 progressDialog.dismiss();
-                DynamicToast.make(ChangePassword.this,e.getMessage(),3000).show();
+                DynamicToast.make(ChangePassword.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -375,7 +382,8 @@ public class ChangePassword extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChangePassword.this, error.getMessage(), 3000).show();
+                        DynamicToast.make(ChangePassword.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 

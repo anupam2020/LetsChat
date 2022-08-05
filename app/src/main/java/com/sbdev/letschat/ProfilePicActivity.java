@@ -150,7 +150,8 @@ public class ProfilePicActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
-                                        DynamicToast.make(ProfilePicActivity.this,error.getMessage(),3000).show();
+                                        DynamicToast.make(ProfilePicActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
                                 });
                             }
@@ -163,7 +164,8 @@ public class ProfilePicActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(ProfilePicActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(ProfilePicActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -191,7 +193,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         progressDialog.dismiss();
-                        DynamicToast.make(ProfilePicActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(ProfilePicActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
@@ -206,7 +209,8 @@ public class ProfilePicActivity extends AppCompatActivity {
         if(imageURI==null)
         {
             progressDialog.dismiss();
-            DynamicToast.make(ProfilePicActivity.this,"Please select an image!",3000).show();
+            DynamicToast.make(ProfilePicActivity.this, "Please select an image!", getResources().getDrawable(R.drawable.image_sent),
+                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
         }
         else
         {
@@ -237,7 +241,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                                                 {
 
                                                     progressDialog.dismiss();
-                                                    DynamicToast.make(ProfilePicActivity.this,"Profile picture was successfully uploaded!",3000).show();
+                                                    DynamicToast.make(ProfilePicActivity.this, "Profile picture was successfully uploaded!", getResources().getDrawable(R.drawable.checked),
+                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
                                                     finishAffinity();
                                                 }
@@ -246,7 +251,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
+                                                DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                             }
                                         });
 
@@ -255,7 +261,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
 
-                                    DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
+                                    DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
                                 }
                             });
@@ -266,7 +273,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
 
                         progressDialog.dismiss();
-                        DynamicToast.make(ProfilePicActivity.this,e.getMessage(),3000).show();
+                        DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
                     }
                 });
@@ -306,7 +314,7 @@ public class ProfilePicActivity extends AppCompatActivity {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
-    public void checkStatus(String status)
+    public void checkStatus(@NonNull String status)
     {
 
         DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
@@ -358,16 +366,27 @@ public class ProfilePicActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        checkStatus("Offline");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         checkStatus("Online");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        //dRef.removeEventListener(seenListener);
-        checkStatus("Offline");
+    protected void onStart() {
+        super.onStart();
+        checkStatus("Online");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkStatus("Online");
     }
 
     @Override

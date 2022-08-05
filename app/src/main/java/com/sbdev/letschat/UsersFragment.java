@@ -134,7 +134,8 @@ public class UsersFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(getActivity(),error.getMessage(),3000).show();
+                DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -249,7 +250,8 @@ public class UsersFragment extends Fragment {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         progressDialog.dismiss();
-                        DynamicToast.make(getActivity(),error.getMessage(),3000).show();
+                        DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 

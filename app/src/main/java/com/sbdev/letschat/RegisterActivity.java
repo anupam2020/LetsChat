@@ -291,7 +291,8 @@ public class RegisterActivity extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
 
                 progressDialog.dismiss();
-                DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         }
     }
@@ -322,7 +323,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                                     if (snapshot.exists()) {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(RegisterActivity.this, "Login Successful!", 3000).show();
+                                        DynamicToast.make(RegisterActivity.this, "Login Successful!", getResources().getDrawable(R.drawable.checked),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                         startActivity(new Intent(RegisterActivity.this, ChatActivity.class));
                                         finish();
                                     }
@@ -342,7 +344,8 @@ public class RegisterActivity extends AppCompatActivity {
                                                                 reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
 
                                                                 progressDialog.dismiss();
-                                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", 3000).show();
+                                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                                 startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
                                                                 finish();
 
@@ -350,7 +353,8 @@ public class RegisterActivity extends AppCompatActivity {
                                                         }).addOnFailureListener(new OnFailureListener() {
                                                             @Override
                                                             public void onFailure(@NonNull Exception e) {
-                                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), 3000).show();
+                                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
                                                         });
                                                     }
@@ -359,7 +363,8 @@ public class RegisterActivity extends AppCompatActivity {
                                             }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
-                                                    DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+                                                    DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 }
                                             });
 
@@ -369,7 +374,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    DynamicToast.make(RegisterActivity.this,error.getMessage(),3000).show();
+                                    DynamicToast.make(RegisterActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
                             });
 
@@ -378,7 +384,8 @@ public class RegisterActivity extends AppCompatActivity {
                         // If sign in fails, display a message to the user.
 
                         progressDialog.dismiss();
-                        DynamicToast.make(RegisterActivity.this, (CharSequence) task.getException(),3000).show();
+                        DynamicToast.make(RegisterActivity.this, task.getException().toString(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 }
             });
@@ -418,7 +425,8 @@ public class RegisterActivity extends AppCompatActivity {
                                                 reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
 
                                                 progressDialog.dismiss();
-                                                DynamicToast.make(RegisterActivity.this,"Registration Successful!",3000).show();
+                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
                                                 finish();
 
@@ -426,7 +434,8 @@ public class RegisterActivity extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), 3000).show();
+                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                             }
                                         });
                                     }
@@ -437,7 +446,8 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onFailure(@NonNull Exception e) {
 
                                     progressDialog.dismiss();
-                                    DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+                                    DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
                                 }
                             });
@@ -450,7 +460,8 @@ public class RegisterActivity extends AppCompatActivity {
             public void onFailure(@NonNull Exception e) {
 
                 progressDialog.dismiss();
-                DynamicToast.make(RegisterActivity.this,e.getMessage(),3000).show();
+                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
             }
         });

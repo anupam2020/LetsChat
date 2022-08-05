@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +31,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -107,13 +109,15 @@ public class MessageActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    RelativeLayout layout,topLayout;
+    RelativeLayout layout,topLayout, lottieRelative;
 
     ValueEventListener seenListener;
 
     Animation animation,animationClick;
 
     String downloadURL="";
+
+    LottieAnimationView lottie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +138,8 @@ public class MessageActivity extends AppCompatActivity {
         recyclerView=findViewById(R.id.msgRecycler);
         layout=findViewById(R.id.relativeMsg);
         topLayout=findViewById(R.id.msgRelativeTop);
+        lottieRelative=findViewById(R.id.messageRelativeVIS);
+        lottie=findViewById(R.id.msgLottie);
 
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
@@ -273,7 +279,8 @@ public class MessageActivity extends AppCompatActivity {
                                     }
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
-                                        DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                        DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
                                 });
 
@@ -302,7 +309,8 @@ public class MessageActivity extends AppCompatActivity {
                                 }
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                                    DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
                             });
 
@@ -369,7 +377,8 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -401,14 +410,16 @@ public class MessageActivity extends AppCompatActivity {
                                     public void onSuccess(Void unused) {
                                         getWindow().setBackgroundDrawableResource(R.color.white);
                                         progressDialog.dismiss();
-                                        DynamicToast.make(MessageActivity.this,"Wallpaper reset successful!",3000).show();
+                                        DynamicToast.make(MessageActivity.this, "Wallpaper reset successful!", getResources().getDrawable(R.drawable.checked),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         progressDialog.dismiss();
-                                        DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                                        DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
                                 });
                         }
@@ -441,7 +452,8 @@ public class MessageActivity extends AppCompatActivity {
 
                     if(text.isEmpty())
                     {
-                        DynamicToast.make(MessageActivity.this,"Please write a message to send!",3000).show();
+                        DynamicToast.make(MessageActivity.this, "Please write a message to send!", getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                     else
                     {
@@ -654,7 +666,8 @@ public class MessageActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
@@ -728,7 +741,8 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -760,17 +774,32 @@ public class MessageActivity extends AppCompatActivity {
 
                 }
 
+                if(arrayList.isEmpty()){
+                    lottieRelative.setVisibility(View.VISIBLE);
+                    lottieRelative.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            addTextToFirebase(myUID,friendUID,"Hello!");
+
+                        }
+                    });
+                }
+                else{
+                    lottieRelative.setVisibility(View.GONE);
+                }
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private void addTextToFirebase(String sender, String receiver, String text)
     {
 
@@ -870,7 +899,8 @@ public class MessageActivity extends AppCompatActivity {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                            DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                         }
                     });
 
@@ -1020,13 +1050,15 @@ public class MessageActivity extends AppCompatActivity {
                         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", 3000).show();
+                                DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", getResources().getDrawable(R.drawable.checked),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 progressDialog.dismiss();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 progressDialog.dismiss();
                             }
                         });
@@ -1086,7 +1118,8 @@ public class MessageActivity extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                                DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 progressDialog.dismiss();
                                             }
                                         });
@@ -1095,7 +1128,8 @@ public class MessageActivity extends AppCompatActivity {
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(MessageActivity.this, e.getMessage(), 3000).show();
+                                DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 progressDialog.dismiss();
                             }
                         });
@@ -1206,7 +1240,8 @@ public class MessageActivity extends AppCompatActivity {
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(MessageActivity.this,e.getMessage(),3000).show();
+                                DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             }
                         });
 

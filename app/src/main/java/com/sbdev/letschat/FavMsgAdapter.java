@@ -194,13 +194,15 @@ public class FavMsgAdapter extends RecyclerView.Adapter<FavMsgAdapter.FavMsgView
 
                 downloadManager.enqueue(request);
 
-                DynamicToast.make(context,"Downloading file!",3000).show();
+                DynamicToast.make(context, "Downloading file!", context.getResources().getDrawable(R.drawable.download_1),
+                        context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                DynamicToast.make(context, error.getMessage(), context.getResources().getDrawable(R.drawable.warning),
+                        context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
             }
         });
 

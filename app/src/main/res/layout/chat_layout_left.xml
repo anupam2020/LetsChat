@@ -9,7 +9,6 @@
         android:layout_width="15dp"
         android:layout_height="15sp"
         android:id="@+id/imgTick"
-        android:src="@drawable/single_tick"
         android:layout_below="@id/chatLinear"
         android:layout_marginTop="-15dp"
         android:visibility="gone"
@@ -23,7 +22,7 @@
         android:layout_marginRight="50dp"
         android:background="@drawable/chat_bg_left"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="7dp">
 
         <TextView
             android:id="@+id/showMsg"
@@ -57,8 +56,8 @@
         android:id="@+id/textTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
         android:layout_below="@id/chatLinear"
+        android:layout_gravity="start"
         android:layout_marginLeft="15sp"
         android:layout_marginTop="5dp"
         android:text="Jul 07, 2021 - 09:04PM"

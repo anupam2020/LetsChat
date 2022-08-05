@@ -10,6 +10,7 @@
         android:layout_width="20dp"
         android:layout_height="20sp"
         android:layout_below="@id/chatLinear"
+        android:src="@drawable/double_tick"
         android:layout_alignParentRight="true" />
 
     <LinearLayout
@@ -22,7 +23,7 @@
         android:layout_toLeftOf="@id/imgTick"
         android:background="@drawable/chat_bg_right"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="7dp">
 
         <TextView
             android:id="@+id/showMsg"
@@ -30,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:padding="5dp"
-            android:text="Hi!"
+            android:text="Hi! Welcome to  my Youtube channel..."
             android:textColor="@color/white"
             android:textSize="16sp" />
 
@@ -57,9 +58,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/chatLinear"
-        android:layout_marginRight="25sp"
-        android:layout_marginTop="5dp"
         android:layout_alignParentRight="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="25sp"
         android:text="Jul 07, 2021 - 09:04PM"
         android:textColor="#80000000"
         android:textSize="10sp" />

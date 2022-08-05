@@ -118,7 +118,8 @@ public class MoreActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MoreActivity.this,error.getMessage(),3000).show();
+                DynamicToast.make(MoreActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
 
@@ -173,7 +174,8 @@ public class MoreActivity extends AppCompatActivity {
                     sendIntent.setType("text/plain");
                     startActivity(sendIntent);
                 } catch(Exception e) {
-                    DynamicToast.makeError(MoreActivity.this,e.getMessage(),2000).show();
+                    DynamicToast.make(MoreActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                 }
 
             }
@@ -201,7 +203,8 @@ public class MoreActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(MoreActivity.this,error.getMessage(),3000).show();
+                        DynamicToast.make(MoreActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
 
