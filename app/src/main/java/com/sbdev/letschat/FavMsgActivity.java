@@ -1,20 +1,25 @@
 package com.sbdev.letschat;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,7 +54,7 @@ public class FavMsgActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference favRef,usersRef;
+    DatabaseReference favRef,usersRef,reference;
 
     StorageReference storageReference;
 
@@ -75,6 +80,8 @@ public class FavMsgActivity extends AppCompatActivity {
 
         firebaseAuth=FirebaseAuth.getInstance();
 
+        reference=FirebaseDatabase.getInstance().getReference("Users");
+        reference.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
         favRef= FirebaseDatabase.getInstance().getReference("Favorites");
@@ -84,12 +91,18 @@ public class FavMsgActivity extends AppCompatActivity {
 
         bg.setBackgroundResource(R.color.white);
 
-        checkRealTimeNetwork();
-
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        loadWallpaper();
+
+        if(!isNetworkConnected())
+        {
+            progressDialog.dismiss();
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
 
         favRef.child(firebaseAuth.getCurrentUser().getUid())
                 .addValueEventListener(new ValueEventListener() {
@@ -103,6 +116,7 @@ public class FavMsgActivity extends AppCompatActivity {
                 }
 
                 adapter.notifyDataSetChanged();
+                progressDialog.dismiss();
 
             }
 
@@ -113,30 +127,6 @@ public class FavMsgActivity extends AppCompatActivity {
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
-
-
-        storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                .child("Wallpaper")
-                .getDownloadUrl()
-                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-
-                        Glide.with(FavMsgActivity.this)
-                                .load(uri)
-                                .into(bg);
-
-                        progressDialog.dismiss();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                        bg.setBackgroundResource(R.color.white);
-                        progressDialog.dismiss();
-
-                    }
-                });
 
 
         back.setOnClickListener(new View.OnClickListener() {
@@ -198,34 +188,36 @@ public class FavMsgActivity extends AppCompatActivity {
 
     }
 
-    private void checkRealTimeNetwork()
+    public void loadWallpaper()
     {
 
-        new Handler().postDelayed(new Runnable() {
+        reference.child(firebaseAuth.getCurrentUser().getUid()).child("Wallpaper").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void run() {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+                Log.d("Snapshot", String.valueOf(snapshot));
 
-                connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
-                    }
+                if(snapshot.exists())
+                {
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
+                    Glide.with(getApplicationContext())
+                        .load(Objects.requireNonNull(snapshot.getValue()).toString())
+                        .into(bg);
+                    progressDialog.dismiss();
+
+                }
+                else {
+                    bg.setBackgroundResource(R.color.white);
+                    progressDialog.dismiss();
+                }
 
             }
-        },2000);
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 

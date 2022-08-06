@@ -1,6 +1,7 @@
 package com.sbdev.letschat;
 
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -30,6 +31,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -206,70 +209,160 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     if(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid().equals(messageModel.getSender()))
                     {
 
-                        PopupMenu popupMenu=new PopupMenu(context,holder.itemView);
-                        popupMenu.getMenuInflater().inflate(R.menu.text_options,popupMenu.getMenu());
-                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
+                        if(messageModel.getText().equals("--Image--") && messageModel.getImgURI()!=null)
+                        {
 
-                                switch (item.getItemId())
-                                {
-                                    case R.id.deleteMsg:
-                                        arrayList.remove(holder.getAdapterPosition());
-                                        notifyItemRemoved(holder.getAdapterPosition());
+                            PopupMenu popupMenu=new PopupMenu(context,holder.itemView);
+                            popupMenu.getMenuInflater().inflate(R.menu.delete_img,popupMenu.getMenu());
+                            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
 
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
+                                    switch (item.getItemId())
+                                    {
+                                        case R.id.deleteImg:
 
-                                                chatsRef.child(key).removeValue();
-                                                storageReference.child("Chat_Pics").child(firebaseAuth.getCurrentUser().getUid()).child(key).delete();
+                                            ProgressDialog progressDialog=new ProgressDialog(context);
+                                            progressDialog.show();
+                                            progressDialog.setContentView(R.layout.progress_image_delete_status);
+                                            progressDialog.setCancelable(true);
+                                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-                                                isFav=true;
-                                                favorites.addValueEventListener(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            arrayList.remove(holder.getAdapterPosition());
+                                            notifyItemRemoved(holder.getAdapterPosition());
 
-                                                        if(isFav)
-                                                        {
-                                                            if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+
+                                                    chatsRef.child(key).removeValue();
+                                                    storageReference.child("Chat_Pics").child(firebaseAuth.getCurrentUser().getUid())
+                                                            .child(key)
+                                                            .delete()
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void unused) {
+
+                                                                    progressDialog.dismiss();
+
+                                                                }
+                                                            }).addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    DynamicToast.make(context, e.getMessage(), context.getResources().getDrawable(R.drawable.warning),
+                                                                            context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
+                                                                }
+                                                            });
+
+                                                    isFav=true;
+                                                    favorites.addValueEventListener(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                            if(isFav)
                                                             {
-                                                                holder.favImg.setVisibility(View.GONE);
-                                                                favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
-                                                                isFav=false;
+                                                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                                                {
+                                                                    holder.favImg.setVisibility(View.GONE);
+                                                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                                                    isFav=false;
+                                                                }
                                                             }
+
                                                         }
 
-                                                    }
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
 
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                        }
+                                                    });
 
-                                                    }
-                                                });
+                                                }
+                                            },500);
 
-                                            }
-                                        },500);
-
-
-                                        //notifyItemRemoved(holder.getAdapterPosition());
+                                            //notifyItemRemoved(holder.getAdapterPosition());
                                         break;
+                                    }
 
-                                    case R.id.copyMsg:
-
-                                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                                        ClipData clip = ClipData.newPlainText("Copied Text", messageModel.getText());
-                                        clipboard.setPrimaryClip(clip);
-
-                                        DynamicToast.make(context,"Text copied!",3000).show();
-                                        break;
+                                    return false;
                                 }
+                            });
 
-                                return false;
-                            }
-                        });
+                            popupMenu.show();
 
-                        popupMenu.show();
+                        }
+                        else
+                        {
+
+                            PopupMenu popupMenu=new PopupMenu(context,holder.itemView);
+                            popupMenu.getMenuInflater().inflate(R.menu.text_options,popupMenu.getMenu());
+                            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+
+                                    switch (item.getItemId())
+                                    {
+
+                                        case R.id.deleteMsg:
+
+                                            arrayList.remove(holder.getAdapterPosition());
+                                            notifyItemRemoved(holder.getAdapterPosition());
+
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+
+                                                    chatsRef.child(key).removeValue();
+
+                                                    isFav=true;
+                                                    favorites.addValueEventListener(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                            if(isFav)
+                                                            {
+                                                                if(snapshot.child(firebaseAuth.getCurrentUser().getUid()).hasChild(key))
+                                                                {
+                                                                    holder.favImg.setVisibility(View.GONE);
+                                                                    favorites.child(firebaseAuth.getCurrentUser().getUid()).child(key).removeValue();
+                                                                    isFav=false;
+                                                                }
+                                                            }
+
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+
+                                                }
+                                            },500);
+
+
+                                            //notifyItemRemoved(holder.getAdapterPosition());
+                                            break;
+
+                                        case R.id.copyMsg:
+
+                                            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                                            ClipData clip = ClipData.newPlainText("Copied Text", messageModel.getText());
+                                            clipboard.setPrimaryClip(clip);
+
+                                            DynamicToast.make(context,"Text copied!",3000).show();
+                                            break;
+                                    }
+
+                                    return false;
+                                }
+                            });
+
+                            popupMenu.show();
+
+                        }
+
+
 
                     }
 

@@ -20,6 +20,8 @@ public class ChatStateAdapter extends FragmentStateAdapter {
             case 0:
                 return new ChatFragment();
             case 1:
+                return new StatusFragment();
+            case 2:
                 return new UsersFragment();
         }
 
@@ -29,6 +31,6 @@ public class ChatStateAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

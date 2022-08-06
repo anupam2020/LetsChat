@@ -55,7 +55,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     ArrayList<UserModel> arrayList;
     Context context;
-    String lastMessage, strTime;
+    String lastMessage, strTime, lastMsgURI;
 
     public UserAdapter(ArrayList<UserModel> arrayList, Context context) {
         this.arrayList = arrayList;
@@ -236,6 +236,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     {
 
         lastMessage="";
+        lastMsgURI="";
 
         FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
 
@@ -261,6 +262,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                             if(messageModel.getSender().equals(friendUID) && messageModel.getReceiver().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
                             {
                                 lastMessage=messageModel.getText();
+                                lastMsgURI=messageModel.getImgURI();
                                 time.setText(strTime);
                                 msg_icon.setImageResource(R.drawable.curve_down_arrow);
                                 if(messageModel.getIsSeen()==0)
@@ -280,6 +282,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                             if(messageModel.getSender().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()) && messageModel.getReceiver().equals(friendUID))
                             {
                                 lastMessage=messageModel.getText();
+                                lastMsgURI=messageModel.getImgURI();
                                 time.setText(strTime);
                                 msg_icon.setImageResource(R.drawable.curve_up_arrow);
                             }
@@ -307,7 +310,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     time.setText("");
                 }
 
-                if(lastMessage.equals("--Image--"))
+                if(lastMessage.equals("--Image--") && (lastMsgURI!=null))
                 {
                     last_msg.setVisibility(View.GONE);
                     imageIconSent.setVisibility(View.VISIBLE);
@@ -318,10 +321,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     imageIconSent.setVisibility(View.GONE);
                 }
 
-
-
                 lastMessage="";
                 strTime="";
+                lastMsgURI="";
 
             }
 

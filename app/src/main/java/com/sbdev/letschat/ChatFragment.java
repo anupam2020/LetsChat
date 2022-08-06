@@ -87,16 +87,12 @@ public class ChatFragment extends Fragment {
         dRef= FirebaseDatabase.getInstance().getReference("Users");
         dRef.keepSynced(true);
 
-
-
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-
-        checkRealTimeNetwork(view);
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -229,45 +225,6 @@ public class ChatFragment extends Fragment {
 
     }
 
-    private void checkRealTimeNetwork(View view)
-    {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (connected) {
-                            chatsList();
-                        }
-                        else {
-                            progressDialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        progressDialog.dismiss();
-                        DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        },2000);
-    }
-
-
-
-    private boolean isNetworkConnected()
-    {
-        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

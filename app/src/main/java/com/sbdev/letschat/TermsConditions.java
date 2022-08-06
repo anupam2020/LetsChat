@@ -57,8 +57,6 @@ public class TermsConditions extends AppCompatActivity {
 
         webView.loadUrl("file:///android_asset/terms_conditions.html");
 
-        checkRealTimeNetwork();
-
         if(!isNetworkConnected())
         {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
@@ -123,36 +121,6 @@ public class TermsConditions extends AppCompatActivity {
 
     }
 
-
-    private void checkRealTimeNetwork()
-    {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
-                connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(TermsConditions.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        },2000);
-
-    }
 
     @Override
     public void onBackPressed() {

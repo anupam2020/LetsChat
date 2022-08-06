@@ -37,12 +37,12 @@
                 android:textSize="15sp" />
 
             <ImageView
+                android:id="@+id/activitiesMore"
                 android:layout_width="20dp"
-                android:layout_height="20sp"
-                android:layout_centerVertical="true"
+                android:layout_height="20dp"
                 android:layout_alignParentRight="true"
-                android:src="@drawable/ic_baseline_more_vert_24"
-                android:id="@+id/activitiesMore"/>
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_baseline_more_vert_24" />
 
             <TextView
                 android:id="@+id/activitiesDataTime"

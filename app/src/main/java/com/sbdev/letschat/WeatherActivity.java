@@ -124,12 +124,16 @@ public class WeatherActivity extends AppCompatActivity {
         locationRef= FirebaseDatabase.getInstance().getReference("Location");
         locationRef.keepSynced(true);
 
-        checkRealTimeNetwork();
-
         progressDialog.show();
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        if(!isNetworkConnected())
+        {
+            progressDialog.dismiss();
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
 
         sp=getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
 
@@ -518,38 +522,6 @@ public class WeatherActivity extends AppCompatActivity {
             DynamicToast.make(WeatherActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                     getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
         }
-
-    }
-
-    private void checkRealTimeNetwork()
-    {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
-                connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        progressDialog.dismiss();
-                        DynamicToast.make(WeatherActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        },2000);
 
     }
 

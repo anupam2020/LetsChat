@@ -57,6 +57,7 @@ public class Activities extends AppCompatActivity {
         setContentView(R.layout.activity_activities);
 
         back=findViewById(R.id.activitiesBack);
+        layout=findViewById(R.id.activitiesRelative);
         recyclerView=findViewById(R.id.activitiesRecycler);
 
         arrayList=new ArrayList<>();
@@ -80,8 +81,6 @@ public class Activities extends AppCompatActivity {
         progressDialog.setContentView(R.layout.progress_dialog_dots);
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-
-        checkRealTimeNetwork();
 
         if(!isNetworkConnected())
         {
@@ -185,37 +184,6 @@ public class Activities extends AppCompatActivity {
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
         });
-
-    }
-
-    private void checkRealTimeNetwork()
-    {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
-                connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(Activities.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        },2000);
 
     }
 

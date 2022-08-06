@@ -81,14 +81,17 @@ public class ChangePassword extends AppCompatActivity {
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
         usersRef.keepSynced(true);
 
-        checkRealTimeNetwork();
-
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
+
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
 
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -362,33 +365,6 @@ public class ChangePassword extends AppCompatActivity {
 
 
 
-    }
-
-    private void checkRealTimeNetwork() {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout, "Your device is offline!", Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChangePassword.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        }, 2000);
     }
 
     private boolean isNetworkConnected()

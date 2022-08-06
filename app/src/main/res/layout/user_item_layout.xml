@@ -34,29 +34,29 @@
                 android:src="@drawable/circle_offline" />
 
             <RelativeLayout
+                android:id="@+id/relativeUserItem"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_toRightOf="@id/userProfilePic"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:id="@+id/relativeUserItem"
+                android:layout_toRightOf="@id/userProfilePic"
                 android:gravity="center_vertical">
 
                 <RelativeLayout
+                    android:id="@+id/userRelative"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/userRelative">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/userName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Anupam Basak"
-                        android:textColor="@color/black"
-                        android:textSize="16dp"
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@id/userInfo"
-                        android:singleLine="true"/>
+                        android:singleLine="true"
+                        android:text="Anupam Basak"
+                        android:textColor="@color/black"
+                        android:textSize="16dp" />
 
                     <ImageView
                         android:id="@+id/userInfo"
@@ -64,8 +64,8 @@
                         android:layout_height="15sp"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:visibility="gone"
-                        android:src="@drawable/info2_black_new" />
+                        android:src="@drawable/ic_baseline_info_24_purple"
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 
@@ -79,8 +79,8 @@
                         android:id="@+id/userMsgIcon"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_centerVertical="true"/>
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="5dp" />
 
                     <TextView
                         android:id="@+id/userLastMsg"
@@ -91,7 +91,7 @@
                         android:layout_toRightOf="@id/userMsgIcon"
                         android:singleLine="true"
                         android:textColor="@color/grey"
-                        android:textSize="12dp" />
+                        android:textSize="12sp" />
 
                     <ImageView
                         android:id="@+id/userImgSent"
@@ -100,17 +100,17 @@
                         android:layout_toRightOf="@id/userMsgIcon"
                         android:scaleType="centerCrop"
                         android:src="@drawable/image_sent"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/userTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/light_grey"
-                        android:textSize="10dp"
+                        android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:singleLine="true"
-                        android:layout_alignParentRight="true"/>
+                        android:textColor="@color/light_grey"
+                        android:textSize="10sp" />
 
                 </RelativeLayout>
 

@@ -88,8 +88,6 @@ public class FriendProfile extends AppCompatActivity {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
 
-        checkRealTimeNetwork();
-
         reloadFriendProfile();
 
         back.setOnClickListener(new View.OnClickListener() {
@@ -208,33 +206,6 @@ public class FriendProfile extends AppCompatActivity {
                                 getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
-
-    }
-
-    private void checkRealTimeNetwork() {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(FriendProfile.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        }, 2000);
 
     }
 

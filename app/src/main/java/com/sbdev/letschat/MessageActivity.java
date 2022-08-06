@@ -1,5 +1,6 @@
 package com.sbdev.letschat;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -49,6 +51,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -79,9 +83,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageActivity extends AppCompatActivity {
 
-    ImageView back,more,gallery,send;
+    ImageView back,more,gallery,send,searchImg;
 
-    //ImageView background;
+    TextInputLayout textInputLayout;
+
+    TextInputEditText textInputEditText;
 
     EditText msgText;
 
@@ -103,7 +109,7 @@ public class MessageActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
 
-    ArrayList<MessageModel> arrayList;
+    ArrayList<MessageModel> arrayList, filterList;
 
     MessageAdapter adapter;
 
@@ -111,13 +117,13 @@ public class MessageActivity extends AppCompatActivity {
 
     RelativeLayout layout,topLayout, lottieRelative;
 
-    ValueEventListener seenListener;
-
     Animation animation,animationClick;
 
     String downloadURL="";
 
     LottieAnimationView lottie;
+
+    int flag=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +146,11 @@ public class MessageActivity extends AppCompatActivity {
         topLayout=findViewById(R.id.msgRelativeTop);
         lottieRelative=findViewById(R.id.messageRelativeVIS);
         lottie=findViewById(R.id.msgLottie);
+        searchImg=findViewById(R.id.messageSearchImg);
+        textInputLayout=findViewById(R.id.messageTIL);
+        textInputEditText=findViewById(R.id.messageET);
 
+        filterList=new ArrayList<>();
         arrayList=new ArrayList<>();
         adapter=new MessageAdapter(arrayList,MessageActivity.this);
         recyclerView.setAdapter(adapter);
@@ -201,7 +211,11 @@ public class MessageActivity extends AppCompatActivity {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        checkRealTimeNetwork();
+        if(!isNetworkConnected())
+        {
+            progressDialog.dismiss();
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
 
         loadWallpaper();
 
@@ -209,11 +223,74 @@ public class MessageActivity extends AppCompatActivity {
 
         //recyclerView.scrollToPosition(arrayList.size() - 1);
 
-
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+
+        searchImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(flag==0){
+                    textInputLayout.setVisibility(View.VISIBLE);
+                    flag=1;
+
+                    textInputEditText.requestFocus();
+                    InputMethodManager imm = (InputMethodManager) MessageActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(textInputEditText, 0);
+                    textInputEditText.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                            filterList.clear();
+
+                            if(s.toString().trim().isEmpty())
+                            {
+                                adapter=new MessageAdapter(arrayList,MessageActivity.this);
+                            }
+                            else
+                            {
+
+                                for(MessageModel model : arrayList)
+                                {
+                                    if(model.getText().toLowerCase().contains(s.toString().toLowerCase()) && model.getImgURI()==null)
+                                    {
+                                        filterList.add(model);
+                                    }
+                                }
+
+                                adapter=new MessageAdapter(filterList,MessageActivity.this);
+
+                            }
+                            recyclerView.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+
+                        }
+                    });
+
+                }
+                else{
+                    textInputLayout.setVisibility(View.GONE);
+                    flag=0;
+                    textInputEditText.setText("");
+
+                    InputMethodManager imm = (InputMethodManager) MessageActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+
             }
         });
 
@@ -365,9 +442,6 @@ public class MessageActivity extends AppCompatActivity {
 
                         }
                     });
-
-                    //loadProfile();
-                    //loadWallpaper();
                 }
                 else
                 {
@@ -410,6 +484,7 @@ public class MessageActivity extends AppCompatActivity {
                                     public void onSuccess(Void unused) {
                                         getWindow().setBackgroundDrawableResource(R.color.white);
                                         progressDialog.dismiss();
+                                        reference.child(myUID).child("Wallpaper").removeValue();
                                         DynamicToast.make(MessageActivity.this, "Wallpaper reset successful!", getResources().getDrawable(R.drawable.checked),
                                                 getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
@@ -645,49 +720,20 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    private void checkRealTimeNetwork()
-    {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-
-                connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        },2000);
-
-    }
-
     public void loadWallpaper()
     {
 
-        storageReference.child(myUID)
-            .child("Wallpaper")
-            .getDownloadUrl()
-            .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
+        reference.child(myUID).child("Wallpaper").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                Log.d("Snapshot", String.valueOf(snapshot));
+
+                if(snapshot.exists())
+                {
 
                     Glide.with(getApplicationContext())
-                        .load(uri)
+                        .load(Objects.requireNonNull(snapshot.getValue()).toString())
                         .into(new CustomTarget<Drawable>() {
                             @Override
                             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
@@ -703,18 +749,19 @@ public class MessageActivity extends AppCompatActivity {
                             }
                         });
 
+                }
+                else {
+                    progressDialog.dismiss();
+                    getWindow().setBackgroundDrawableResource(R.color.white);
+                }
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+            }
 
-                        progressDialog.dismiss();
-                        getWindow().setBackgroundDrawableResource(R.color.white);
-                        //background.setImageResource(R.drawable.msg_bg);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+            }
+        });
 
     }
 
@@ -769,10 +816,10 @@ public class MessageActivity extends AppCompatActivity {
                         arrayList.add(messageModel);
                     }
 
-                    adapter.notifyDataSetChanged();
-                    recyclerView.scrollToPosition(arrayList.size() - 1);
-
                 }
+
+                adapter.notifyDataSetChanged();
+                recyclerView.scrollToPosition(arrayList.size() - 1);
 
                 if(arrayList.isEmpty()){
                     lottieRelative.setVisibility(View.VISIBLE);
@@ -788,11 +835,13 @@ public class MessageActivity extends AppCompatActivity {
                 else{
                     lottieRelative.setVisibility(View.GONE);
                 }
+                progressDialog.dismiss();
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
                 DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
@@ -1050,9 +1099,24 @@ public class MessageActivity extends AppCompatActivity {
                         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", getResources().getDrawable(R.drawable.checked),
-                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                progressDialog.dismiss();
+
+                                storageReference.child(myUID)
+                                .child("Wallpaper")
+                                .getDownloadUrl()
+                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+
+                                        reference.child(myUID)
+                                                 .child("Wallpaper")
+                                                 .setValue(uri.toString());
+
+                                        DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", getResources().getDrawable(R.drawable.checked),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                        progressDialog.dismiss();
+
+                                    }
+                                });
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -1338,9 +1402,6 @@ public class MessageActivity extends AppCompatActivity {
 
         //friendUID="";
 
-        if (seenListener != null && reference!=null) {
-            reference.child(friendUID).removeEventListener(seenListener);
-        }
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
 
         typingRef.child(firebaseAuth.getCurrentUser().getUid())
@@ -1357,9 +1418,6 @@ public class MessageActivity extends AppCompatActivity {
         super.onPause();
         //friendUID="";
 
-        if (seenListener != null && reference!=null) {
-            reference.child(friendUID).removeEventListener(seenListener);
-        }
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
         checkStatus("Offline");
     }

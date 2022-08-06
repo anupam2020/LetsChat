@@ -127,8 +127,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         reloadProfile();
 
-        checkRealTimeNetwork();
-
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -611,43 +609,55 @@ public class ProfileActivity extends AppCompatActivity {
                                 });
                                 break;
                             case R.id.verifyEmail:
+
                                 progressDialog.show();
                                 progressDialog.setContentView(R.layout.progress_dialog_dots);
                                 progressDialog.setCancelable(true);
                                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                                if(firebaseAuth.getCurrentUser()!=null)
+
+                                if(!isNetworkConnected())
+                                {
+                                    progressDialog.dismiss();
+                                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                                }
+                                else
                                 {
 
-                                    if(!firebaseAuth.getCurrentUser().isEmailVerified())
+                                    if(firebaseAuth.getCurrentUser()!=null)
                                     {
 
-                                        firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
+                                        if(!firebaseAuth.getCurrentUser().isEmailVerified())
+                                        {
 
-                                                if(task.isSuccessful())
-                                                {
-                                                    DynamicToast.make(ProfileActivity.this, "Email verification link is sent to your mail!", getResources().getDrawable(R.drawable.mail),
+                                            firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+
+                                                    if(task.isSuccessful())
+                                                    {
+                                                        DynamicToast.make(ProfileActivity.this, "Email verification link is sent to your mail!", getResources().getDrawable(R.drawable.mail),
+                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                                        progressDialog.dismiss();
+                                                    }
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                             getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     progressDialog.dismiss();
                                                 }
+                                            });
 
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                progressDialog.dismiss();
-                                            }
-                                        });
+                                        }
+                                        else
+                                        {
+                                            progressDialog.dismiss();
+                                            DynamicToast.make(ProfileActivity.this, "Email is already verified!", getResources().getDrawable(R.drawable.mail),
+                                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                        }
 
-                                    }
-                                    else
-                                    {
-                                        progressDialog.dismiss();
-                                        DynamicToast.make(ProfileActivity.this, "Email is already verified!", getResources().getDrawable(R.drawable.mail),
-                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                     }
 
                                 }
@@ -682,6 +692,7 @@ public class ProfileActivity extends AppCompatActivity {
                     FirebaseDatabase.getInstance().getReference("Typing").child(currentUID).removeValue();
                     FirebaseDatabase.getInstance().getReference("Favorites").child(currentUID).removeValue();
                     FirebaseDatabase.getInstance().getReference("ChatsList").child(currentUID).removeValue();
+                    FirebaseDatabase.getInstance().getReference("Activities").child(currentUID).removeValue();
 
                     FirebaseStorage.getInstance().getReference("Pictures")
                             .child(currentUID)
@@ -762,33 +773,6 @@ public class ProfileActivity extends AppCompatActivity {
                 openGallery();
             }
         });
-
-    }
-
-    private void checkRealTimeNetwork() {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (!connected) {
-                            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ProfileActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        }, 2000);
 
     }
 

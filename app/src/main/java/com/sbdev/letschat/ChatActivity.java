@@ -119,6 +119,11 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         reference.child(firebaseAuth.getCurrentUser().getUid()).child("isLoggedIn").setValue("true");
 
+        if(!isNetworkConnected())
+        {
+            Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+        }
+
         weather.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +137,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         viewPager2.setAdapter(adapter);
 
         tabLayout.addTab(tabLayout.newTab().setText("Chats"));
+        tabLayout.addTab(tabLayout.newTab().setText("Status"));
+        tabLayout.addTab(tabLayout.newTab().setText("Users"));
 
         chatsRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -148,12 +155,42 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                 }
 
-                if(unreadMsg==0) {
-                    tabLayout.getTabAt(0).setText("Chats");
-                }
-                else {
-                    tabLayout.getTabAt(0).setText("Chats ("+unreadMsg+")");
-                }
+                DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList");
+
+                int finalUnreadMsg = unreadMsg;
+                chatsListRef.child(firebaseAuth.getCurrentUser().getUid())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if(snapshot.exists()){
+
+                                if(finalUnreadMsg ==0) {
+                                    tabLayout.getTabAt(0).setText("Chats");
+                                }
+                                else {
+                                    tabLayout.getTabAt(0).setText("Chats ("+ finalUnreadMsg +")");
+                                }
+
+                            }
+                            else{
+
+                                if(finalUnreadMsg ==0) {
+                                    tabLayout.getTabAt(2).setText("Users");
+                                }
+                                else {
+                                    tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
+                                }
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
 
             }
 
@@ -162,10 +199,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
             }
         });
-
-        tabLayout.addTab(tabLayout.newTab().setText("Users"));
-
-        checkRealTimeNetwork();
 
         tabLayout.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
 
@@ -287,23 +320,31 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                 startActivity(new Intent(ChatActivity.this,MoreActivity.class));
                                 break;
                             case R.id.logout:
-                                reference.child(firebaseAuth.getCurrentUser().getUid())
-                                    .child("isLoggedIn")
-                                    .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()) {
-                                                logoutUser();
+
+                                if(!isNetworkConnected()) {
+                                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                                }
+                                else {
+
+                                    reference.child(firebaseAuth.getCurrentUser().getUid())
+                                        .child("isLoggedIn")
+                                        .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if(task.isSuccessful()) {
+                                                    logoutUser();
+                                                }
                                             }
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                        }
-                                    });
-                                    break;
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                            }
+                                        });
+
+                                }
+                                break;
                         }
 
                         return false;
@@ -342,68 +383,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                 getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
-
-    }
-
-    private void checkRealTimeNetwork() {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean connected = snapshot.getValue(Boolean.class);
-                        if (connected) {
-                            usersRef.child("status").setValue("Online");
-                            //usersRef.child("status").onDisconnect().setValue("Offline");
-
-                            usersRef.child("status").onDisconnect().setValue("Offline").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-
-                                    if(task.isSuccessful())
-                                    {
-                                        DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
-                                        serverTimeRef.addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                                long offset = snapshot.getValue(Long.class);
-                                                long estimatedServerTimeMs = System.currentTimeMillis() + offset;
-
-                                                Timestamp timestamp=new Timestamp(estimatedServerTimeMs);
-                                                Date date=timestamp;
-                                                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("MMM dd, hh:mm a");
-                                                String strDateTime=simpleDateFormat.format(date);
-
-                                                usersRef.child("status").onDisconnect().setValue(strDateTime);
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                            }
-                                        });
-                                    }
-
-                                }
-                            });
-                            getCity();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
-
-            }
-        }, 2000);
 
     }
 
@@ -590,22 +569,28 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         }).setNegativeButton("Logout", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                reference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                    .child("isLoggedIn")
-                    .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()) {
-                                logoutUser();
+
+                if(!isNetworkConnected()) {
+                    Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                }
+                else{
+                    reference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
+                        .child("isLoggedIn")
+                        .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()) {
+                                    logoutUser();
+                                }
                             }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                        }
-                    });
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                            }
+                        });
+                }
             }
         });
 
@@ -645,6 +630,13 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                 });
         }
 
+    }
+
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
     public void checkStatus(String status)

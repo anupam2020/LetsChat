@@ -23,5 +23,6 @@
     <color name="light_violet">#BF8E24AB</color>
     <color name="deep_violet">#4D3380</color>
     <color name="purple">#D91A60</color>
+    <color name="purple_violet">#C200CF</color>
     <color name="light_purple">#BFD91A60</color>
 </resources>
