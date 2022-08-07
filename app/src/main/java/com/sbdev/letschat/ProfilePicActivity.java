@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -32,6 +33,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
@@ -181,9 +183,27 @@ public class ProfilePicActivity extends AppCompatActivity {
         else
         {
 
+            Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
+
             storageReference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .child("Profile_Pic")
                 .putFile(imageURI)
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                        double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                        //progressDialog.setMessage((int) progress + "");
+                        progressDialog.show();
+                        progressDialog.setContentView(R.layout.progress_image_upload_status);
+                        progressDialog.setCancelable(false);
+                        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                        TextView tv = progressDialog.findViewById(R.id.progressText);
+                        tv.setText(String.format("%.2f", progress) + "%");
+
+                    }
+                })
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -214,7 +234,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                                                 }
 
                                             }
-                                        }).addOnFailureListener(new OnFailureListener() {
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
@@ -223,7 +244,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                                         });
 
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
 
@@ -234,7 +256,8 @@ public class ProfilePicActivity extends AppCompatActivity {
                             });
 
                     }
-                }).addOnFailureListener(new OnFailureListener() {
+                })
+                .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
 

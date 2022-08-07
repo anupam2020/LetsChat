@@ -144,53 +144,67 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                int unreadMsg=0;
+                if(snapshot.exists())
+                {
 
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    int unreadMsg=0;
 
-                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                    if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getIsSeen()==0) {
-                        unreadMsg++;
+                    for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+
+                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+                        assert messageModel != null;
+                        if(messageModel.getSender()!=null)
+                        {
+                            if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getIsSeen()==0)
+                            {
+                                unreadMsg++;
+                            }
+                        }
+//                        else
+//                        {
+//                            chatsRef.child(Objects.requireNonNull(dataSnapshot.getKey())).removeValue();
+//                        }
+
                     }
 
+                    DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList");
+
+                    int finalUnreadMsg = unreadMsg;
+                    chatsListRef.child(firebaseAuth.getCurrentUser().getUid())
+                            .addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    if(snapshot.exists()){
+
+                                        if(finalUnreadMsg ==0) {
+                                            tabLayout.getTabAt(0).setText("Chats");
+                                        }
+                                        else {
+                                            tabLayout.getTabAt(0).setText("Chats ("+ finalUnreadMsg +")");
+                                        }
+
+                                    }
+                                    else{
+
+                                        if(finalUnreadMsg ==0) {
+                                            tabLayout.getTabAt(2).setText("Users");
+                                        }
+                                        else {
+                                            tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
+                                        }
+
+                                    }
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
                 }
-
-                DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList");
-
-                int finalUnreadMsg = unreadMsg;
-                chatsListRef.child(firebaseAuth.getCurrentUser().getUid())
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                            if(snapshot.exists()){
-
-                                if(finalUnreadMsg ==0) {
-                                    tabLayout.getTabAt(0).setText("Chats");
-                                }
-                                else {
-                                    tabLayout.getTabAt(0).setText("Chats ("+ finalUnreadMsg +")");
-                                }
-
-                            }
-                            else{
-
-                                if(finalUnreadMsg ==0) {
-                                    tabLayout.getTabAt(2).setText("Users");
-                                }
-                                else {
-                                    tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
-                                }
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
 
             }
 

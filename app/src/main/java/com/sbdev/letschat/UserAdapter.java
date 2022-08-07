@@ -97,7 +97,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                         myProfilePic=userModel.getProfilePic();
 
                         String key=statusRef.push().getKey();
-                        uploadStatus(myName,myProfilePic,key,model.getUID(),"view");
+                        uploadStatus(myName,myProfilePic,key,model.getUID(),"viewProfile");
 
                     }
 
@@ -159,7 +159,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                         myName=userModel.getName();
                                         myProfilePic=userModel.getProfilePic();
                                         String key=statusRef.push().getKey();
-                                        uploadStatus(myName,myProfilePic,key,model.getUID(),"download");
+                                        uploadStatus(myName,myProfilePic,key,model.getUID(),"downloadProfile");
 
                                     }
 
@@ -268,11 +268,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                                 if(messageModel.getIsSeen()==0)
                                 {
                                     last_msg.setTypeface(last_msg.getTypeface(),Typeface.BOLD);
+                                    time.setTypeface(last_msg.getTypeface(),Typeface.BOLD);
+                                    last_msg.setTextColor(context.getResources().getColor(R.color.black));
                                     info.setVisibility(View.VISIBLE);
+                                    time.setTextColor(context.getResources().getColor(R.color.black));
                                 }
                                 else
                                 {
                                     info.setVisibility(View.GONE);
+                                    time.setTypeface(null,Typeface.NORMAL);
+                                    time.setTextColor(context.getResources().getColor(R.color.light_grey));
                                 }
                             }
                         }
@@ -359,7 +364,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public void uploadStatus(String name, String profile, String key, String uid, String status)
     {
-        if(status.equals("download"))
+        if(status.equals("downloadProfile"))
         {
             downloadURL(profile, name);
         }

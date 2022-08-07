@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,6 +44,8 @@ public class UsersFragment extends Fragment {
 
     RecyclerView recyclerView;
 
+    TextInputLayout textInputLayout;
+
     TextInputEditText searchText;
 
     UserAdapter adapter;
@@ -60,6 +63,7 @@ public class UsersFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView=view.findViewById(R.id.usersRecyclerView);
+        textInputLayout=view.findViewById(R.id.userTIL);
         searchText=view.findViewById(R.id.usersSearch);
 
         filterList=new ArrayList<>();
@@ -210,6 +214,13 @@ public class UsersFragment extends Fragment {
                             return o2.getLast_text_time().compareTo(o1.getLast_text_time());
                         }
                     });
+
+                    textInputLayout.setVisibility(View.VISIBLE);
+
+                }
+                else
+                {
+                    textInputLayout.setVisibility(View.GONE);
                 }
 
                 adapter.notifyDataSetChanged();

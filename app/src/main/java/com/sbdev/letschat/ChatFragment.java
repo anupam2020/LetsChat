@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +29,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,9 +53,13 @@ public class ChatFragment extends Fragment {
 
     RecyclerView recyclerView;
 
+    TextInputLayout textInputLayout;
+
+    TextInputEditText editText;
+
     UserAdapter adapter;
 
-    ArrayList<UserModel> mUsers;
+    ArrayList<UserModel> mUsers,filterList;
 
     ArrayList<MessageModel> msgList;
 
@@ -68,7 +76,10 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView=view.findViewById(R.id.chatsRecycler);
+        textInputLayout=view.findViewById(R.id.chatsTIL);
+        editText=view.findViewById(R.id.chatsSearch);
 
+        filterList=new ArrayList<>();
         mUsers=new ArrayList<>();
         adapter=new UserAdapter(mUsers,getActivity());
         recyclerView.setAdapter(adapter);
@@ -171,6 +182,46 @@ public class ChatFragment extends Fragment {
         });
 
 
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                filterList.clear();
+
+                if(s.toString().trim().isEmpty())
+                {
+                    adapter=new UserAdapter(mUsers,getActivity());
+                }
+                else
+                {
+
+                    for(UserModel model : mUsers)
+                    {
+                        if(model.getName().toLowerCase().contains(s.toString().toLowerCase()))
+                        {
+                            filterList.add(model);
+                        }
+                    }
+
+                    adapter=new UserAdapter(filterList,getActivity());
+
+                }
+                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+            }
+        });
+
     }
 
     private void chatsList()
@@ -208,6 +259,13 @@ public class ChatFragment extends Fragment {
                             return o2.getLast_text_time().compareTo(o1.getLast_text_time());
                         }
                     });
+
+                    textInputLayout.setVisibility(View.VISIBLE);
+
+                }
+                else
+                {
+                    textInputLayout.setVisibility(View.GONE);
                 }
 
                 adapter.notifyDataSetChanged();

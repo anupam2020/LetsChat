@@ -1,5 +1,6 @@
 package com.sbdev.letschat;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,9 +20,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,6 +42,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.jsibbold.zoomage.ZoomageView;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
 import java.sql.Timestamp;
@@ -46,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -65,11 +70,9 @@ public class StatusFragment extends Fragment {
 
     FirebaseAuth firebaseAuth;
 
-    DatabaseReference reference,statusRef;
+    DatabaseReference reference,statusDBRef,statusRef;
 
     StorageReference storageReference;
-
-    CardView cardView;
 
     ProgressDialog progressDialog;
 
@@ -77,9 +80,13 @@ public class StatusFragment extends Fragment {
 
     private final int reqCodeMsg=1;
 
-    Uri imgURI;
+    static Uri imgURI;
 
-    String name="",profilePicURL="";
+    String name="",profilePicURL="",statusPicURL="";
+
+    LinearLayout linearLayout;
+
+    int flag=0;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -90,8 +97,8 @@ public class StatusFragment extends Fragment {
         date=view.findViewById(R.id.statusDate);
         more=view.findViewById(R.id.statusMore);
         recyclerView=view.findViewById(R.id.statusRecycler);
-        cardView=view.findViewById(R.id.statusCard);
         layout=view.findViewById(R.id.statusRelative);
+        linearLayout=view.findViewById(R.id.statusLinear);
 
         arrayList=new ArrayList<>();
         adapter=new StatusAdapter(getActivity(),arrayList);
@@ -108,7 +115,9 @@ public class StatusFragment extends Fragment {
 
         reference= FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
-        statusRef=FirebaseDatabase.getInstance().getReference("StatusDB");
+        statusDBRef=FirebaseDatabase.getInstance().getReference("StatusDB");
+        statusDBRef.keepSynced(true);
+        statusRef=FirebaseDatabase.getInstance().getReference("Status");
         statusRef.keepSynced(true);
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
@@ -119,37 +128,7 @@ public class StatusFragment extends Fragment {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
 
-        reference.child(firebaseAuth.getCurrentUser().getUid())
-            .addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                    UserModel userModel=snapshot.getValue(UserModel.class);
-                    assert userModel != null;
-                    if(userModel.getProfilePic()!=null)
-                    {
-                        profilePicURL=userModel.getProfilePic();
-                        Glide.with(getActivity())
-                                .load(userModel.getProfilePic())
-                                .placeholder(R.drawable.bw_loading1)
-                                .error(R.drawable.bw_loading1)
-                                .into(img);
-                    }
-                    else
-                    {
-                        img.setImageResource(R.drawable.item_user);
-                    }
-                    name=userModel.getName();
-                    progressDialog.dismiss();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-        cardView.setOnClickListener(new View.OnClickListener() {
+        linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -161,6 +140,56 @@ public class StatusFragment extends Fragment {
                 {
                     openGallery();
                 }
+
+            }
+        });
+
+        img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.d("On Click Flag", String.valueOf(flag));
+
+                if(flag==1)
+                {
+
+                    ZoomageView profile=new ZoomageView(getActivity());
+                    profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    profile.setAdjustViewBounds(true);
+
+                    Glide.with(getActivity())
+                            .load(statusPicURL)
+                            .placeholder(R.drawable.bw_loading1)
+                            .error(R.drawable.bw_loading1)
+                            .into(profile);
+
+                    AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
+                    builder.setView(profile);
+
+                    builder.show();
+
+                }
+                else
+                {
+
+                    ZoomageView profile=new ZoomageView(getActivity());
+                    profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    profile.setAdjustViewBounds(true);
+
+                    Glide.with(getActivity())
+                            .load(profilePicURL)
+                            .placeholder(R.drawable.item_user)
+                            .error(R.drawable.item_user)
+                            .into(profile);
+
+                    AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
+                    builder.setView(profile);
+
+                    builder.show();
+
+                }
+
+
 
             }
         });
@@ -198,7 +227,7 @@ public class StatusFragment extends Fragment {
                                             @Override
                                             public void onSuccess(Void unused) {
 
-                                                statusRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
+                                                statusDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
 
                                                 Glide.with(getActivity())
                                                         .load(profilePicURL)
@@ -237,7 +266,7 @@ public class StatusFragment extends Fragment {
             }
         });
 
-        statusRef.child(firebaseAuth.getCurrentUser().getUid())
+        statusDBRef.child(firebaseAuth.getCurrentUser().getUid())
             .addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -245,9 +274,11 @@ public class StatusFragment extends Fragment {
                     if(snapshot.exists())
                     {
 
+                        flag=1;
                         StatusModel statusModel=snapshot.getValue(StatusModel.class);
 
                         assert statusModel != null;
+                        statusPicURL=statusModel.getImageURL();
                         Glide.with(getActivity())
                                 .load(statusModel.getImageURL())
                                 .placeholder(R.drawable.bw_loading1)
@@ -259,9 +290,46 @@ public class StatusFragment extends Fragment {
 
                         progressDialog.dismiss();
 
+                        Log.d("Exists Flag", String.valueOf(flag));
+
                     }
                     else
                     {
+
+                        flag=0;
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                            .addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    UserModel userModel=snapshot.getValue(UserModel.class);
+                                    assert userModel != null;
+                                    if(userModel.getProfilePic()!=null)
+                                    {
+                                        profilePicURL=userModel.getProfilePic();
+                                        Glide.with(getActivity())
+                                            .load(userModel.getProfilePic())
+                                            .placeholder(R.drawable.item_user)
+                                            .error(R.drawable.item_user)
+                                            .into(img);
+                                    }
+                                    else
+                                    {
+                                        img.setImageResource(R.drawable.item_user);
+                                    }
+                                    name=userModel.getName();
+                                    progressDialog.dismiss();
+
+                                    Log.d("Not Exists Flag", String.valueOf(flag));
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
                         date.setText("Tap to upload status");
                         more.setVisibility(View.GONE);
                     }
@@ -275,7 +343,7 @@ public class StatusFragment extends Fragment {
             });
 
 
-        statusRef.addValueEventListener(new ValueEventListener() {
+        statusDBRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -325,14 +393,16 @@ public class StatusFragment extends Fragment {
             imgURI=data.getData();
             img.setImageURI(imgURI);
 
-            uploadToFirebase(imgURI);
+            uploadToFirebase();
 
         }
 
     }
 
-    private void uploadToFirebase(Uri imgURI)
+    private void uploadToFirebase()
     {
+
+        Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
 
         DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
         serverTimeRef.addValueEventListener(new ValueEventListener() {
@@ -387,13 +457,14 @@ public class StatusFragment extends Fragment {
 
                                                 Log.d("Uri",uri.toString());
 
-                                                statusRef.child(firebaseAuth.getCurrentUser().getUid())
+                                                statusDBRef.child(firebaseAuth.getCurrentUser().getUid())
                                                     .setValue(map)
                                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
 
                                                             if(task.isSuccessful()){
+                                                                imgURI=null;
                                                                 DynamicToast.make(getActivity(),"Status successfully posted!", getResources().getDrawable(R.drawable.checked),
                                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }

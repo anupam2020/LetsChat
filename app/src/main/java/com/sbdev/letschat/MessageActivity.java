@@ -629,25 +629,15 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-//        seenRef.addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                    if(snapshot.child(friendUID).child(firebaseAuth.getCurrentUser().getUid()).exists())
-//                    {
-//                        seenMsg(getIntent().getStringExtra("friendUID"));
-//                    }
-//
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//
-//                }
-//            });
 
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        seenMsg();
+                seenMsg();
+
+            }
+        },1000);
 
     }
 
@@ -666,47 +656,51 @@ public class MessageActivity extends AppCompatActivity {
 
         DatabaseReference FriendDB=FirebaseDatabase.getInstance().getReference("Friend");
 
-
         dRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 for(DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
-                    MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-                    FriendDB.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot1) {
+                    if(dataSnapshot.exists())
+                    {
 
-                            for(DataSnapshot dataSnapshot1 : snapshot1.getChildren())
-                            {
+                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
-                                String value=dataSnapshot1.getValue().toString();
-                                value=value.substring(value.indexOf('=')+1,value.length()-1);
+                        FriendDB.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot1) {
 
-                                if(dataSnapshot1.getKey().equals(messageModel.getReceiver()))
+                                for(DataSnapshot dataSnapshot1 : snapshot1.getChildren())
                                 {
 
-                                    if(messageModel.getSender().equals(value))
+                                    String value=dataSnapshot1.getValue().toString();
+                                    value=value.substring(value.indexOf('=')+1,value.length()-1);
+
+                                    assert messageModel != null;
+                                    if(dataSnapshot1.getKey().equals(messageModel.getReceiver()))
                                     {
 
-                                        dataSnapshot.getRef().child("isSeen").setValue(1);
+                                        if(messageModel.getSender().equals(value))
+                                        {
+                                            dataSnapshot.getRef().child("isSeen").setValue(1);
+                                        }
 
                                     }
 
                                 }
 
+
                             }
 
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
+                            }
+                        });
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                    }
 
                 }
 
@@ -810,11 +804,18 @@ public class MessageActivity extends AppCompatActivity {
                     MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
 
                     assert messageModel != null;
-                    if(messageModel.getSender().equals(uid) && messageModel.getReceiver().equals(friendUID) ||
-                        messageModel.getReceiver().equals(uid) && messageModel.getSender().equals(friendUID))
+                    if(messageModel.getSender()!=null)
                     {
-                        arrayList.add(messageModel);
+                        if(messageModel.getSender().equals(uid) && messageModel.getReceiver().equals(friendUID) ||
+                                messageModel.getReceiver().equals(uid) && messageModel.getSender().equals(friendUID))
+                        {
+                            arrayList.add(messageModel);
+                        }
                     }
+//                    else
+//                    {
+//                        chatsRef.child(Objects.requireNonNull(dataSnapshot.getKey())).removeValue();
+//                    }
 
                 }
 
@@ -827,7 +828,14 @@ public class MessageActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
 
-                            addTextToFirebase(myUID,friendUID,"Hello!");
+                            if(!isNetworkConnected())
+                            {
+                                Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                addTextToFirebase(myUID,friendUID,"Hello!");
+                            }
 
                         }
                     });
@@ -1074,66 +1082,69 @@ public class MessageActivity extends AppCompatActivity {
                     InputStream inputStream = getContentResolver().openInputStream(imgURI);
                     drawable = Drawable.createFromStream(inputStream, imgURI.toString());
                 } catch (FileNotFoundException e) {
-                    drawable = getResources().getDrawable(R.drawable.msg_bg);
+                    drawable = getResources().getDrawable(R.color.white);
                 }
 
                 getWindow().setBackgroundDrawable(drawable);
 
+                Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
+
                 storageReference.child(myUID)
-                        .child("Wallpaper")
-                        .putFile(imgURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                    .child("Wallpaper")
+                    .putFile(imgURI)
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
 
-                                double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                                //progressDialog.setMessage((int) progress + "");
-                                progressDialog.show();
-                                progressDialog.setContentView(R.layout.progress_image_upload_status);
-                                progressDialog.setCancelable(false);
-                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                            double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                            //progressDialog.setMessage((int) progress + "");
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.progress_image_upload_status);
+                            progressDialog.setCancelable(false);
+                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-                                TextView tv = progressDialog.findViewById(R.id.progressText);
-                                tv.setText(String.format("%.2f", progress) + "%");
+                            TextView tv = progressDialog.findViewById(R.id.progressText);
+                            tv.setText(String.format("%.2f", progress) + "%");
 
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                storageReference.child(myUID)
-                                .child("Wallpaper")
-                                .getDownloadUrl()
-                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
+                            storageReference.child(myUID)
+                            .child("Wallpaper")
+                            .getDownloadUrl()
+                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
 
-                                        reference.child(myUID)
-                                                 .child("Wallpaper")
-                                                 .setValue(uri.toString());
+                                    reference.child(myUID)
+                                             .child("Wallpaper")
+                                             .setValue(uri.toString());
 
-                                        DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", getResources().getDrawable(R.drawable.checked),
-                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                        progressDialog.dismiss();
+                                    DynamicToast.make(MessageActivity.this, "Wallpaper successfully changed!", getResources().getDrawable(R.drawable.checked),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                    progressDialog.dismiss();
 
-                                    }
-                                });
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                progressDialog.dismiss();
-                            }
-                        });
+                                }
+                            });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            DynamicToast.make(MessageActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                            progressDialog.dismiss();
+                        }
+                    });
 
             }
         }
         if(requestCode == reqCodeMsg && resultCode == RESULT_OK) {
             assert data != null;
             if (data.getData()!=null) {
-
-                Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
 
                 imageURI = data.getData();
 
@@ -1146,6 +1157,8 @@ public class MessageActivity extends AppCompatActivity {
                         .putFile(imageURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                                Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
 
                                 double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
                                 //progressDialog.setMessage((int) progress + "");

@@ -51,13 +51,21 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
                 .load(activitiesModel.getProfilePic())
                 .into(holder.circleProfile);
 
-        if(activitiesModel.getStatus().equals("view"))
+        if(activitiesModel.getStatus().equals("viewProfile"))
         {
             holder.name.setText(activitiesModel.getName()+" viewed your profile picture.");
         }
-        else
+        else if(activitiesModel.getStatus().equals("downloadProfile"))
         {
             holder.name.setText(activitiesModel.getName()+" downloaded your profile picture.");
+        }
+        else if(activitiesModel.getStatus().equals("viewStatus"))
+        {
+            holder.name.setText(activitiesModel.getName()+" viewed your status.");
+        }
+        else
+        {
+            holder.name.setText(activitiesModel.getName()+" downloaded your status.");
         }
 
         holder.dateTime.setText(activitiesModel.getDateTime());

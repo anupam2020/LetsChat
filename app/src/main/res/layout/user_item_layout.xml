@@ -64,7 +64,7 @@
                         android:layout_height="15sp"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/ic_baseline_info_24_purple"
+                        android:src="@drawable/ic_baseline_info_24"
                         android:visibility="gone" />
 
                 </RelativeLayout>

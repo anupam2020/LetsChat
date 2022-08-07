@@ -23,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.facebook.login.Login;
@@ -42,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.jsibbold.zoomage.ZoomageView;
@@ -386,9 +388,30 @@ public class ProfileActivity extends AppCompatActivity {
 
                                         if(imgURI!=null)
                                         {
+
+                                            Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
+
                                             storageReference.child(firebaseAuth.getCurrentUser().getUid())
                                                 .child("Profile_Pic")
                                                 .putFile(imgURI)
+                                                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                                                        Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
+
+                                                        double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                                                        //progressDialog.setMessage((int) progress + "");
+                                                        progressDialog.show();
+                                                        progressDialog.setContentView(R.layout.progress_image_upload_status);
+                                                        progressDialog.setCancelable(false);
+                                                        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                                                        TextView tv = progressDialog.findViewById(R.id.progressText);
+                                                        tv.setText(String.format("%.2f", progress) + "%");
+
+                                                    }
+                                                })
                                                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                                     @Override
                                                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -416,6 +439,7 @@ public class ProfileActivity extends AppCompatActivity {
                                                 }).addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
+                                                        progressDialog.dismiss();
                                                         DynamicToast.make(ProfileActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                                 getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                     }

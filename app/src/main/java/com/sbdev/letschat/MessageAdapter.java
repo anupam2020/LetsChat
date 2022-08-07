@@ -1,7 +1,6 @@
 package com.sbdev.letschat;
 
 import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -222,12 +221,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                     {
                                         case R.id.deleteImg:
 
-                                            ProgressDialog progressDialog=new ProgressDialog(context);
-                                            progressDialog.show();
-                                            progressDialog.setContentView(R.layout.progress_image_delete_status);
-                                            progressDialog.setCancelable(true);
-                                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-
                                             arrayList.remove(holder.getAdapterPosition());
                                             notifyItemRemoved(holder.getAdapterPosition());
 
@@ -242,8 +235,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                                                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                                 @Override
                                                                 public void onSuccess(Void unused) {
-
-                                                                    progressDialog.dismiss();
 
                                                                 }
                                                             }).addOnFailureListener(new OnFailureListener() {

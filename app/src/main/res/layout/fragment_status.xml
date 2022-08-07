@@ -32,9 +32,10 @@
                     android:src="@drawable/item_user" />
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:layout_toLeftOf="@id/statusMore"
                     android:layout_toRightOf="@id/statusProfilePic"
                     android:layout_marginLeft="10sp"
                     android:layout_centerVertical="true"
@@ -63,9 +64,10 @@
                     android:id="@+id/statusMore"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
+                    android:visibility="gone"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:visibility="gone"
+
                     android:src="@drawable/ic_baseline_more_vert_24" />
 
             </RelativeLayout>
