@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <RelativeLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/white_box"
+            android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Your email is verified!"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:layout_centerHorizontal="true"
+                    android:fontFamily="@font/aladin"
+                    android:id="@+id/tvVerified"/>
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/mainLottie"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_below="@id/tvVerified"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="5dp"
+                    app:lottie_autoPlay="true"
+                    app:lottie_fileName="verified.json"
+                    app:lottie_loop="true"/>
+
+        </RelativeLayout>
+
+</RelativeLayout>

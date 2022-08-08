@@ -13,10 +13,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -26,7 +24,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.facebook.login.Login;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -133,6 +130,26 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+
+        verificationImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(firebaseAuth.getCurrentUser()!=null){
+                    progressDialog.show();
+                    if(firebaseAuth.getCurrentUser().isEmailVerified()){
+
+                        progressDialog.setContentView(R.layout.verified_dialog);
+                    }
+                    else{
+
+                        progressDialog.setContentView(R.layout.not_verified_dialog);
+                    }
+                    progressDialog.setCancelable(true);
+                }
+
             }
         });
 
