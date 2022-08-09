@@ -4,32 +4,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -37,9 +27,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,14 +38,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,8 +50,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity implements LifecycleObserver {
 
@@ -83,6 +64,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
     String city="";
 
     RelativeLayout layout;
+
+    public static NetworkClass.FirebaseListener fragmentListener = null ;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,9 +125,13 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         tabLayout.addTab(tabLayout.newTab().setText("Status"));
         tabLayout.addTab(tabLayout.newTab().setText("Users"));
 
-        chatsRef.addValueEventListener(new ValueEventListener() {
+        NetworkClass.myChats=new NetworkClass.FirebaseListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChatDataChange(DataSnapshot snapshot) {
+                if(fragmentListener != null)
+                {
+                    fragmentListener.onChatDataChange(snapshot);
+                }
 
                 if(snapshot.exists())
                 {
@@ -205,14 +194,106 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                             });
 
                 }
+            }
+
+            @Override
+            public void onChatListDataChange(DataSnapshot snapshot) {
+                if(fragmentListener != null)
+                {
+                    fragmentListener.onChatListDataChange(snapshot);
+                }
+            }
+
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
 
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+                if(fragmentListener != null)
+                {
+                    fragmentListener.onUserDataChange(snapshot);
+                }
 
             }
-        });
+
+        };
+
+//        chatsRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                if(snapshot.exists())
+//                {
+//
+//                    int unreadMsg=0;
+//
+//                    for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+//
+//                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+//                        assert messageModel != null;
+//                        if(messageModel.getSender()!=null)
+//                        {
+//                            if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getIsSeen()==0)
+//                            {
+//                                unreadMsg++;
+//                            }
+//                        }
+////                        else
+////                        {
+////                            chatsRef.child(Objects.requireNonNull(dataSnapshot.getKey())).removeValue();
+////                        }
+//
+//                    }
+//
+//                    DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList");
+//
+//                    int finalUnreadMsg = unreadMsg;
+//                    chatsListRef.child(firebaseAuth.getCurrentUser().getUid())
+//                            .addValueEventListener(new ValueEventListener() {
+//                                @Override
+//                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                                    if(snapshot.exists()){
+//
+//                                        if(finalUnreadMsg ==0) {
+//                                            tabLayout.getTabAt(0).setText("Chats");
+//                                        }
+//                                        else {
+//                                            tabLayout.getTabAt(0).setText("Chats ("+ finalUnreadMsg +")");
+//                                        }
+//
+//                                    }
+//                                    else{
+//
+//                                        if(finalUnreadMsg ==0) {
+//                                            tabLayout.getTabAt(2).setText("Users");
+//                                        }
+//                                        else {
+//                                            tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
+//                                        }
+//
+//                                    }
+//
+//                                }
+//
+//                                @Override
+//                                public void onCancelled(@NonNull DatabaseError error) {
+//
+//                                }
+//                            });
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
         tabLayout.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
 

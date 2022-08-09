@@ -40,6 +40,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,7 +64,9 @@ public class ChatFragment extends Fragment {
 
     ArrayList<MessageModel> msgList;
 
-    ArrayList<ChatsListModel> userList;
+    DataSnapshot chatlist_snapshot = null;
+
+    DataSnapshot userSnapshot = null;
 
     FirebaseAuth firebaseAuth;
 
@@ -86,7 +89,7 @@ public class ChatFragment extends Fragment {
 
         progressDialog=new ProgressDialog(getActivity());
 
-        userList=new ArrayList<>();
+
         msgList=new ArrayList<>();
 
         firebaseAuth=FirebaseAuth.getInstance();
@@ -105,29 +108,62 @@ public class ChatFragment extends Fragment {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        reference.addValueEventListener(new ValueEventListener() {
+        if(NetworkClass.dataSnapshotOnSuccessUsersList!=null && NetworkClass.dataSnapshotOnSuccessChatsList!=null){
+            chatsList(NetworkClass.dataSnapshotOnSuccessUsersList,NetworkClass.dataSnapshotOnSuccessChatsList);
+        }
+        ChatActivity.fragmentListener=new NetworkClass.FirebaseListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChatDataChange(DataSnapshot snapshot) {
 
-                userList.clear();
+            }
 
-                for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                {
-                    ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
-                    userList.add(chatsListModel);
+            @Override
+            public void onChatListDataChange(DataSnapshot chatlist_snapshot) {
+
+                if(userSnapshot!=null){
+                    chatsList(userSnapshot,chatlist_snapshot);
                 }
 
-                chatsList();
+            }
+
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
 
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                progressDialog.dismiss();
-                DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+            public void onUserDataChange(DataSnapshot user_snapshot) {
+                if(chatlist_snapshot!=null){
+                    chatsList(user_snapshot,chatlist_snapshot);
+                }
             }
-        });
+        };
+
+//        reference.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                userList.clear();
+//
+//                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+//                {
+//                    ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
+//                    userList.add(chatsListModel);
+//                }
+//                if (userSnapshot!=null){
+//                    chatsList();
+//                }
+//
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                progressDialog.dismiss();
+//                DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
+//                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+//            }
+//        });
 
         NetworkClass.connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -170,7 +206,7 @@ public class ChatFragment extends Fragment {
                         }
                     });
 
-                    chatsList();
+
                 }
             }
 
@@ -224,10 +260,56 @@ public class ChatFragment extends Fragment {
 
     }
 
-    private void chatsList()
+
+
+    private void chatsList(DataSnapshot user_snapshot , DataSnapshot chatlist_snapshot)
     {
 
-        reference=FirebaseDatabase.getInstance().getReference("Users");
+        mUsers.clear();
+
+        for(DataSnapshot dataSnapshot : user_snapshot.getChildren())
+        {
+            UserModel userModel=dataSnapshot.getValue(UserModel.class);
+
+            ArrayList<ChatsListModel> userList = new ArrayList<>();
+            for(DataSnapshot dataSnapshot1 : chatlist_snapshot.getChildren())
+            {
+                ChatsListModel chatsListModel=dataSnapshot1.getValue(ChatsListModel.class);
+                userList.add(chatsListModel);
+            }
+
+            for(ChatsListModel chatsListModel : userList)
+            {
+                assert userModel != null;
+                if(userModel.getUID().equals(chatsListModel.getUID()))
+                {
+                    mUsers.add(userModel);
+                }
+            }
+
+        }
+
+        if(!mUsers.isEmpty())
+        {
+            Collections.sort(mUsers, new Comparator<UserModel>() {
+                @Override
+                public int compare(UserModel o1, UserModel o2) {
+                    return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+                }
+            });
+
+            textInputLayout.setVisibility(View.VISIBLE);
+
+        }
+        else
+        {
+            textInputLayout.setVisibility(View.GONE);
+        }
+
+        adapter.notifyDataSetChanged();
+        progressDialog.dismiss();
+
+        /*reference=FirebaseDatabase.getInstance().getReference("Users");
 
         reference.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -279,7 +361,7 @@ public class ChatFragment extends Fragment {
                 DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
-        });
+        });*/
 
     }
 

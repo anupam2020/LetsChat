@@ -20,4 +20,7 @@ public class ChatsListModel {
     public void setUID(String UID) {
         this.UID = UID;
     }
+
+
+
 }

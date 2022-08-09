@@ -353,6 +353,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                         }).addOnFailureListener(new OnFailureListener() {
                                                             @Override
                                                             public void onFailure(@NonNull Exception e) {
+                                                                progressDialog.dismiss();
                                                                 DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
@@ -363,6 +364,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
+                                                    progressDialog.dismiss();
                                                     DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                             getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 }
@@ -374,6 +376,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
+                                    progressDialog.dismiss();
                                     DynamicToast.make(RegisterActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
                                             getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }
@@ -434,6 +437,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
+                                                progressDialog.dismiss();
                                                 DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                             }

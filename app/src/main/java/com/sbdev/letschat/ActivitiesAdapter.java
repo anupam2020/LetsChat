@@ -49,6 +49,8 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
 
         Glide.with(context)
                 .load(activitiesModel.getProfilePic())
+                .placeholder(R.drawable.item_user)
+                .error(R.drawable.item_user)
                 .into(holder.circleProfile);
 
         if(activitiesModel.getStatus().equals("viewProfile"))

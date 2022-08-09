@@ -383,6 +383,7 @@ public class LoginActivity extends AppCompatActivity {
                                                         }).addOnFailureListener(new OnFailureListener() {
                                                             @Override
                                                             public void onFailure(@NonNull Exception e) {
+                                                                progressDialog.dismiss();
                                                                 DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
@@ -394,6 +395,7 @@ public class LoginActivity extends AppCompatActivity {
                                             }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
+                                                    progressDialog.dismiss();
                                                     DynamicToast.make(LoginActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                             getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                 }
@@ -405,6 +407,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
+                                    progressDialog.dismiss();
                                     DynamicToast.make(LoginActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
                                             getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                 }

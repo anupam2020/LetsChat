@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -12,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
@@ -220,6 +218,8 @@ public class MessageActivity extends AppCompatActivity {
         loadWallpaper();
 
         loadProfile(friendUID);
+
+        readMsg(myUID,friendUID);
 
         //recyclerView.scrollToPosition(arrayList.size() - 1);
 
@@ -776,8 +776,6 @@ public class MessageActivity extends AppCompatActivity {
                         .error(R.drawable.item_user)
                         .into(profilePic);
 
-                readMsg(myUID,friendUID);
-
             }
 
             @Override
@@ -792,7 +790,7 @@ public class MessageActivity extends AppCompatActivity {
     private void readMsg(String uid, String friendUID)
     {
 
-        chatsRef.addValueEventListener(new ValueEventListener() {
+        /*chatsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -853,7 +851,97 @@ public class MessageActivity extends AppCompatActivity {
                 DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
-        });
+        });*/
+
+        if(NetworkClass.dataSnapshotOnSuccessChats!=null)
+        {
+            //Toast.makeText(this, "IF", Toast.LENGTH_SHORT).show();
+            loadChatSnapshot(uid,friendUID,NetworkClass.dataSnapshotOnSuccessChats);
+        }
+        else
+        {
+            //Toast.makeText(this, "ELSE", Toast.LENGTH_SHORT).show();
+        }
+        NetworkClass.myChats= new NetworkClass.FirebaseListener() {
+            @Override
+            public void onChatDataChange(DataSnapshot snapshot) {
+                loadChatSnapshot(uid,friendUID,snapshot);
+            }
+
+            @Override
+            public void onChatListDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+            }
+
+        };
+
+
+
+
+
+    }
+
+    private void loadChatSnapshot(String uid, String friendUID,DataSnapshot dataSnapshot1)
+    {
+
+        arrayList.clear();
+
+        for(DataSnapshot dataSnapshot : dataSnapshot1.getChildren())
+        {
+
+            MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
+
+            assert messageModel != null;
+            if(messageModel.getSender()!=null)
+            {
+                if(messageModel.getSender().equals(uid) && messageModel.getReceiver().equals(friendUID) ||
+                        messageModel.getReceiver().equals(uid) && messageModel.getSender().equals(friendUID))
+                {
+                    arrayList.add(messageModel);
+                }
+            }
+//                    else
+//                    {
+//                        chatsRef.child(Objects.requireNonNull(dataSnapshot.getKey())).removeValue();
+//                    }
+
+        }
+
+        adapter.notifyDataSetChanged();
+        recyclerView.scrollToPosition(arrayList.size() - 1);
+
+        if(arrayList.isEmpty()){
+            lottieRelative.setVisibility(View.VISIBLE);
+            lottieRelative.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if(!isNetworkConnected())
+                    {
+                        Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        addTextToFirebase(myUID,friendUID,"Hello!");
+                    }
+
+                }
+            });
+        }
+        else{
+            lottieRelative.setVisibility(View.GONE);
+        }
+        progressDialog.dismiss();
 
     }
 

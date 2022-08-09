@@ -129,8 +129,6 @@ public class UsersFragment extends Fragment {
 
                         }
                     });
-
-                    usersList();
                 }
             }
 
@@ -181,12 +179,44 @@ public class UsersFragment extends Fragment {
             }
         });
 
+
+
     }
 
     public void usersList()
     {
 
-        reference.addValueEventListener(new ValueEventListener() {
+        if(NetworkClass.dataSnapshotOnSuccessUsersList != null){
+            displayUsers(NetworkClass.dataSnapshotOnSuccessUsersList);
+        }
+
+
+            ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
+                @Override
+                public void onChatDataChange(DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onChatListDataChange(DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onStatusDataChange(DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onUserDataChange(DataSnapshot snapshot) {
+
+                    displayUsers(snapshot);
+
+                }
+            };
+
+
+        /*reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -233,7 +263,48 @@ public class UsersFragment extends Fragment {
                 progressDialog.dismiss();
                 Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
+
+    }
+
+    private void displayUsers(DataSnapshot snapshot)
+    {
+
+        arrayList.clear();
+
+        for(DataSnapshot dataSnapshot : snapshot.getChildren())
+        {
+            UserModel userModel=dataSnapshot.getValue(UserModel.class);
+
+            assert userModel != null;
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                if(!userModel.getUID().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()))
+                {
+                    arrayList.add(userModel);
+                }
+            }
+        }
+
+        if(!arrayList.isEmpty())
+        {
+            Collections.sort(arrayList, new Comparator<UserModel>() {
+                @Override
+                public int compare(UserModel o1, UserModel o2) {
+                    return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+                }
+            });
+
+            textInputLayout.setVisibility(View.VISIBLE);
+
+        }
+        else
+        {
+            textInputLayout.setVisibility(View.GONE);
+        }
+
+        adapter.notifyDataSetChanged();
+        progressDialog.dismiss();
 
     }
 
@@ -244,4 +315,7 @@ public class UsersFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_users, container, false);
     }
+
+
+
 }
