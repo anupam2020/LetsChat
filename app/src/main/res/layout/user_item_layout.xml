@@ -54,7 +54,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@id/userInfo"
                         android:singleLine="true"
-                        android:text="Anupam Basak"
+                        android:text="..."
                         android:textColor="@color/black"
                         android:textSize="16dp" />
 
@@ -90,6 +90,7 @@
                         android:layout_toLeftOf="@id/userTime"
                         android:layout_toRightOf="@id/userMsgIcon"
                         android:singleLine="true"
+                        android:text="..."
                         android:textColor="@color/grey"
                         android:textSize="12sp" />
 

@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:padding="5dp"
-            android:text="Hi where are you?"
+            android:text="..."
             android:textColor="@color/black"
             android:textSize="16sp" />
 

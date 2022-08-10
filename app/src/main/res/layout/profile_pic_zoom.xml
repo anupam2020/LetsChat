@@ -4,12 +4,12 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/profilePicZoomImg"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_centerInParent="true"
-        android:src="@drawable/me"
-        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:id="@+id/profilePicZoomImg"/>
+        android:scaleType="centerCrop"
+        android:src="@drawable/item_user" />
 
 </RelativeLayout>

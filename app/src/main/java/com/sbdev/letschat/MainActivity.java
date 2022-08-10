@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent=new Intent(MainActivity.this,ChatActivity.class);
             intent.putExtra("myUID",getIntent().getStringExtra("myUID"));
             intent.putExtra("myToken",getIntent().getStringExtra("myToken"));
+            intent.putExtra("myName",getIntent().getStringExtra("myName"));
+            intent.putExtra("myPic",getIntent().getStringExtra("myPic"));
             startActivity(intent);
             finishAffinity();
         }

@@ -89,7 +89,6 @@ public class ChatFragment extends Fragment {
 
         progressDialog=new ProgressDialog(getActivity());
 
-
         msgList=new ArrayList<>();
 
         firebaseAuth=FirebaseAuth.getInstance();
@@ -136,6 +135,11 @@ public class ChatFragment extends Fragment {
                 if(chatlist_snapshot!=null){
                     chatsList(user_snapshot,chatlist_snapshot);
                 }
+            }
+
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
             }
         };
 

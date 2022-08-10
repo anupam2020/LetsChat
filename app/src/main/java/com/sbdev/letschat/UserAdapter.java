@@ -199,6 +199,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 Intent intent=new Intent(context,MessageActivity.class);
                 intent.putExtra("friendUID",model.getUID());
                 intent.putExtra("friendToken",model.getToken());
+                intent.putExtra("friendName",model.getName());
+                intent.putExtra("friendPic",model.getProfilePic());
                 context.startActivity(intent);
 
             }

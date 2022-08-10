@@ -53,7 +53,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:singleLine="true"
-                android:text="Anupam Basak"
+                android:text="..."
                 android:textColor="@color/white"
                 android:textSize="18dp" />
 
@@ -66,7 +66,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
                 android:singleLine="true"
-                android:text="Online"
+                android:text="..."
                 android:textColor="@color/white"
                 android:textSize="12dp" />
 

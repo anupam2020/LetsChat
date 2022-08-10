@@ -23,14 +23,12 @@ public class NetworkClass extends Application {
 
     public static DatabaseReference connectedRef;
 
-    public DatabaseReference chats,chatsList,statusList,usersList;
+    public DatabaseReference chats,chatsList,statusList,usersList,favList;
 
     public static FirebaseListener myChats= null;
 
-    public static DataSnapshot dataSnapshotOnSuccessChats;
-    public static DataSnapshot dataSnapshotOnSuccessChatsList;
-    public static DataSnapshot dataSnapshotOnSuccessStatusList;
-    public static DataSnapshot dataSnapshotOnSuccessUsersList;
+    public static DataSnapshot dataSnapshotOnSuccessChats,dataSnapshotOnSuccessChatsList,dataSnapshotOnSuccessStatusList,
+            dataSnapshotOnSuccessUsersList,dataSnapshotOnSuccessFavList;
 
     FirebaseAuth firebaseAuth;
 
@@ -48,6 +46,7 @@ public class NetworkClass extends Application {
         chatsList=FirebaseDatabase.getInstance().getReference("ChatsList");
         statusList=FirebaseDatabase.getInstance().getReference("StatusDB");
         usersList=FirebaseDatabase.getInstance().getReference("Users");
+        favList= FirebaseDatabase.getInstance().getReference("Favorites");
 
         dataSnapshotOnSuccessChats=null;
 
@@ -71,7 +70,6 @@ public class NetworkClass extends Application {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser()!=null)
                 {
-                    Log.d("FirebaseAuth1", firebaseAuth.getCurrentUser().getUid());
 
                     chatsList.child(firebaseAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                         @Override
@@ -89,42 +87,23 @@ public class NetworkClass extends Application {
                     });
 
                 }
-                else
-                {
-                    Log.d("Else", "ELSE");
-                }
             }
         });
 
-//        chatsList.child(firebaseAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                if(myChats!=null) {
-//                    myChats.onUserDataChange(snapshot);
-//                }
-//                dataSnapshotOnSuccessChatsList=snapshot;
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//            }
-//        });
+        statusList.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-//        statusList.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                if(myChats!=null) {
-//                    myChats.onUserDataChange(snapshot);
-//                }
-//                dataSnapshotOnSuccessChats=snapshot;
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//            }
-//        });
+                if(myChats!=null) {
+                    myChats.onStatusDataChange(snapshot);
+                }
+                dataSnapshotOnSuccessStatusList=snapshot;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
 
         usersList.addValueEventListener(new ValueEventListener() {
             @Override
@@ -141,6 +120,25 @@ public class NetworkClass extends Application {
             }
         });
 
+        favList.child(firebaseAuth.getCurrentUser().getUid())
+            .addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    if(myChats!=null) {
+                        myChats.onFavChatsChange(snapshot);
+                    }
+                    dataSnapshotOnSuccessFavList=snapshot;
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
 
     }
 
@@ -150,6 +148,7 @@ public class NetworkClass extends Application {
         void onChatListDataChange(DataSnapshot snapshot);
         void onStatusDataChange(DataSnapshot snapshot);
         void onUserDataChange(DataSnapshot snapshot);
+        void onFavChatsChange(DataSnapshot snapshot);
 
     }
 

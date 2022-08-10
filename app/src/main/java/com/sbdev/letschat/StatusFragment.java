@@ -122,6 +122,8 @@ public class StatusFragment extends Fragment {
 
         storageReference= FirebaseStorage.getInstance().getReference("Pictures");
 
+        statusList();
+
         if(!isNetworkConnected())
         {
             progressDialog.dismiss();
@@ -147,8 +149,6 @@ public class StatusFragment extends Fragment {
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Log.d("On Click Flag", String.valueOf(flag));
 
                 if(flag==1)
                 {
@@ -217,7 +217,7 @@ public class StatusFragment extends Fragment {
 
                                 progressDialog.show();
                                 progressDialog.setContentView(R.layout.progress_image_delete_status);
-                                progressDialog.setCancelable(true);
+                                progressDialog.setCancelable(false);
                                 progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
                                 storageReference.child(firebaseAuth.getCurrentUser().getUid())
@@ -290,8 +290,6 @@ public class StatusFragment extends Fragment {
 
                         progressDialog.dismiss();
 
-                        Log.d("Exists Flag", String.valueOf(flag));
-
                     }
                     else
                     {
@@ -307,11 +305,11 @@ public class StatusFragment extends Fragment {
                                     if(userModel.getProfilePic()!=null)
                                     {
                                         profilePicURL=userModel.getProfilePic();
-                                        Glide.with(getActivity())
-                                            .load(userModel.getProfilePic())
-                                            .placeholder(R.drawable.item_user)
-                                            .error(R.drawable.item_user)
-                                            .into(img);
+                                        Glide.with(Objects.requireNonNull(getContext()))
+                                                .load(userModel.getProfilePic())
+                                                .placeholder(R.drawable.item_user)
+                                                .error(R.drawable.item_user)
+                                                .into(img);
                                     }
                                     else
                                     {
@@ -319,8 +317,6 @@ public class StatusFragment extends Fragment {
                                     }
                                     name=userModel.getName();
                                     progressDialog.dismiss();
-
-                                    Log.d("Not Exists Flag", String.valueOf(flag));
 
                                 }
 
@@ -343,33 +339,90 @@ public class StatusFragment extends Fragment {
             });
 
 
-        statusDBRef.addValueEventListener(new ValueEventListener() {
+//        statusDBRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                arrayList.clear();
+//
+//                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+//                {
+//
+//                    StatusModel statusModel=dataSnapshot.getValue(StatusModel.class);
+//                    if(!statusModel.getUid().equals(firebaseAuth.getCurrentUser().getUid()))
+//                    {
+//                        arrayList.add(statusModel);
+//                    }
+//
+//                }
+//
+//                adapter.notifyDataSetChanged();
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+
+
+    }
+
+    private void statusList()
+    {
+
+        if(NetworkClass.dataSnapshotOnSuccessStatusList != null){
+            displayStatus(NetworkClass.dataSnapshotOnSuccessStatusList);
+        }
+
+        ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                arrayList.clear();
-
-                for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                {
-
-                    StatusModel statusModel=dataSnapshot.getValue(StatusModel.class);
-                    if(!statusModel.getUid().equals(firebaseAuth.getCurrentUser().getUid()))
-                    {
-                        arrayList.add(statusModel);
-                    }
-
-                }
-
-                adapter.notifyDataSetChanged();
+            public void onChatDataChange(DataSnapshot snapshot) {
 
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onChatListDataChange(DataSnapshot snapshot) {
 
             }
-        });
 
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
+
+                displayStatus(snapshot);
+            }
+
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
+            }
+        };
+
+    }
+
+    private void displayStatus(DataSnapshot snapshot)
+    {
+
+        arrayList.clear();
+
+        for(DataSnapshot dataSnapshot : snapshot.getChildren())
+        {
+
+            StatusModel statusModel=dataSnapshot.getValue(StatusModel.class);
+            if(!statusModel.getUid().equals(firebaseAuth.getCurrentUser().getUid()))
+            {
+                arrayList.add(statusModel);
+            }
+
+        }
+
+        adapter.notifyDataSetChanged();
 
     }
 

@@ -43,6 +43,8 @@ public class PushNotificationService extends FirebaseMessagingService {
         String body=remoteMessage.getNotification().getBody();
         String uid=remoteMessage.getData().get("myUID");
         String token=remoteMessage.getData().get("myToken");
+        String name=remoteMessage.getData().get("myName");
+        String pic=remoteMessage.getData().get("myPic");
         String image=remoteMessage.getData().get("image");
 
         Bitmap bitmap=null;
@@ -61,6 +63,8 @@ public class PushNotificationService extends FirebaseMessagingService {
         Intent myIntent = new Intent(this, MessageActivity.class);
         myIntent.putExtra("myUID",uid);
         myIntent.putExtra("myToken",token);
+        myIntent.putExtra("myName",name);
+        myIntent.putExtra("myPic",pic);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this,
                 0,

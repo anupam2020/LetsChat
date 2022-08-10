@@ -213,6 +213,11 @@ public class UsersFragment extends Fragment {
                     displayUsers(snapshot);
 
                 }
+
+                @Override
+                public void onFavChatsChange(DataSnapshot snapshot) {
+
+                }
             };
 
 

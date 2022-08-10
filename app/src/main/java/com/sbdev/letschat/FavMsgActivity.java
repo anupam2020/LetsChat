@@ -98,35 +98,37 @@ public class FavMsgActivity extends AppCompatActivity {
 
         loadWallpaper();
 
+        favChatsList();
+
         if(!isNetworkConnected())
         {
             progressDialog.dismiss();
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
 
-        favRef.child(firebaseAuth.getCurrentUser().getUid())
-                .addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                for(DataSnapshot dataSnapshot : snapshot.getChildren())
-                {
-                    FavMsgModel favMsgModel=dataSnapshot.getValue(FavMsgModel.class);
-                    arrayList.add(favMsgModel);
-                }
-
-                adapter.notifyDataSetChanged();
-                progressDialog.dismiss();
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                progressDialog.dismiss();
-                DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-            }
-        });
+//        favRef.child(firebaseAuth.getCurrentUser().getUid())
+//                .addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                for(DataSnapshot dataSnapshot : snapshot.getChildren())
+//                {
+//                    FavMsgModel favMsgModel=dataSnapshot.getValue(FavMsgModel.class);
+//                    arrayList.add(favMsgModel);
+//                }
+//
+//                adapter.notifyDataSetChanged();
+//                progressDialog.dismiss();
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                progressDialog.dismiss();
+//                DynamicToast.make(FavMsgActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+//                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+//            }
+//        });
 
 
         back.setOnClickListener(new View.OnClickListener() {
@@ -188,6 +190,57 @@ public class FavMsgActivity extends AppCompatActivity {
 
     }
 
+    private void favChatsList()
+    {
+
+        if(NetworkClass.dataSnapshotOnSuccessFavList != null){
+            displayFavChats(NetworkClass.dataSnapshotOnSuccessFavList);
+        }
+
+        ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
+            @Override
+            public void onChatDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChatListDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
+                displayFavChats(snapshot);
+            }
+        };
+
+    }
+
+    private void displayFavChats(DataSnapshot snapshot)
+    {
+
+        for(DataSnapshot dataSnapshot : snapshot.getChildren())
+        {
+            FavMsgModel favMsgModel=dataSnapshot.getValue(FavMsgModel.class);
+            arrayList.add(favMsgModel);
+        }
+
+        adapter.notifyDataSetChanged();
+        progressDialog.dismiss();
+
+    }
+
     public void loadWallpaper()
     {
 
@@ -203,13 +256,12 @@ public class FavMsgActivity extends AppCompatActivity {
                     Glide.with(getApplicationContext())
                         .load(Objects.requireNonNull(snapshot.getValue()).toString())
                         .into(bg);
-                    progressDialog.dismiss();
 
                 }
                 else {
                     bg.setBackgroundResource(R.color.white);
-                    progressDialog.dismiss();
                 }
+                progressDialog.dismiss();
 
             }
 

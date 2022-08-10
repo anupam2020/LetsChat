@@ -99,7 +99,7 @@ public class MessageActivity extends AppCompatActivity {
 
     StorageReference storageReference;
 
-    String myUID,receiverStr,senderStr,receiverName,senderName,friendToken,friendUID,myToken;
+    String myUID,receiverStr,senderStr,receiverName,senderName,friendToken,friendUID,myToken,friendName,friendPic,myName,myPic;
 
     private final int reqCodeWall=1,reqCodeMsg=2;
 
@@ -187,8 +187,23 @@ public class MessageActivity extends AppCompatActivity {
         else {
             friendToken=getIntent().getStringExtra("myToken");
         }
+        if(getIntent().getStringExtra("friendName")!=null) {
+            friendName=getIntent().getStringExtra("friendName");
+        }
+        else {
+            friendName=getIntent().getStringExtra("myName");
+        }
+        if(getIntent().getStringExtra("friendPic")!=null) {
+            friendPic=getIntent().getStringExtra("friendPic");
+        }
+        else {
+            friendPic=getIntent().getStringExtra("myPic");
+        }
+
         Log.d("friendUID",friendUID+"");
         Log.d("friendToken",friendToken+"");
+        Log.d("friendName",friendName+"");
+        Log.d("friendPic",friendPic+"");
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
         myUID=firebaseAuth.getCurrentUser().getUid();
 
@@ -217,7 +232,9 @@ public class MessageActivity extends AppCompatActivity {
 
         loadWallpaper();
 
-        loadProfile(friendUID);
+        //loadProfile(friendUID);
+
+        loadProfile(friendName,friendPic);
 
         readMsg(myUID,friendUID);
 
@@ -532,6 +549,7 @@ public class MessageActivity extends AppCompatActivity {
                     }
                     else
                     {
+
                         msgText.setText("");
                         downloadURL="";
                         addTextToFirebase(myUID,friendUID,text);
@@ -596,6 +614,8 @@ public class MessageActivity extends AppCompatActivity {
                 UserModel userModel=snapshot.getValue(UserModel.class);
                 assert userModel != null;
                 senderName=userModel.getName();
+                myName=senderName;
+                myPic=userModel.getProfilePic();
                 if(userModel.getProfilePic()!=null)
                 {
                     senderStr=userModel.getProfilePic();
@@ -759,33 +779,46 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void loadProfile(String friendUID)
+    public void loadProfile(String friendName, String friendPic)
     {
 
-        reference.child(friendUID).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+        Glide.with(getApplicationContext())
+                .load(friendPic)
+                .placeholder(R.drawable.item_user)
+                .error(R.drawable.item_user)
+                .into(profilePic);
 
-                UserModel userModel=snapshot.getValue(UserModel.class);
-                assert userModel != null;
-                userName.setText(userModel.getName());
-
-                Glide.with(getApplicationContext())
-                        .load(userModel.getProfilePic())
-                        .placeholder(R.drawable.item_user)
-                        .error(R.drawable.item_user)
-                        .into(profilePic);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-            }
-        });
+        userName.setText(friendName);
 
     }
+
+//    public void loadProfile(String friendUID)
+//    {
+//
+//        reference.child(friendUID).addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                UserModel userModel=snapshot.getValue(UserModel.class);
+//                assert userModel != null;
+//                userName.setText(userModel.getName());
+//
+//                Glide.with(getApplicationContext())
+//                        .load(userModel.getProfilePic())
+//                        .placeholder(R.drawable.item_user)
+//                        .error(R.drawable.item_user)
+//                        .into(profilePic);
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                DynamicToast.make(MessageActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+//                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+//            }
+//        });
+//
+//    }
 
     private void readMsg(String uid, String friendUID)
     {
@@ -883,10 +916,11 @@ public class MessageActivity extends AppCompatActivity {
 
             }
 
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
+            }
         };
-
-
-
 
 
     }
@@ -1103,6 +1137,8 @@ public class MessageActivity extends AppCompatActivity {
             dataobjData = new JSONObject();
             dataobjData.put("myUID", myUID);
             dataobjData.put("myToken", myToken);
+            dataobjData.put("myName", myName);
+            dataobjData.put("myPic", myPic);
             dataobjData.put("image", url);
 
             obj.put("to", fcm_token);

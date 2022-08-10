@@ -23,15 +23,16 @@
             app:lottie_autoPlay="true"
             app:lottie_fileName="image_upload_to_cloud.json"
             app:lottie_loop="true" />
+
         <TextView
+            android:id="@+id/progressText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="0%"
             android:textColor="@color/white"
             android:textSize="12sp"
-            android:textStyle="bold"
-            android:text="75%"
-            android:layout_centerInParent="true"
-            android:id="@+id/progressText"/>
+            android:textStyle="bold" />
 
     </RelativeLayout>
 
