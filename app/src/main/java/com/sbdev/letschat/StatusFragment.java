@@ -130,6 +130,43 @@ public class StatusFragment extends Fragment {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
 
+        reference.child(firebaseAuth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        UserModel userModel=snapshot.getValue(UserModel.class);
+                        assert userModel != null;
+                        if(userModel.getProfilePic()!=null)
+                        {
+                            profilePicURL=userModel.getProfilePic();
+
+                            if(flag==0)
+                            {
+                                if(getActivity()!=null)
+                                {
+                                    Glide.with(StatusFragment.this)
+                                            .load(profilePicURL)
+                                            .placeholder(R.drawable.bw_loading1)
+                                            .error(R.drawable.bw_loading1)
+                                            .into(img);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            img.setImageResource(R.drawable.item_user);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +177,24 @@ public class StatusFragment extends Fragment {
                 }
                 else
                 {
+                    Log.d("StatusURL",statusPicURL);
+                    imgURI=null;
+                    if(statusPicURL.length()>0)
+                    {
+                        Glide.with(StatusFragment.this)
+                                .load(statusPicURL)
+                                .placeholder(R.drawable.bw_loading1)
+                                .error(R.drawable.bw_loading1)
+                                .into(img);
+                    }
+                    if(flag==0)
+                    {
+                        Glide.with(StatusFragment.this)
+                                .load(profilePicURL)
+                                .placeholder(R.drawable.bw_loading1)
+                                .error(R.drawable.bw_loading1)
+                                .into(img);
+                    }
                     openGallery();
                 }
 
@@ -157,7 +212,8 @@ public class StatusFragment extends Fragment {
                     profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     profile.setAdjustViewBounds(true);
 
-                    Glide.with(getActivity())
+                    profilePicURL="";
+                    Glide.with(StatusFragment.this)
                             .load(statusPicURL)
                             .placeholder(R.drawable.bw_loading1)
                             .error(R.drawable.bw_loading1)
@@ -169,27 +225,6 @@ public class StatusFragment extends Fragment {
                     builder.show();
 
                 }
-                else
-                {
-
-                    ZoomageView profile=new ZoomageView(getActivity());
-                    profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    profile.setAdjustViewBounds(true);
-
-                    Glide.with(getActivity())
-                            .load(profilePicURL)
-                            .placeholder(R.drawable.item_user)
-                            .error(R.drawable.item_user)
-                            .into(profile);
-
-                    AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
-                    builder.setView(profile);
-
-                    builder.show();
-
-                }
-
-
 
             }
         });
@@ -229,12 +264,14 @@ public class StatusFragment extends Fragment {
 
                                                 statusDBRef.child(firebaseAuth.getCurrentUser().getUid()).removeValue();
 
-                                                Glide.with(getActivity())
+                                                Glide.with(StatusFragment.this)
                                                         .load(profilePicURL)
                                                         .placeholder(R.drawable.bw_loading1)
                                                         .error(R.drawable.bw_loading1)
                                                         .into(img);
 
+                                                flag=0;
+                                                statusPicURL="";
                                                 date.setText("Tap to upload status");
                                                 more.setVisibility(View.GONE);
 
@@ -279,8 +316,8 @@ public class StatusFragment extends Fragment {
 
                         assert statusModel != null;
                         statusPicURL=statusModel.getImageURL();
-                        Glide.with(getActivity())
-                                .load(statusModel.getImageURL())
+                        Glide.with(StatusFragment.this)
+                                .load(statusPicURL)
                                 .placeholder(R.drawable.bw_loading1)
                                 .error(R.drawable.bw_loading1)
                                 .into(img);
@@ -305,11 +342,11 @@ public class StatusFragment extends Fragment {
                                     if(userModel.getProfilePic()!=null)
                                     {
                                         profilePicURL=userModel.getProfilePic();
-                                        Glide.with(Objects.requireNonNull(getContext()))
-                                                .load(userModel.getProfilePic())
-                                                .placeholder(R.drawable.item_user)
-                                                .error(R.drawable.item_user)
-                                                .into(img);
+//                                        Glide.with(StatusFragment.this)
+//                                                .load(profilePicURL)
+//                                                .placeholder(R.drawable.item_user)
+//                                                .error(R.drawable.item_user)
+//                                                .into(img);
                                     }
                                     else
                                     {
@@ -337,6 +374,15 @@ public class StatusFragment extends Fragment {
 
                 }
             });
+
+        if(flag==0)
+        {
+            Glide.with(StatusFragment.this)
+                    .load(profilePicURL)
+                    .placeholder(R.drawable.bw_loading1)
+                    .error(R.drawable.bw_loading1)
+                    .into(img);
+        }
 
 
 //        statusDBRef.addValueEventListener(new ValueEventListener() {
@@ -517,7 +563,8 @@ public class StatusFragment extends Fragment {
                                                         public void onComplete(@NonNull Task<Void> task) {
 
                                                             if(task.isSuccessful()){
-                                                                imgURI=null;
+                                                                progressDialog.dismiss();
+                                                                flag=1;
                                                                 DynamicToast.make(getActivity(),"Status successfully posted!", getResources().getDrawable(R.drawable.checked),
                                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                             }
@@ -526,6 +573,7 @@ public class StatusFragment extends Fragment {
                                                     }).addOnFailureListener(new OnFailureListener() {
                                                         @Override
                                                         public void onFailure(@NonNull Exception e) {
+                                                            progressDialog.dismiss();
                                                             DynamicToast.make(getActivity(), e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                                     getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                                                         }
@@ -538,6 +586,7 @@ public class StatusFragment extends Fragment {
                             }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                progressDialog.dismiss();
                                 DynamicToast.make(getActivity(), e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                             }

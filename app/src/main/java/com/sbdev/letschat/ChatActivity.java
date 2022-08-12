@@ -70,14 +70,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
     public static NetworkClass.FirebaseListener fragmentListener = null ;
 
-    MessageModel messageModel=null;
-
-    TextView unreadMsgCount;
-
-    SharedPreferences sp;
-
-    String UNREAD_MSG="UNREAD_MSG_COUNT";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +91,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         final TabLayout tabLayout=findViewById(R.id.chatTabLayout);
         final ViewPager2 viewPager2=findViewById(R.id.viewPager2);
         layout=findViewById(R.id.relativeChats);
-        unreadMsgCount=findViewById(R.id.unreadMsgCount);
 
         firebaseAuth=FirebaseAuth.getInstance();
 
@@ -112,8 +103,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         chatsRef=FirebaseDatabase.getInstance().getReference("Chats");
         chatsRef.keepSynced(true);
 
-        sp=getSharedPreferences(UNREAD_MSG,MODE_PRIVATE);
-
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         reference.child(firebaseAuth.getCurrentUser().getUid()).child("isLoggedIn").setValue("true");
@@ -121,11 +110,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         if(!isNetworkConnected())
         {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
-        }
-
-        if(sp.getString(UNREAD_MSG,"0")!=null)
-        {
-            unreadMsgCount.setText(sp.getString(UNREAD_MSG,"0"));
         }
 
         Log.d("Chat Activity", "Yes");
@@ -161,7 +145,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                     for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
 
-                        messageModel=dataSnapshot.getValue(MessageModel.class);
+                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
                         assert messageModel != null;
                         if(messageModel.getSender()!=null)
                         {
@@ -179,39 +163,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
                     Log.d("unreadMsg", String.valueOf(unreadMsg));
 
-                    //chatCountsList(unreadMsg,tabLayout,messageModel);
-
-                    DatabaseReference chatsListRef=FirebaseDatabase.getInstance().getReference("ChatsList");
-
-                    int finalUnreadMsg = unreadMsg;
-                    chatsListRef.child(firebaseAuth.getCurrentUser().getUid())
-                        .addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                if(snapshot.exists()){
-
-                                    SharedPreferences.Editor editor=sp.edit();
-
-                                    if(finalUnreadMsg ==0) {
-                                        editor.putString(UNREAD_MSG, "0");
-                                        unreadMsgCount.setText("0");
-                                    }
-                                    else {
-                                        editor.putString(UNREAD_MSG, String.valueOf(finalUnreadMsg));
-                                        unreadMsgCount.setText(String.valueOf(finalUnreadMsg));
-                                    }
-                                    editor.apply();
-
-                                }
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
+                    chatCountsList(unreadMsg,tabLayout);
 
                 }
             }
@@ -478,11 +430,11 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
     }
 
-    private void chatCountsList(int finalUnreadMsg, TabLayout tabLayout, MessageModel messageModel)
+    private void chatCountsList(int finalUnreadMsg, TabLayout tabLayout)
     {
 
         if(NetworkClass.dataSnapshotOnSuccessChatsList != null){
-            getChatCounts(NetworkClass.dataSnapshotOnSuccessChatsList,finalUnreadMsg,tabLayout,messageModel);
+            getChatCounts(NetworkClass.dataSnapshotOnSuccessChatsList,finalUnreadMsg,tabLayout);
         }
 
         ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
@@ -494,7 +446,7 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             @Override
             public void onChatListDataChange(DataSnapshot snapshot) {
 
-                getChatCounts(snapshot,finalUnreadMsg,tabLayout,messageModel);
+                getChatCounts(snapshot,finalUnreadMsg,tabLayout);
             }
 
             @Override
@@ -516,23 +468,11 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
     }
 
-    private void getChatCounts(DataSnapshot snapshot,int finalUnreadMsg, TabLayout tabLayout, MessageModel messageModel)
+    private void getChatCounts(DataSnapshot snapshot,int finalUnreadMsg, TabLayout tabLayout)
     {
 
         Log.d("Chat Act Snapshot", String.valueOf(snapshot));
         Log.d("unreadMsg", String.valueOf(finalUnreadMsg));
-
-        if(snapshot.exists()){
-
-            if(finalUnreadMsg ==0) {
-                tabLayout.getTabAt(0).setText("Chats");
-            }
-            else {
-                tabLayout.getTabAt(0).setText("Chats ("+ finalUnreadMsg +")");
-            }
-
-        }
-        else{
 
             if(finalUnreadMsg ==0) {
                 tabLayout.getTabAt(2).setText("Users");
@@ -540,8 +480,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             else {
                 tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
             }
-
-        }
 
     }
 

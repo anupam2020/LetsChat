@@ -50,21 +50,6 @@
                 android:src="@drawable/ic_baseline_more_vert_24"
                 app:tint="@color/white" />
 
-            <TextView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@id/chatText"
-                android:background="@drawable/ic_baseline_circle_24_white"
-                android:gravity="center"
-                android:text="0"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:id="@+id/unreadMsgCount"/>
-
         </RelativeLayout>
 
     </RelativeLayout>
