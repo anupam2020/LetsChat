@@ -230,7 +230,7 @@ public class MessageActivity extends AppCompatActivity {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
 
-        loadWallpaper();
+        loadWallpaperList();
 
         //loadProfile(friendUID);
 
@@ -734,48 +734,117 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public void loadWallpaper()
+    public void loadWallpaperList()
     {
 
-        reference.child(myUID).child("Wallpaper").addListenerForSingleValueEvent(new ValueEventListener() {
+//        reference.child(myUID).child("Wallpaper").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                Log.d("Snapshot", String.valueOf(snapshot));
+//
+//                if(snapshot.exists())
+//                {
+//
+//                    Glide.with(getApplicationContext())
+//                        .load(Objects.requireNonNull(snapshot.getValue()).toString())
+//                        .into(new CustomTarget<Drawable>() {
+//                            @Override
+//                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+//
+//                                getWindow().setBackgroundDrawable(resource);
+//                                progressDialog.dismiss();
+//
+//                            }
+//
+//                            @Override
+//                            public void onLoadCleared(@Nullable Drawable placeholder) {
+//
+//                            }
+//                        });
+//
+//                }
+//                else {
+//                    progressDialog.dismiss();
+//                    getWindow().setBackgroundDrawableResource(R.color.white);
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+
+        if(NetworkClass.dataSnapshotOnSuccessWallpaperList != null){
+            loadWallpaper(NetworkClass.dataSnapshotOnSuccessWallpaperList);
+        }
+
+        ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                Log.d("Snapshot", String.valueOf(snapshot));
-
-                if(snapshot.exists())
-                {
-
-                    Glide.with(getApplicationContext())
-                        .load(Objects.requireNonNull(snapshot.getValue()).toString())
-                        .into(new CustomTarget<Drawable>() {
-                            @Override
-                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-
-                                getWindow().setBackgroundDrawable(resource);
-                                progressDialog.dismiss();
-
-                            }
-
-                            @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                            }
-                        });
-
-                }
-                else {
-                    progressDialog.dismiss();
-                    getWindow().setBackgroundDrawableResource(R.color.white);
-                }
+            public void onChatDataChange(DataSnapshot snapshot) {
 
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onChatListDataChange(DataSnapshot snapshot) {
 
             }
-        });
+
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
+
+                loadWallpaper(snapshot);
+            }
+        };
+
+
+    }
+
+    private void loadWallpaper(DataSnapshot snapshot)
+    {
+
+        if(snapshot.exists())
+        {
+
+            Glide.with(getApplicationContext())
+                    .load(Objects.requireNonNull(snapshot.getValue()).toString())
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+
+                            getWindow().setBackgroundDrawable(resource);
+                            progressDialog.dismiss();
+
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                        }
+                    });
+
+        }
+        else {
+            progressDialog.dismiss();
+            getWindow().setBackgroundDrawableResource(R.color.white);
+        }
 
     }
 
@@ -918,6 +987,11 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public void onFavChatsChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
 
             }
         };

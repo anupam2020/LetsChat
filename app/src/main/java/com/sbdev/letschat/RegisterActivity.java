@@ -337,27 +337,12 @@ public class RegisterActivity extends AppCompatActivity {
 
                                                     if (task.isSuccessful()) {
 
-                                                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
-                                                            @Override
-                                                            public void onSuccess(String s) {
+                                                        progressDialog.dismiss();
+                                                        DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                                        startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
+                                                        finish();
 
-                                                                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
-
-                                                                progressDialog.dismiss();
-                                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
-                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                                startActivity(new Intent(RegisterActivity.this, ProfilePicActivity.class));
-                                                                finish();
-
-                                                            }
-                                                        }).addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                progressDialog.dismiss();
-                                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                            }
-                                                        });
                                                     }
 
                                                 }
@@ -421,27 +406,13 @@ public class RegisterActivity extends AppCompatActivity {
 
                                     if(task.isSuccessful())
                                     {
-                                        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
-                                            @Override
-                                            public void onSuccess(String s) {
 
-                                                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+                                        progressDialog.dismiss();
+                                        DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                        startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
+                                        finish();
 
-                                                progressDialog.dismiss();
-                                                DynamicToast.make(RegisterActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
-                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                startActivity(new Intent(RegisterActivity.this,ProfilePicActivity.class));
-                                                finish();
-
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                progressDialog.dismiss();
-                                                DynamicToast.make(RegisterActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                            }
-                                        });
                                     }
 
                                 }

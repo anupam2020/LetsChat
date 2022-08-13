@@ -448,6 +448,11 @@ public class StatusFragment extends Fragment {
             public void onFavChatsChange(DataSnapshot snapshot) {
 
             }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
+
+            }
         };
 
     }

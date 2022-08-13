@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +18,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -70,6 +73,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
     public static NetworkClass.FirebaseListener fragmentListener = null ;
 
+    int flag=0;
+
+    ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +101,8 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         firebaseAuth=FirebaseAuth.getInstance();
 
+        progressDialog=new ProgressDialog(this);
+
         reference=FirebaseDatabase.getInstance().getReference("Users");
         reference.keepSynced(true);
         usersRef= FirebaseDatabase.getInstance().getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
@@ -111,8 +120,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         {
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
-
-        Log.d("Chat Activity", "Yes");
 
         weather.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,41 +140,11 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
         NetworkClass.myChats=new NetworkClass.FirebaseListener() {
             @Override
             public void onChatDataChange(DataSnapshot snapshot) {
-                if(fragmentListener != null)
-                {
+                if (fragmentListener != null) {
                     fragmentListener.onChatDataChange(snapshot);
                 }
 
-                if(snapshot.exists())
-                {
-
-                    int unreadMsg=0;
-
-                    for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
-
-                        MessageModel messageModel=dataSnapshot.getValue(MessageModel.class);
-                        assert messageModel != null;
-                        if(messageModel.getSender()!=null)
-                        {
-                            if(messageModel.getReceiver().equals(firebaseAuth.getCurrentUser().getUid()) && messageModel.getIsSeen()==0)
-                            {
-                                unreadMsg++;
-                            }
-                        }
-//                        else
-//                        {
-//                            chatsRef.child(Objects.requireNonNull(dataSnapshot.getKey())).removeValue();
-//                        }
-
-                    }
-
-                    Log.d("unreadMsg", String.valueOf(unreadMsg));
-
-                    chatCountsList(unreadMsg,tabLayout);
-
-                }
             }
-
             @Override
             public void onChatListDataChange(DataSnapshot snapshot) {
                 if(fragmentListener != null)
@@ -178,7 +155,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
             @Override
             public void onStatusDataChange(DataSnapshot snapshot) {
-
+                if(fragmentListener != null)
+                {
+                    fragmentListener.onStatusDataChange(snapshot);
+                }
             }
 
             @Override
@@ -193,6 +173,15 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
             @Override
             public void onFavChatsChange(DataSnapshot snapshot) {
+
+                if(fragmentListener != null)
+                {
+                    fragmentListener.onFavChatsChange(snapshot);
+                }
+            }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
 
             }
         };
@@ -303,11 +292,75 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
             }
         });
 
+
+
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
             @Override
             public void onSuccess(String s) {
 
-                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+                Log.d("Chat Token",s);
+
+                reference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        for(DataSnapshot dataSnapshot : snapshot.getChildren())
+                        {
+
+                            UserModel userModel=dataSnapshot.getValue(UserModel.class);
+                            assert userModel != null;
+                            if(firebaseAuth.getCurrentUser()!=null && userModel.getUID()!=null && userModel.getToken()!=null)
+                            {
+                                if(!userModel.getUID().equals(firebaseAuth.getCurrentUser().getUid()) && userModel.getToken().equals(s))
+                                {
+                                    flag=1;
+
+                                    if(!ChatActivity.this.isFinishing())
+                                    {
+                                        //show dialog
+                                        progressDialog.show();
+                                        progressDialog.setContentView(R.layout.multiple_device_detect);
+                                        progressDialog.setCancelable(false);
+                                        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                                    }
+                                    reference.child(firebaseAuth.getCurrentUser().getUid())
+                                            .child("isLoggedIn")
+                                            .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if(task.isSuccessful()) {
+
+                                                        new Handler().postDelayed(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                logoutUserAndQuitApp();
+                                                            }
+                                                        },1500);
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+
+                        }
+
+//                        if(flag==1)
+//                        {
+//                            DynamicToast.make(ChatActivity.this, "One device multiple users detected", getResources().getDrawable(R.drawable.warning),
+//                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+//                        }
+                        if(flag==0)
+                        {
+                            reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
 
             }
         });
@@ -427,59 +480,6 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
             }
         });
-
-    }
-
-    private void chatCountsList(int finalUnreadMsg, TabLayout tabLayout)
-    {
-
-        if(NetworkClass.dataSnapshotOnSuccessChatsList != null){
-            getChatCounts(NetworkClass.dataSnapshotOnSuccessChatsList,finalUnreadMsg,tabLayout);
-        }
-
-        ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
-            @Override
-            public void onChatDataChange(DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChatListDataChange(DataSnapshot snapshot) {
-
-                getChatCounts(snapshot,finalUnreadMsg,tabLayout);
-            }
-
-            @Override
-            public void onStatusDataChange(DataSnapshot snapshot) {
-
-
-            }
-
-            @Override
-            public void onUserDataChange(DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onFavChatsChange(DataSnapshot snapshot) {
-
-            }
-        };
-
-    }
-
-    private void getChatCounts(DataSnapshot snapshot,int finalUnreadMsg, TabLayout tabLayout)
-    {
-
-        Log.d("Chat Act Snapshot", String.valueOf(snapshot));
-        Log.d("unreadMsg", String.valueOf(finalUnreadMsg));
-
-            if(finalUnreadMsg ==0) {
-                tabLayout.getTabAt(2).setText("Users");
-            }
-            else {
-                tabLayout.getTabAt(2).setText("Users ("+ finalUnreadMsg +")");
-            }
 
     }
 
@@ -752,6 +752,40 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                                 getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
                     }
                 });
+        }
+
+    }
+
+    public void logoutUserAndQuitApp()
+    {
+
+        DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users");
+
+        HashMap map=new HashMap();
+        map.put("status","Offline");
+
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            reference.child(firebaseAuth.getCurrentUser().getUid())
+                    .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+
+                            if(task.isSuccessful())
+                            {
+                                progressDialog.dismiss();
+                                firebaseAuth.signOut();
+                                finishAffinity();
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                        }
+                    });
         }
 
     }

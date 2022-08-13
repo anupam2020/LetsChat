@@ -20,6 +20,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -27,6 +32,9 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class PushNotificationService extends FirebaseMessagingService {
+
+    FirebaseAuth firebaseAuth;
+    DatabaseReference reference;
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -54,9 +62,7 @@ public class PushNotificationService extends FirebaseMessagingService {
                     .load(image)
                     .submit()
                     .get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
 

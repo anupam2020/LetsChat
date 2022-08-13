@@ -185,88 +185,91 @@ public class ProfilePicActivity extends AppCompatActivity {
 
             Snackbar.make(layout, "Please wait! We are uploading your image...", Snackbar.LENGTH_LONG).show();
 
-            storageReference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                .child("Profile_Pic")
-                .putFile(imageURI)
-                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+            if(firebaseAuth.getCurrentUser()!=null)
+            {
+                storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                        .child("Profile_Pic")
+                        .putFile(imageURI)
+                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
 
-                        double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                        //progressDialog.setMessage((int) progress + "");
-                        progressDialog.show();
-                        progressDialog.setContentView(R.layout.progress_image_upload_status);
-                        progressDialog.setCancelable(false);
-                        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                                double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                                //progressDialog.setMessage((int) progress + "");
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.progress_image_upload_status);
+                                progressDialog.setCancelable(false);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-                        TextView tv = progressDialog.findViewById(R.id.progressText);
-                        tv.setText(String.format("%.2f", progress) + "%");
+                                TextView tv = progressDialog.findViewById(R.id.progressText);
+                                tv.setText(String.format("%.2f", progress) + "%");
 
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            }
+                        })
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        storageReference.child(firebaseAuth.getCurrentUser().getUid())
-                            .child("Profile_Pic")
-                            .getDownloadUrl()
-                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-
-                                    HashMap map=new HashMap();
-                                    map.put("ProfilePic",uri.toString());
-
-                                    reference.child(firebaseAuth.getCurrentUser().getUid())
-                                        .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                                storageReference.child(firebaseAuth.getCurrentUser().getUid())
+                                        .child("Profile_Pic")
+                                        .getDownloadUrl()
+                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                             @Override
-                                            public void onComplete(@NonNull Task task) {
+                                            public void onSuccess(Uri uri) {
 
-                                                if(task.isSuccessful())
-                                                {
+                                                HashMap map=new HashMap();
+                                                map.put("ProfilePic",uri.toString());
 
-                                                    progressDialog.dismiss();
-                                                    DynamicToast.make(ProfilePicActivity.this, "Profile picture was successfully uploaded!", getResources().getDrawable(R.drawable.checked),
-                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                    startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
-                                                    finishAffinity();
-                                                }
+                                                reference.child(firebaseAuth.getCurrentUser().getUid())
+                                                        .updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task task) {
+
+                                                                if(task.isSuccessful())
+                                                                {
+
+                                                                    progressDialog.dismiss();
+                                                                    DynamicToast.make(ProfilePicActivity.this, "Profile picture was successfully uploaded!", getResources().getDrawable(R.drawable.checked),
+                                                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                                                    startActivity(new Intent(ProfilePicActivity.this,ChatActivity.class));
+                                                                    finishAffinity();
+                                                                }
+
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                                            }
+                                                        });
 
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
+
                                                 DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
                                                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+
                                             }
                                         });
 
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
 
-                                    DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                progressDialog.dismiss();
+                                DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
 
-                                }
-                            });
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                        progressDialog.dismiss();
-                        DynamicToast.make(ProfilePicActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-
-                    }
-                });
+                            }
+                        });
+            }
 
         }
 

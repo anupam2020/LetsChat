@@ -223,6 +223,11 @@ public class FavMsgActivity extends AppCompatActivity {
 
                 displayFavChats(snapshot);
             }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
+
+            }
         };
 
     }

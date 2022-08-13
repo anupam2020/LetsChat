@@ -191,34 +191,39 @@ public class UsersFragment extends Fragment {
         }
 
 
-            ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
-                @Override
-                public void onChatDataChange(DataSnapshot snapshot) {
+        ChatActivity.fragmentListener = new NetworkClass.FirebaseListener() {
+            @Override
+            public void onChatDataChange(DataSnapshot snapshot) {
 
-                }
+            }
 
-                @Override
-                public void onChatListDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onChatListDataChange(DataSnapshot snapshot) {
 
-                }
+            }
 
-                @Override
-                public void onStatusDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
 
-                }
+            }
 
-                @Override
-                public void onUserDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
 
-                    displayUsers(snapshot);
+                displayUsers(snapshot);
 
-                }
+            }
 
-                @Override
-                public void onFavChatsChange(DataSnapshot snapshot) {
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
 
-                }
-            };
+            }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
+
+            }
+        };
 
 
         /*reference.addValueEventListener(new ValueEventListener() {

@@ -121,25 +121,10 @@ public class FacebookActivity extends AppCompatActivity {
                                             if(task.isSuccessful())
                                             {
 
-                                                FirebaseMessaging.getInstance().getToken().addOnSuccessListener(new OnSuccessListener<String>() {
-                                                    @Override
-                                                    public void onSuccess(String s) {
-
-                                                        reference.child(mAuth.getCurrentUser().getUid()).child("token").setValue(s);
-
-                                                        DynamicToast.make(FacebookActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
-                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                        startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
-                                                        finish();
-
-                                                    }
-                                                }).addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        DynamicToast.make(FacebookActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                                                    }
-                                                });
+                                                DynamicToast.make(FacebookActivity.this, "Registration Successful!", getResources().getDrawable(R.drawable.checked),
+                                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                                startActivity(new Intent(FacebookActivity.this,ProfilePicActivity.class));
+                                                finish();
 
                                             }
                                         }

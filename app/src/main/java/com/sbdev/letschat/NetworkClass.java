@@ -23,12 +23,12 @@ public class NetworkClass extends Application {
 
     public static DatabaseReference connectedRef;
 
-    public DatabaseReference chats,chatsList,statusList,usersList,favList;
+    public DatabaseReference chats,chatsList,statusList,usersList,favList,wallpaperList;
 
     public static FirebaseListener myChats= null;
 
     public static DataSnapshot dataSnapshotOnSuccessChats,dataSnapshotOnSuccessChatsList,dataSnapshotOnSuccessStatusList,
-            dataSnapshotOnSuccessUsersList,dataSnapshotOnSuccessFavList;
+            dataSnapshotOnSuccessUsersList,dataSnapshotOnSuccessFavList,dataSnapshotOnSuccessWallpaperList;
 
     FirebaseAuth firebaseAuth;
 
@@ -47,8 +47,6 @@ public class NetworkClass extends Application {
         statusList=FirebaseDatabase.getInstance().getReference("StatusDB");
         usersList=FirebaseDatabase.getInstance().getReference("Users");
         favList= FirebaseDatabase.getInstance().getReference("Favorites");
-
-        dataSnapshotOnSuccessChats=null;
 
         chats.addValueEventListener(new ValueEventListener() {
             @Override
@@ -120,25 +118,46 @@ public class NetworkClass extends Application {
             }
         });
 
-        favList.child(firebaseAuth.getCurrentUser().getUid())
-            .addValueEventListener(new ValueEventListener() {
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            usersList.child(firebaseAuth.getCurrentUser().getUid())
+                    .child("Wallpaper")
+                    .addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                     if(myChats!=null) {
-                        myChats.onFavChatsChange(snapshot);
+                        myChats.onWallpaperChange(snapshot);
                     }
-                    dataSnapshotOnSuccessFavList=snapshot;
-
+                    dataSnapshotOnSuccessWallpaperList=snapshot;
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
                 }
             });
+        }
 
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            favList.child(firebaseAuth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        if(myChats!=null) {
+                            myChats.onFavChatsChange(snapshot);
+                        }
+                        dataSnapshotOnSuccessFavList=snapshot;
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+        }
 
     }
 
@@ -149,6 +168,8 @@ public class NetworkClass extends Application {
         void onStatusDataChange(DataSnapshot snapshot);
         void onUserDataChange(DataSnapshot snapshot);
         void onFavChatsChange(DataSnapshot snapshot);
+        void onWallpaperChange(DataSnapshot snapshot);
+
 
     }
 

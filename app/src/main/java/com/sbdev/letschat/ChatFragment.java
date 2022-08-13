@@ -3,6 +3,7 @@ package com.sbdev.letschat;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -62,9 +63,11 @@ public class ChatFragment extends Fragment {
 
     ArrayList<UserModel> mUsers,filterList;
 
+    ArrayList<ChatsListModel> userList;
+
     ArrayList<MessageModel> msgList;
 
-    DataSnapshot chatlist_snapshot = null;
+    DataSnapshot chatlistSnapshot = null;
 
     DataSnapshot userSnapshot = null;
 
@@ -82,6 +85,7 @@ public class ChatFragment extends Fragment {
         textInputLayout=view.findViewById(R.id.chatsTIL);
         editText=view.findViewById(R.id.chatsSearch);
 
+        userList=new ArrayList<>();
         filterList=new ArrayList<>();
         mUsers=new ArrayList<>();
         adapter=new UserAdapter(mUsers,getActivity());
@@ -107,41 +111,48 @@ public class ChatFragment extends Fragment {
         progressDialog.setCancelable(true);
         progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        if(NetworkClass.dataSnapshotOnSuccessUsersList!=null && NetworkClass.dataSnapshotOnSuccessChatsList!=null){
-            chatsList(NetworkClass.dataSnapshotOnSuccessUsersList,NetworkClass.dataSnapshotOnSuccessChatsList);
-        }
-        ChatActivity.fragmentListener=new NetworkClass.FirebaseListener() {
-            @Override
-            public void onChatDataChange(DataSnapshot snapshot) {
+        displayChatsList();
 
-            }
-
-            @Override
-            public void onChatListDataChange(DataSnapshot chatlist_snapshot) {
-
-                if(userSnapshot!=null){
-                    chatsList(userSnapshot,chatlist_snapshot);
-                }
-
-            }
-
-            @Override
-            public void onStatusDataChange(DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onUserDataChange(DataSnapshot user_snapshot) {
-                if(chatlist_snapshot!=null){
-                    chatsList(user_snapshot,chatlist_snapshot);
-                }
-            }
-
-            @Override
-            public void onFavChatsChange(DataSnapshot snapshot) {
-
-            }
-        };
+//        if(NetworkClass.dataSnapshotOnSuccessUsersList!=null && NetworkClass.dataSnapshotOnSuccessChatsList!=null){
+//            chatsList(NetworkClass.dataSnapshotOnSuccessUsersList,NetworkClass.dataSnapshotOnSuccessChatsList);
+//        }
+//        ChatActivity.fragmentListener=new NetworkClass.FirebaseListener() {
+//            @Override
+//            public void onChatDataChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChatListDataChange(DataSnapshot chatlist_snapshot) {
+//
+//                if(userSnapshot!=null){
+//                    chatsList(userSnapshot,chatlist_snapshot);
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onStatusDataChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onUserDataChange(DataSnapshot user_snapshot) {
+//                if(chatlistSnapshot!=null){
+//                    chatsList(chatlistSnapshot,user_snapshot);
+//                }
+//            }
+//
+//            @Override
+//            public void onFavChatsChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onWallpaperChange(DataSnapshot snapshot) {
+//
+//            }
+//        };
 
 //        reference.addValueEventListener(new ValueEventListener() {
 //            @Override
@@ -154,9 +165,11 @@ public class ChatFragment extends Fragment {
 //                    ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
 //                    userList.add(chatsListModel);
 //                }
-//                if (userSnapshot!=null){
-//                    chatsList();
-//                }
+////                if (userSnapshot!=null){
+////                    chatsList();
+////                }
+//
+//                chatsList();
 //
 //
 //            }
@@ -264,56 +277,150 @@ public class ChatFragment extends Fragment {
 
     }
 
-
-
-    private void chatsList(DataSnapshot user_snapshot , DataSnapshot chatlist_snapshot)
+    private void displayChatsList()
     {
 
-        mUsers.clear();
+        if(NetworkClass.dataSnapshotOnSuccessChatsList!=null ) {
+            putIntoUserList(NetworkClass.dataSnapshotOnSuccessChatsList);
+        }
+        ChatActivity.fragmentListener=new NetworkClass.FirebaseListener() {
+            @Override
+            public void onChatDataChange(DataSnapshot snapshot) {
 
-        for(DataSnapshot dataSnapshot : user_snapshot.getChildren())
-        {
-            UserModel userModel=dataSnapshot.getValue(UserModel.class);
-
-            ArrayList<ChatsListModel> userList = new ArrayList<>();
-            for(DataSnapshot dataSnapshot1 : chatlist_snapshot.getChildren())
-            {
-                ChatsListModel chatsListModel=dataSnapshot1.getValue(ChatsListModel.class);
-                userList.add(chatsListModel);
             }
 
-            for(ChatsListModel chatsListModel : userList)
-            {
-                assert userModel != null;
-                if(userModel.getUID().equals(chatsListModel.getUID()))
-                {
-                    mUsers.add(userModel);
-                }
+            @Override
+            public void onChatListDataChange(DataSnapshot snapshot) {
+
+                putIntoUserList(snapshot);
             }
 
-        }
+            @Override
+            public void onStatusDataChange(DataSnapshot snapshot) {
 
-        if(!mUsers.isEmpty())
+            }
+
+            @Override
+            public void onUserDataChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onFavChatsChange(DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onWallpaperChange(DataSnapshot snapshot) {
+
+            }
+        };
+
+    }
+
+    private void putIntoUserList(DataSnapshot snapshot)
+    {
+
+        userList.clear();
+
+        for(DataSnapshot dataSnapshot : snapshot.getChildren())
         {
-            Collections.sort(mUsers, new Comparator<UserModel>() {
-                @Override
-                public int compare(UserModel o1, UserModel o2) {
-                    return o2.getLast_text_time().compareTo(o1.getLast_text_time());
-                }
-            });
-
-            textInputLayout.setVisibility(View.VISIBLE);
-
+            ChatsListModel chatsListModel=dataSnapshot.getValue(ChatsListModel.class);
+            userList.add(chatsListModel);
         }
-        else
-        {
-            textInputLayout.setVisibility(View.GONE);
-        }
+//                if (userSnapshot!=null){
+//                    chatsList();
+//                }
 
-        adapter.notifyDataSetChanged();
-        progressDialog.dismiss();
+        chatsList();
 
-        /*reference=FirebaseDatabase.getInstance().getReference("Users");
+    }
+
+
+    private void chatsList()
+    {
+//        if(NetworkClass.dataSnapshotOnSuccessUsersList!=null){
+//            showChatsInChatsList(NetworkClass.dataSnapshotOnSuccessUsersList);
+//        }
+//        ChatActivity.fragmentListener=new NetworkClass.FirebaseListener() {
+//            @Override
+//            public void onChatDataChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChatListDataChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onStatusDataChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onUserDataChange(DataSnapshot snapshot) {
+//
+//                showChatsInChatsList(snapshot);
+//            }
+//
+//            @Override
+//            public void onFavChatsChange(DataSnapshot snapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onWallpaperChange(DataSnapshot snapshot) {
+//
+//            }
+//        };
+
+
+//        mUsers.clear();
+//
+//        for(DataSnapshot dataSnapshot : user_snapshot.getChildren())
+//        {
+//            UserModel userModel=dataSnapshot.getValue(UserModel.class);
+//
+//            ArrayList<ChatsListModel> userList = new ArrayList<>();
+//            for(DataSnapshot dataSnapshot1 : chatlist_snapshot.getChildren())
+//            {
+//                ChatsListModel chatsListModel=dataSnapshot1.getValue(ChatsListModel.class);
+//                userList.add(chatsListModel);
+//            }
+//
+//            for(ChatsListModel chatsListModel : userList)
+//            {
+//                assert userModel != null;
+//                if(userModel.getUID().equals(chatsListModel.getUID()))
+//                {
+//                    mUsers.add(userModel);
+//                }
+//            }
+//
+//        }
+//
+//        if(!mUsers.isEmpty())
+//        {
+//            Collections.sort(mUsers, new Comparator<UserModel>() {
+//                @Override
+//                public int compare(UserModel o1, UserModel o2) {
+//                    return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+//                }
+//            });
+//
+//            textInputLayout.setVisibility(View.VISIBLE);
+//
+//        }
+//        else
+//        {
+//            textInputLayout.setVisibility(View.GONE);
+//        }
+//
+//        adapter.notifyDataSetChanged();
+//        progressDialog.dismiss();
+
+        reference=FirebaseDatabase.getInstance().getReference("Users");
 
         reference.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -365,10 +472,53 @@ public class ChatFragment extends Fragment {
                 DynamicToast.make(getActivity(), error.getMessage(), getResources().getDrawable(R.drawable.warning),
                         getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
             }
-        });*/
+        });
+
+
 
     }
 
+//    private void showChatsInChatsList(DataSnapshot snapshot)
+//    {
+//
+//        mUsers.clear();
+//
+//        for(DataSnapshot dataSnapshot : snapshot.getChildren())
+//        {
+//            UserModel userModel=dataSnapshot.getValue(UserModel.class);
+//
+//            for(ChatsListModel chatsListModel : userList)
+//            {
+//                assert userModel != null;
+//                if(userModel.getUID().equals(chatsListModel.getUID()))
+//                {
+//                    mUsers.add(userModel);
+//                }
+//            }
+//
+//        }
+//
+//        if(!mUsers.isEmpty())
+//        {
+//            Collections.sort(mUsers, new Comparator<UserModel>() {
+//                @Override
+//                public int compare(UserModel o1, UserModel o2) {
+//                    return o2.getLast_text_time().compareTo(o1.getLast_text_time());
+//                }
+//            });
+//
+//            textInputLayout.setVisibility(View.VISIBLE);
+//
+//        }
+//        else
+//        {
+//            textInputLayout.setVisibility(View.GONE);
+//        }
+//
+//        adapter.notifyDataSetChanged();
+//        progressDialog.dismiss();
+//
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
