@@ -114,7 +114,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 
         //connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
-        reference.child(firebaseAuth.getCurrentUser().getUid()).child("isLoggedIn").setValue("true");
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            reference.child(firebaseAuth.getCurrentUser().getUid()).child("isLoggedIn").setValue("true");
+        }
 
         if(!isNetworkConnected())
         {
@@ -351,7 +354,10 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
 //                        }
                         if(flag==0)
                         {
-                            reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+                            if(firebaseAuth.getCurrentUser()!=null)
+                            {
+                                reference.child(firebaseAuth.getCurrentUser().getUid()).child("token").setValue(s);
+                            }
                         }
 
                     }
@@ -486,27 +492,31 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
     public void getCity()
     {
 
-        locationRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        if(firebaseAuth.getCurrentUser()!=null)
+        {
+            locationRef.child(firebaseAuth.getCurrentUser().getUid())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        if(snapshot.exists())
-                        {
-                            LocationModel locationModel=snapshot.getValue(LocationModel.class);
-                            assert locationModel != null;
-                            city=locationModel.getLocation();
-                            updateWeather(city);
+                            if(snapshot.exists())
+                            {
+                                LocationModel locationModel=snapshot.getValue(LocationModel.class);
+                                assert locationModel != null;
+                                city=locationModel.getLocation();
+                                updateWeather(city);
+                            }
+
                         }
 
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                    getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                        }
+                    });
+        }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        DynamicToast.make(ChatActivity.this, error.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                    }
-                });
 
     }
 
@@ -698,22 +708,25 @@ public class ChatActivity extends AppCompatActivity implements LifecycleObserver
                     Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
                 }
                 else{
-                    reference.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
-                        .child("isLoggedIn")
-                        .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if(task.isSuccessful()) {
-                                    logoutUser();
+                    if(firebaseAuth.getCurrentUser()!=null)
+                    {
+                        reference.child(firebaseAuth.getCurrentUser().getUid())
+                            .child("isLoggedIn")
+                            .setValue("false").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()) {
+                                        logoutUser();
+                                    }
                                 }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
-                                        getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
-                            }
-                        });
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    DynamicToast.make(ChatActivity.this, e.getMessage(), getResources().getDrawable(R.drawable.warning),
+                                            getResources().getColor(R.color.white), getResources().getColor(R.color.black), 3000).show();
+                                }
+                            });
+                    }
                 }
             }
         });

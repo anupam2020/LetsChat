@@ -123,6 +123,8 @@ public class MessageActivity extends AppCompatActivity {
 
     int flag=0;
 
+    String FCM_SERVER_KEY="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -200,10 +202,6 @@ public class MessageActivity extends AppCompatActivity {
             friendPic=getIntent().getStringExtra("myPic");
         }
 
-        Log.d("friendUID",friendUID+"");
-        Log.d("friendToken",friendToken+"");
-        Log.d("friendName",friendName+"");
-        Log.d("friendPic",friendPic+"");
         friendDBRef.child(firebaseAuth.getCurrentUser().getUid()).child("friendUID").setValue(friendUID);
         myUID=firebaseAuth.getCurrentUser().getUid();
 
@@ -229,6 +227,8 @@ public class MessageActivity extends AppCompatActivity {
             progressDialog.dismiss();
             Snackbar.make(layout,"Your device is offline!",Snackbar.LENGTH_SHORT).show();
         }
+
+        getFCM_KEY();
 
         loadWallpaperList();
 
@@ -658,6 +658,27 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         },1000);
+
+    }
+
+    private void getFCM_KEY()
+    {
+
+        DatabaseReference fcmRef=FirebaseDatabase.getInstance().getReference("FCM_KEY");
+        fcmRef.child("key").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                FCM_SERVER_KEY=String.valueOf(snapshot.getValue());
+                Log.d("SERVER_KEY",FCM_SERVER_KEY);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 
@@ -1190,7 +1211,7 @@ public class MessageActivity extends AppCompatActivity {
 
     private void sendFCMPush(String fcm_token, String text, String receiverName, String url) {
 
-        String SERVER_KEY = "AAAA76VUvnQ:APA91bGH0SR1DIt7IpkrFUoIg8RfAHaTXlVDzmA9Tk7XxVrOQy1vKfPW0NUP0-34dXR4ESeOmvtn9RTdJ_F5Ew3nQYlKUUB-hQIFv07hkZZXOpjSP60bOiA8YoHwqjQnzonUVXCtyWdL";
+        String SERVER_KEY = FCM_SERVER_KEY;
         String msg = receiverName+" : "+text;
         String title = "You've a new message!";
         String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
@@ -1220,7 +1241,6 @@ public class MessageActivity extends AppCompatActivity {
 
             obj.put("notification", objData);
             obj.put("data", dataobjData);
-            Log.e("return here>>", obj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1229,13 +1249,13 @@ public class MessageActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.e("True", response + "");
+
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("False", error + "");
+
                     }
                 }) {
             @Override

@@ -447,7 +447,7 @@ public class LoginActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Exit");
-        builder.setMessage("Do you ready want to exit?");
+        builder.setMessage("Do you really want to exit?");
 
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
