@@ -48,6 +48,8 @@ import com.pranavpandey.android.dynamic.toasts.DynamicToast;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
@@ -470,6 +472,13 @@ public class StatusFragment extends Fragment {
             {
                 arrayList.add(statusModel);
             }
+
+            Collections.sort(arrayList, new Comparator<StatusModel>() {
+                @Override
+                public int compare(StatusModel o1, StatusModel o2) {
+                    return o2.getDate().compareTo(o1.getDate());
+                }
+            });
 
         }
 
