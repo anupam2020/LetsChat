@@ -51,7 +51,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     DatabaseReference statusRef=FirebaseDatabase.getInstance().getReference("Status");
 
-    String myName,myProfilePic;
+    String myName,myProfilePic,friendName,friendProfilePic;
 
     ArrayList<UserModel> arrayList;
     Context context;
@@ -83,6 +83,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             @Override
             public void onClick(View v) {
 
+                friendName=model.getName();
+                friendProfilePic=model.getProfilePic();
 
                 DatabaseReference reference=FirebaseDatabase.getInstance().getReference("Users")
                         .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
@@ -350,7 +352,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         return position;
     }
 
-    private void downloadURL(String url, String name) {
+    private void downloadURL(String url) {
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
@@ -358,11 +360,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name+"_dp" + ".jpg");
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, friendName+"_dp" + ".jpg");
 
         downloadManager.enqueue(request);
 
-        DynamicToast.make(context, "Downloading profile picture!", context.getResources().getDrawable(R.drawable.download_1),
+        DynamicToast.make(context, "Downloading "+friendName+"'s dp!", context.getResources().getDrawable(R.drawable.download_1),
                 context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
     }
@@ -371,7 +373,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     {
         if(status.equals("downloadProfile"))
         {
-            downloadURL(profile, name);
+            downloadURL(friendProfilePic);
         }
 
         DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");

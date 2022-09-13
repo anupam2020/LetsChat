@@ -41,7 +41,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
 
     DatabaseReference statusRef=FirebaseDatabase.getInstance().getReference("Status");
 
-    String myName,myProfilePic;
+    String myName,myProfilePic,friendName,friendStatusPic;
 
     Context context;
     ArrayList<StatusModel> arrayList;
@@ -76,6 +76,9 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
             @Override
             public void onClick(View v) {
 
+                friendName=statusModel.getName();
+                friendStatusPic=statusModel.getImageURL();
+
                 DatabaseReference reference= FirebaseDatabase.getInstance().getReference("Users")
                         .child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
 
@@ -100,7 +103,6 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
                 });
 
 
-
                 ZoomageView profile=new ZoomageView(context);
                 profile.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 profile.setAdjustViewBounds(true);
@@ -113,18 +115,14 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(context)
                     .setView(profile)
-                    .setNegativeButton("",new DialogInterface.OnClickListener() {
+                    .setNeutralButton("",new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            Intent intent=new Intent(context,MessageActivity.class);
-                            intent.putExtra("friendUID",statusModel.getUid());
-                            context.startActivity(intent);
-
+                            dialog.dismiss();
                         }
                     })
-                    .setNegativeButtonIcon(context.getDrawable(R.drawable.chat_black_new))
-                    .setNeutralButton("",new DialogInterface.OnClickListener() {
+                    .setNeutralButtonIcon(context.getDrawable(R.drawable.return_black_new))
+                    .setNegativeButton("",new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
@@ -134,7 +132,6 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
                             reference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-
 
                                     UserModel userModel=snapshot.getValue(UserModel.class);
                                     assert userModel != null;
@@ -152,7 +149,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
                             });
                         }
                     })
-                    .setNeutralButtonIcon(context.getDrawable(R.drawable.download_black_new));
+                    .setNegativeButtonIcon(context.getDrawable(R.drawable.download_black_new));
 
                 builder.show();
 
@@ -186,7 +183,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
     {
         if(status.equals("downloadStatus"))
         {
-            downloadURL(profile, name);
+            downloadURL(friendStatusPic);
         }
 
         DatabaseReference serverTimeRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
@@ -222,7 +219,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
 
     }
 
-    private void downloadURL(String url, String name) {
+    private void downloadURL(String url) {
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
@@ -230,11 +227,11 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.StatusView
 
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name+"_status" + ".jpg");
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, friendName+"_status" + ".jpg");
 
         downloadManager.enqueue(request);
 
-        DynamicToast.make(context, "Downloading status!", context.getResources().getDrawable(R.drawable.download_1),
+        DynamicToast.make(context, "Downloading "+friendName+"'s status!", context.getResources().getDrawable(R.drawable.download_1),
                 context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
     }

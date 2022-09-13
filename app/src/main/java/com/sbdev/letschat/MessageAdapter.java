@@ -579,7 +579,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 downloadManager.enqueue(request);
 
-                DynamicToast.make(context, "Downloading file!", context.getResources().getDrawable(R.drawable.download_1),
+                DynamicToast.make(context, "Downloading image!", context.getResources().getDrawable(R.drawable.download_1),
                         context.getResources().getColor(R.color.white), context.getResources().getColor(R.color.black), 3000).show();
 
             }
